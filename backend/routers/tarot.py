@@ -4,13 +4,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import sys
-import os
 import random
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
-
-from tarot_data import ALL_CARDS, get_card
+from shared.tarot_data import ALL_CARDS, get_card
 from services.tarot_prompt import (
     SYSTEM_PROMPT,
     build_reading_prompt,
@@ -22,10 +18,18 @@ from services.llm import tarot_reading, call_llm
 router = APIRouter(prefix="/api/tarot", tags=["tarot"])
 
 
+# --- Request/Response Models ---
+
 class CardSelection(BaseModel):
     """셔플에서 선택한 카드 (id + 방향)"""
     id: int | str
     is_upright: bool = True
+
+
+class ChatMessage(BaseModel):
+    """대화 메시지"""
+    role: str
+    content: str
 
 
 class ShuffleResponse(BaseModel):
@@ -35,7 +39,7 @@ class ShuffleResponse(BaseModel):
 class ReadRequest(BaseModel):
     category: str
     question: Optional[str] = ""
-    cards: list[CardSelection]  # 선택한 3장 (id + is_upright)
+    cards: list[CardSelection]
 
 
 class ReadResponse(BaseModel):
@@ -47,13 +51,15 @@ class ChatRequest(BaseModel):
     category: str
     cards_summary: str
     previous_reading: str
-    chat_history: list[dict]
+    chat_history: list[ChatMessage]
     question: str
 
 
 class ChatResponse(BaseModel):
     reply: str
 
+
+# --- Endpoints ---
 
 @router.get("/categories")
 async def get_categories():
@@ -132,11 +138,13 @@ async def chat_tarot(req: ChatRequest):
     if len(req.chat_history) >= 10:
         raise HTTPException(400, "대화 횟수를 초과했어요")
 
-    # 컨텍스트 프롬프트 생성
+    # 대화 기록을 문자열로 변환 (프롬프트 컨텍스트용)
     chat_history_str = "\n".join(
-        f"{'👤' if m.get('role') == 'user' else '🐱'}: {m.get('content', '')}"
+        f"{'👤' if m.role == 'user' else '🐱'}: {m.content}"
         for m in req.chat_history
     )
+
+    # 컨텍스트 프롬프트 생성 (기존 카드/해석 + 대화기록 포함)
     context_prompt = build_chat_prompt(
         req.category,
         req.cards_summary,
@@ -145,10 +153,9 @@ async def chat_tarot(req: ChatRequest):
         req.question,
     )
 
-    # LLM 호출 (컨텍스트 포함)
+    # messages 구성 (prompt에 컨텍스트 포함, history 중복 제거)
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        *req.chat_history,
         {"role": "user", "content": context_prompt},
     ]
 
