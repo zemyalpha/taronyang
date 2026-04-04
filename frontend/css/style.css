@@ -323,11 +323,6 @@ body {
     color: var(--text-secondary);
 }
 
-.pricing-period {
-    font-size: 14px;
-    color: var(--text-secondary);
-}
-
 /* 푸터 */
 .footer {
     text-align: center;
