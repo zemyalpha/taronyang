@@ -24,7 +24,7 @@
 
         <!-- 히어로 -->
         <section class="hero">
-            <div class="hero-icon">🌙</div>
+            <div class="hero-icon" aria-hidden="true">🌙</div>
             <h1 class="hero-title">타로냥</h1>
             <p class="hero-subtitle">AI 타로로 당신의 이야기를 듣다</p>
             <a href="/tarot.html" class="cta-button">지금 타로 보기 →</a>
@@ -72,19 +72,19 @@
             <p class="section-title">이렇게 진행돼요</p>
             <div class="steps">
                 <div class="step">
-                    <div class="step-num">01</div>
+                    <div class="step-num" aria-hidden="true">01</div>
                     <div class="step-text">주제 선택</div>
                 </div>
                 <div class="step">
-                    <div class="step-num">02</div>
+                    <div class="step-num" aria-hidden="true">02</div>
                     <div class="step-text">카드 선택</div>
                 </div>
                 <div class="step">
-                    <div class="step-num">03</div>
+                    <div class="step-num" aria-hidden="true">03</div>
                     <div class="step-text">AI 해석</div>
                 </div>
                 <div class="step">
-                    <div class="step-num">04</div>
+                    <div class="step-num" aria-hidden="true">04</div>
                     <div class="step-text">추가 대화</div>
                 </div>
             </div>
@@ -93,7 +93,7 @@
         <!-- 오늘의 한 줄 -->
         <section class="section">
             <div class="daily-card">
-                <div class="daily-label">✨ 오늘의 한 줄 운세</div>
+                <div class="daily-label" aria-hidden="true">✨ 오늘의 한 줄 운세</div>
                 <div class="daily-text" id="daily-text">로딩 중...</div>
             </div>
         </section>
@@ -169,7 +169,7 @@
                 star.className = 'star';
                 star.style.left = Math.random() * 100 + '%';
                 star.style.top = Math.random() * 100 + '%';
-                star.style.setProperty('--duration', (2 + Math.random() * 3) + 's');
+                star.style.animationDuration = (2 + Math.random() * 3) + 's';
                 star.style.animationDelay = Math.random() * 3 + 's';
                 starsEl.appendChild(star);
             }
@@ -189,9 +189,8 @@
         document.getElementById('daily-text').textContent =
             dailyMessages[new Date().getDate() % dailyMessages.length];
 
-        // 통계 (임시)
-        document.getElementById('today-count').textContent =
-            Math.floor(800 + Math.random() * 500);
+        // 통계 (임시 하드코딩, 추후 API 연동)
+        document.getElementById('today-count').textContent = '1,247';
     </script>
 </body>
 </html>
