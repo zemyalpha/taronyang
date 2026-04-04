@@ -1,0 +1,24 @@
+/* 🔮 타로냥 - 스타일시트 */
+
+:root {
+    --bg-primary: #0a0a2e;
+    --bg-card: #1a1a3e;
+    --accent-purple: #a78bfa;
+    --accent-gold: #fbbf24;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --positive: #86efac;
+    --negative: #fca5a5;
+    --btn-gradient: linear-gradient(135deg, #7c3aed, #a78bfa);
+    --font-title: 'Noto Serif KR', serif;
+    --font-body: 'Noto Sans KR', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
