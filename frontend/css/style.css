@@ -344,6 +344,11 @@ body {
     font-size: 13px;
 }
 
+.stats-count {
+    color: var(--accent-gold);
+    font-weight: 700;
+}
+
 /* 반응형 */
 @media (max-width: 375px) {
     .hero-title { font-size: 26px; }
