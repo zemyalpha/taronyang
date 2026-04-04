@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import config
+from routers import tarot
 
 app = FastAPI(title="타로냥 API", version="0.1.0")
 
@@ -15,26 +16,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Routers
+app.include_router(tarot.router)
+
 # Static files
 app.mount("/static", StaticFiles(directory="../frontend"), name="static")
 
-
-# --- Routes ---
 
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "service": "taronyang"}
 
 
-# Frontend routes - serve HTML files
 @app.get("/")
 async def index():
     return FileResponse("../frontend/index.html")
-
-
-@app.get("/{page}.html")
-async def serve_page(page: str):
-    return FileResponse(f"../frontend/{page}.html")
 
 
 if __name__ == "__main__":

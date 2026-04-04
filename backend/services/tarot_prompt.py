@@ -95,7 +95,6 @@ def build_reading_prompt(category, question, cards):
     card_data = []
     for i, card in enumerate(cards):
         pos = "정위치" if card.get("is_upright", True) else "역위치"
-        meaning = card.get("meaning_up", "") if card.get("is_upright", True) else card.get("meaning_down", "")
         card_data.append({
             "name": card["name"],
             "position": pos,
