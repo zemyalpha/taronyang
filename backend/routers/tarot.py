@@ -14,7 +14,6 @@ from tarot_data import ALL_CARDS, get_card
 from services.tarot_prompt import (
     SYSTEM_PROMPT,
     build_reading_prompt,
-    build_chat_prompt,
     CATEGORY_NAMES,
 )
 from services.llm import tarot_reading, tarot_chat
@@ -127,19 +126,8 @@ async def chat_tarot(req: ChatRequest):
     if len(req.chat_history) >= 10:
         raise HTTPException(400, "대화 횟수를 초과했어요")
 
-    prompt = build_chat_prompt(
-        req.category,
-        req.cards_summary,
-        req.previous_reading,
-        "\n".join(
-            f"{'👤' if m['role']=='user' else '🐱'}: {m['content']}"
-            for m in req.chat_history
-        ),
-        req.question,
-    )
-
     try:
-        reply = await tarot_chat(SYSTEM_PROMPT, prompt)
+        reply = await tarot_chat(SYSTEM_PROMPT, req.chat_history, req.question)
     except Exception as e:
         raise HTTPException(500, f"AI 응답 실패: {str(e)}")
 
