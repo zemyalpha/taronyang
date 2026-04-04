@@ -14,11 +14,18 @@ from tarot_data import ALL_CARDS, get_card
 from services.tarot_prompt import (
     SYSTEM_PROMPT,
     build_reading_prompt,
+    build_chat_prompt,
     CATEGORY_NAMES,
 )
-from services.llm import tarot_reading, tarot_chat
+from services.llm import tarot_reading, call_llm
 
 router = APIRouter(prefix="/api/tarot", tags=["tarot"])
+
+
+class CardSelection(BaseModel):
+    """셔플에서 선택한 카드 (id + 방향)"""
+    id: int | str
+    is_upright: bool = True
 
 
 class ShuffleResponse(BaseModel):
@@ -28,7 +35,7 @@ class ShuffleResponse(BaseModel):
 class ReadRequest(BaseModel):
     category: str
     question: Optional[str] = ""
-    card_ids: list  # 선택한 3장의 카드 id
+    cards: list[CardSelection]  # 선택한 3장 (id + is_upright)
 
 
 class ReadResponse(BaseModel):
@@ -79,18 +86,17 @@ async def read_tarot(req: ReadRequest):
     """타로 해석"""
     if req.category not in CATEGORY_NAMES:
         raise HTTPException(400, f"Invalid category. Use: {list(CATEGORY_NAMES.keys())}")
-    if len(req.card_ids) != 3:
+    if len(req.cards) != 3:
         raise HTTPException(400, "Must select exactly 3 cards")
 
-    # 카드 데이터 조회
+    # 카드 데이터 조회 (셔플에서 받은 방향 사용)
     cards = []
-    for card_id in req.card_ids:
-        card = get_card(card_id)
+    for selection in req.cards:
+        card = get_card(selection.id)
         if not card:
-            raise HTTPException(400, f"Card not found: {card_id}")
-        # 정/역위치 랜덤 (셔플에서 받은 값 사용, 기본 정위치)
+            raise HTTPException(400, f"Card not found: {selection.id}")
         card_copy = dict(card)
-        card_copy["is_upright"] = card_copy.get("is_upright", True)
+        card_copy["is_upright"] = selection.is_upright
         cards.append(card_copy)
 
     # 프롬프트 생성
@@ -126,8 +132,28 @@ async def chat_tarot(req: ChatRequest):
     if len(req.chat_history) >= 10:
         raise HTTPException(400, "대화 횟수를 초과했어요")
 
+    # 컨텍스트 프롬프트 생성
+    chat_history_str = "\n".join(
+        f"{'👤' if m.get('role') == 'user' else '🐱'}: {m.get('content', '')}"
+        for m in req.chat_history
+    )
+    context_prompt = build_chat_prompt(
+        req.category,
+        req.cards_summary,
+        req.previous_reading,
+        chat_history_str,
+        req.question,
+    )
+
+    # LLM 호출 (컨텍스트 포함)
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        *req.chat_history,
+        {"role": "user", "content": context_prompt},
+    ]
+
     try:
-        reply = await tarot_chat(SYSTEM_PROMPT, req.chat_history, req.question)
+        reply = await call_llm(messages, max_tokens=1000, temperature=0.8)
     except Exception as e:
         raise HTTPException(500, f"AI 응답 실패: {str(e)}")
 
