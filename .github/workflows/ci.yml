@@ -12,6 +12,8 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    env:
+      PYTHONPATH: ..
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +31,7 @@ jobs:
           pip install ruff pytest pytest-cov pytest-asyncio httpx
 
       - name: Lint (ruff)
-        run: ruff check . --ignore=E501,F401
+        run: ruff check .
 
       - name: Test
         run: pytest tests/ -v --cov=. --cov-report=xml --cov-report=term-missing
@@ -42,19 +44,18 @@ jobs:
         with:
           name: coverage-report
           path: backend/coverage.xml
+          retention-days: 1
 
   frontend:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Check HTML
         run: |
-          # HTML 파일 존재 확인
           for f in *.html admin/*.html; do
             if [ -f "$f" ]; then
               echo "✅ $f exists"

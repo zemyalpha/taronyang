@@ -1,10 +1,11 @@
 """
 타로 API 라우터
 """
+import logging
+import random
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import random
 
 from shared.tarot_data import ALL_CARDS, get_card
 from services.tarot_prompt import (
@@ -15,10 +16,12 @@ from services.tarot_prompt import (
 )
 from services.llm import tarot_reading, call_llm
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/tarot", tags=["tarot"])
 
 
-# --- Request/Response Models ---
+# --- Pydantic Models ---
 
 class CardSelection(BaseModel):
     """셔플에서 선택한 카드 (id + 방향)"""
@@ -32,8 +35,18 @@ class ChatMessage(BaseModel):
     content: str
 
 
+class CardInfo(BaseModel):
+    """카드 정보"""
+    id: int | str
+    name: str
+    name_en: str
+    symbol: str
+    is_upright: bool
+    position: str
+
+
 class ShuffleResponse(BaseModel):
-    cards: list[dict]
+    cards: list[CardInfo]
 
 
 class ReadRequest(BaseModel):
@@ -43,7 +56,7 @@ class ReadRequest(BaseModel):
 
 
 class ReadResponse(BaseModel):
-    cards: list[dict]
+    cards: list[CardInfo]
     interpretation: str
 
 
@@ -77,13 +90,14 @@ async def shuffle_cards(count: int = 10):
     result = []
     for card in cards:
         is_upright = random.choice([True, False])
-        result.append({
-            "id": card["id"],
-            "name": card["name"],
-            "name_en": card["name_en"],
-            "symbol": card["symbol"],
-            "is_upright": is_upright,
-        })
+        result.append(CardInfo(
+            id=card["id"],
+            name=card["name"],
+            name_en=card["name_en"],
+            symbol=card["symbol"],
+            is_upright=is_upright,
+            position="정위치" if is_upright else "역위치",
+        ))
     return {"cards": result}
 
 
@@ -111,19 +125,20 @@ async def read_tarot(req: ReadRequest):
     # LLM 호출
     try:
         interpretation = await tarot_reading(SYSTEM_PROMPT, prompt)
-    except Exception:
+    except Exception as e:
+        logger.error("AI 해석 실패: %s", e, exc_info=True)
         raise HTTPException(500, "AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.")
 
     return {
         "cards": [
-            {
-                "id": c["id"],
-                "name": c["name"],
-                "name_en": c["name_en"],
-                "symbol": c["symbol"],
-                "is_upright": c["is_upright"],
-                "position": "정위치" if c["is_upright"] else "역위치",
-            }
+            CardInfo(
+                id=c["id"],
+                name=c["name"],
+                name_en=c["name_en"],
+                symbol=c["symbol"],
+                is_upright=c["is_upright"],
+                position="정위치" if c["is_upright"] else "역위치",
+            )
             for c in cards
         ],
         "interpretation": interpretation,
@@ -153,7 +168,6 @@ async def chat_tarot(req: ChatRequest):
         req.question,
     )
 
-    # messages 구성 (prompt에 컨텍스트 포함, history 중복 제거)
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": context_prompt},
@@ -161,7 +175,8 @@ async def chat_tarot(req: ChatRequest):
 
     try:
         reply = await call_llm(messages, max_tokens=1000, temperature=0.8)
-    except Exception:
+    except Exception as e:
+        logger.error("AI 응답 실패: %s", e, exc_info=True)
         raise HTTPException(500, "AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.")
 
     return {"reply": reply}
