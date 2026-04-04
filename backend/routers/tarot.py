@@ -139,7 +139,7 @@ async def chat_tarot(req: ChatRequest):
     )
 
     try:
-        reply = await tarot_chat(SYSTEM_PROMPT, req.chat_history, req.question)
+        reply = await tarot_chat(SYSTEM_PROMPT, prompt)
     except Exception as e:
         raise HTTPException(500, f"AI 응답 실패: {str(e)}")
 

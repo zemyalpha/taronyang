@@ -46,9 +46,10 @@ async def tarot_reading(system_prompt: str, user_prompt: str) -> str:
     return await call_llm(messages, max_tokens=2000, temperature=0.85)
 
 
-async def tarot_chat(system_prompt: str, chat_history: list, question: str) -> str:
+async def tarot_chat(system_prompt: str, user_prompt: str) -> str:
     """추가 대화"""
-    messages = [{"role": "system", "content": system_prompt}]
-    messages.extend(chat_history)
-    messages.append({"role": "user", "content": question})
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
     return await call_llm(messages, max_tokens=1000, temperature=0.8)
