@@ -4,16 +4,194 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔮 타로냥 - AI 타로/운세</title>
-    <meta name="description" content="AI 타로로 당신의 이야기를 듣다">
+    <meta name="description" content="AI 타로로 당신의 이야기를 듣다. 연애운, 재물운, 직장운, 종합운을 카드 3장으로 해석해드려요.">
+    <meta property="og:title" content="타로냥 - AI 타로/운세">
+    <meta property="og:description" content="AI 타로로 당신의 이야기를 듣다">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <!-- Built during Phase 2 -->
-    <div id="app">
-        <h1>🔮 타로냥</h1>
-        <p>AI 타로로 당신의 이야기를 듣다</p>
+    <!-- 별 배경 -->
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <a href="/" class="header-logo">🔮 타로냥</a>
+            <a href="/login.html" class="header-login">로그인</a>
+        </header>
+
+        <!-- 히어로 -->
+        <section class="hero">
+            <div class="hero-icon">🌙</div>
+            <h1 class="hero-title">타로냥</h1>
+            <p class="hero-subtitle">AI 타로로 당신의 이야기를 듣다</p>
+            <a href="/tarot.html" class="cta-button">지금 타로 보기 →</a>
+        </section>
+
+        <!-- 카테고리 -->
+        <section class="section">
+            <p class="section-title">어떤 운이 궁금하세요?</p>
+            <div class="category-grid">
+                <a href="/tarot.html?cat=love" class="category-card">
+                    <div class="category-icon">💕</div>
+                    <div class="category-name">연애운</div>
+                    <div class="category-desc">사랑, 인연, 관계</div>
+                </a>
+                <a href="/tarot.html?cat=money" class="category-card">
+                    <div class="category-icon">💰</div>
+                    <div class="category-name">재물운</div>
+                    <div class="category-desc">돈, 투자, 재산</div>
+                </a>
+                <a href="/tarot.html?cat=career" class="category-card">
+                    <div class="category-icon">💼</div>
+                    <div class="category-name">직장운</div>
+                    <div class="category-desc">커리어, 이직, 승진</div>
+                </a>
+                <a href="/tarot.html?cat=general" class="category-card">
+                    <div class="category-icon">🌟</div>
+                    <div class="category-name">종합운</div>
+                    <div class="category-desc">전체적인 흐름</div>
+                </a>
+                <a href="/tarot.html?cat=newyear" class="category-card">
+                    <div class="category-icon">🎯</div>
+                    <div class="category-name">신년운</div>
+                    <div class="category-desc">올해의 흐름</div>
+                </a>
+                <a href="/tarot.html?cat=compatibility" class="category-card">
+                    <div class="category-icon">🤝</div>
+                    <div class="category-name">궁합</div>
+                    <div class="category-desc">두 사람의 인연</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 이용 안내 -->
+        <section class="section">
+            <p class="section-title">이렇게 진행돼요</p>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">01</div>
+                    <div class="step-text">주제 선택</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">02</div>
+                    <div class="step-text">카드 선택</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">03</div>
+                    <div class="step-text">AI 해석</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">04</div>
+                    <div class="step-text">추가 대화</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 오늘의 한 줄 -->
+        <section class="section">
+            <div class="daily-card">
+                <div class="daily-label">✨ 오늘의 한 줄 운세</div>
+                <div class="daily-text" id="daily-text">로딩 중...</div>
+            </div>
+        </section>
+
+        <!-- 통계 -->
+        <div class="stats">
+            오늘 <strong id="today-count">-</strong>명이 타로를 봤어요 🔮
+        </div>
+
+        <!-- 후기 -->
+        <section class="section">
+            <p class="section-title">실제 상담 후기</p>
+            <div class="reviews">
+                <div class="review-item">
+                    <div class="review-text">"연애고민 있을때마다 들어가요. 카드 해석이 신기하게 잘 맞아요 😍"</div>
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                </div>
+                <div class="review-item">
+                    <div class="review-text">"이직 고민할 때 봤는데, 결과가 현실과 비슷해서 소름 돋았어요"</div>
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                </div>
+                <div class="review-item">
+                    <div class="review-text">"매일 아침 일운 보는게 습관이 됐어요. 시작이 좋으면 하루도 좋아요!"</div>
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 요금제 -->
+        <section class="section">
+            <p class="section-title">요금제</p>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-name">무료</div>
+                    <div class="pricing-price">₩0</div>
+                    <ul class="pricing-features">
+                        <li>매일 1회 무료</li>
+                        <li>기본 해석</li>
+                        <li>광고 포함</li>
+                    </ul>
+                </div>
+                <div class="pricing-card premium">
+                    <div class="pricing-badge">⭐ 인기</div>
+                    <div class="pricing-name">프리미엄</div>
+                    <div class="pricing-price">₩9,900<span style="font-size:14px;color:var(--text-secondary)">/월</span></div>
+                    <ul class="pricing-features">
+                        <li>무제한 상담</li>
+                        <li>상세 해석</li>
+                        <li>추가 대화</li>
+                        <li>일운 알림</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 푸터 -->
+        <footer class="footer">
+            <p>타로냥 © 2026</p>
+            <p>
+                <a href="#">이용약관</a> · <a href="#">개인정보처리방침</a>
+            </p>
+            <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
+        </footer>
     </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        // 별 생성
+        (function() {
+            const starsEl = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.setProperty('--duration', (2 + Math.random() * 3) + 's');
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsEl.appendChild(star);
+            }
+        })();
+
+        // 오늘의 한 줄
+        const dailyMessages = [
+            "오늘은 새로운 인연이 찾아올 수 있는 날이에요 💫",
+            "과감한 결정이 좋은 결과를 가져올 거예요 ⚡",
+            "오늘은 마음을 열고 주변을 둘러보세요 🌸",
+            "기다리던 소식이 올 수 있는 하루예요 💌",
+            "작은 용기가 큰 변화를 만들어요 🦋",
+            "오늘의 행운의 색은 보라색이에요 🟣",
+            "누군가 당신을 생각하고 있을 거예요 💜",
+            "새로운 기회가 가까이 있어요, 눈을 크게 뜨세요 👀",
+        ];
+        document.getElementById('daily-text').textContent =
+            dailyMessages[new Date().getDate() % dailyMessages.length];
+
+        // 통계 (임시)
+        document.getElementById('today-count').textContent =
+            Math.floor(800 + Math.random() * 500);
+    </script>
 </body>
 </html>
