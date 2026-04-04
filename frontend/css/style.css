@@ -34,6 +34,7 @@ body {
     width: 100%; height: 100%;
     pointer-events: none;
     z-index: 0;
+    overflow: hidden;
 }
 
 .star {
@@ -42,6 +43,7 @@ body {
     background: #fff;
     border-radius: 50%;
     animation: twinkle 3s ease-in-out infinite;
+    will-change: opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -316,6 +318,16 @@ body {
     margin-bottom: 6px;
 }
 
+.pricing-period {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.pricing-period {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
 /* 푸터 */
 .footer {
     text-align: center;
@@ -342,4 +354,5 @@ body {
     .hero-title { font-size: 26px; }
     .category-grid { gap: 8px; }
     .steps { grid-template-columns: repeat(2, 1fr); }
+    .pricing-grid { grid-template-columns: 1fr; }
 }
