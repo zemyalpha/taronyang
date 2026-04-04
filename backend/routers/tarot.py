@@ -3,15 +3,15 @@
 """
 import logging
 import random
+from typing import Literal, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Optional
 
 from shared.tarot_data import ALL_CARDS, get_card
 from services.tarot_prompt import (
     SYSTEM_PROMPT,
     build_reading_prompt,
-    build_chat_prompt,
     CATEGORY_NAMES,
 )
 from services.llm import tarot_reading, call_llm
@@ -31,7 +31,7 @@ class CardSelection(BaseModel):
 
 class ChatMessage(BaseModel):
     """대화 메시지"""
-    role: str
+    role: Literal["user", "assistant", "system"]
     content: str
 
 
@@ -153,25 +153,21 @@ async def chat_tarot(req: ChatRequest):
     if len(req.chat_history) >= 10:
         raise HTTPException(400, "대화 횟수를 초과했어요")
 
-    # 대화 기록을 문자열로 변환 (프롬프트 컨텍스트용)
-    chat_history_str = "\n".join(
-        f"{'👤' if m.role == 'user' else '🐱'}: {m.content}"
-        for m in req.chat_history
-    )
-
-    # 컨텍스트 프롬프트 생성 (기존 카드/해석 + 대화기록 포함)
-    context_prompt = build_chat_prompt(
-        req.category,
-        req.cards_summary,
-        req.previous_reading,
-        chat_history_str,
-        req.question,
-    )
-
+    # 개별 메시지로 전달 (Chat Completion API 구조 활용)
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": context_prompt},
+        {"role": "system", "content": (
+            f"이전 상담: 카테고리={req.category}, "
+            f"카드={req.cards_summary}, 해석={req.previous_reading}"
+        )},
     ]
+
+    # 대화 기록을 개별 메시지로 전달
+    for m in req.chat_history:
+        messages.append({"role": m.role, "content": m.content})
+
+    # 새 질문
+    messages.append({"role": "user", "content": req.question})
 
     try:
         reply = await call_llm(messages, max_tokens=1000, temperature=0.8)
