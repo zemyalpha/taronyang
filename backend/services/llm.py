@@ -2,11 +2,6 @@
 Z.ai GLM API 클라이언트
 """
 import httpx
-import sys
-import os
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
-
 import config
 
 

@@ -111,8 +111,8 @@ async def read_tarot(req: ReadRequest):
     # LLM 호출
     try:
         interpretation = await tarot_reading(SYSTEM_PROMPT, prompt)
-    except Exception as e:
-        raise HTTPException(500, f"AI 해석 실패: {str(e)}")
+    except Exception:
+        raise HTTPException(500, "AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.")
 
     return {
         "cards": [
@@ -161,7 +161,7 @@ async def chat_tarot(req: ChatRequest):
 
     try:
         reply = await call_llm(messages, max_tokens=1000, temperature=0.8)
-    except Exception as e:
-        raise HTTPException(500, f"AI 응답 실패: {str(e)}")
+    except Exception:
+        raise HTTPException(500, "AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.")
 
     return {"reply": reply}
