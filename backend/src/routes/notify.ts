@@ -67,6 +67,14 @@ notifyRouter.put('/zodiac', authMiddleware, (req: Request, res: Response) => {
 /** 오늘의 운세 조회 (공개) */
 notifyRouter.get('/horoscope/:sign', async (req: Request, res: Response) => {
   const sign = req.params.sign;
+  const validSigns = [
+    '양자리', '황소자리', '쌍둥이자리', '게자리', '사자자리', '처녀자리',
+    '천칭자리', '전갈자리', '사수자리', '염소자리', '물병자리', '물고기자리',
+  ];
+  if (!validSigns.includes(sign)) {
+    res.status(400).json({ detail: '유효하지 않은 별자리입니다' });
+    return;
+  }
   const today = new Date().toISOString().split('T')[0];
 
   try {

@@ -4,6 +4,7 @@
  * - node-cron 매일 7시 실행
  */
 import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 import { config } from './config';
 import { getDb } from './database';
 import { callLlm } from './llm';
@@ -45,7 +46,6 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
 
   try {
     const horoscope = await callLlm(messages, 800, 0.9);
-    const crypto = await import('crypto');
     // 캐시 저장
     db.prepare(
       'INSERT OR IGNORE INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
@@ -60,11 +60,10 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
 /** 12별자리 전체 일운 생성 */
 export async function generateAllHoroscopes(): Promise<Record<string, string>> {
   const today = new Date().toISOString().split('T')[0];
-  const results: Record<string, string> = {};
-  for (const sign of ZODIAC_SIGNS) {
-    results[sign] = await generateDailyHoroscope(sign, today);
-  }
-  return results;
+  const entries = await Promise.all(
+    ZODIAC_SIGNS.map(async (sign) => [sign, await generateDailyHoroscope(sign, today)] as const)
+  );
+  return Object.fromEntries(entries);
 }
 
 /** 이메일 HTML 템플릿 */
@@ -106,6 +105,20 @@ function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string)
 </html>`;
 }
 
+/** SMTP transporter 재사용 (싱글톤) */
+let _transporter: nodemailer.Transporter | null = null;
+function getTransporter(): nodemailer.Transporter {
+  if (!_transporter) {
+    _transporter = nodemailer.createTransport({
+      host: config.smtpHost,
+      port: config.smtpPort,
+      secure: false,
+      auth: { user: config.smtpUser, pass: config.smtpPassword },
+    });
+  }
+  return _transporter;
+}
+
 /** SMTP 전송 */
 async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
   if (!config.smtpUser || !config.smtpPassword) {
@@ -114,14 +127,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: config.smtpHost,
-      port: config.smtpPort,
-      secure: false,
-      auth: { user: config.smtpUser, pass: config.smtpPassword },
-    });
-
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: `"타로냥" <${config.smtpUser}>`,
       to,
       subject,
@@ -168,9 +174,9 @@ export async function sendDailyNotifications(): Promise<void> {
   const todayStr = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
   let sent = 0;
 
-  for (const sub of enabled) {
+  await Promise.all(enabled.map(async (sub) => {
     const horoscope = horoscopes[sub.zodiac_sign];
-    if (!horoscope) continue;
+    if (!horoscope) return;
 
     const nickname = sub.nickname || '회원';
     const html = buildEmailHtml(nickname, sub.zodiac_sign, horoscope);
@@ -178,7 +184,7 @@ export async function sendDailyNotifications(): Promise<void> {
 
     const ok = await sendEmail(sub.email, subject, html);
     if (ok) sent++;
-  }
+  }));
 
   console.log(`📧 일운 이메일 발송 완료: ${sent}/${enabled.length}`);
 }
@@ -195,7 +201,7 @@ export function startDailyScheduler(): void {
     const hour = now.getHours();
     const minute = now.getMinutes();
 
-    if (hour === 7 && minute === 0 && lastSentDate !== today) {
+    if (hour >= 7 && lastSentDate !== today) {
       lastSentDate = today;
       try {
         await sendDailyNotifications();
