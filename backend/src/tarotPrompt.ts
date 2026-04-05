@@ -48,7 +48,13 @@ export const READING_PROMPT = `## 상담 정보
 각 카드의 키워드를 자연스럽게 해석에 녹여내.
 마지막에 따뜻한 격려 한마디 해줘.`;
 
-export const DAILY_PROMPT = `## 별자리: {zodiac}
+export const DAILY_PROMPT = `
+You are a tarot reader in Korea, return DAILY horoscope for ${zodiacSign}.
+
+Your ${zodiacSign} sign is today's date.\n
+This is a comprehensive and personal reading that what the mystical energies influence your day."},
+Please provide ${zodiacSign} and date."}, 
+All content should be practical and constructive."},`;`## 별자리: {zodiac}
 ## 날짜: {date}
 
 오늘의 운세를 작성해줘.
