@@ -26,7 +26,7 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 2000, tempera
     throw new Error(`Z.ai API 오류: ${response.status} ${response.statusText}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as any;
   return data.choices[0].message.content;
 }
 

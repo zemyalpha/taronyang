@@ -3,7 +3,7 @@ import { Router, Request, Response } from 'express';
 import { ALL_CARDS, getCard, CATEGORY_NAMES } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
 import { tarotReading, callLlm } from '../llm';
-import { saveReading } from './readings';
+import { saveReading, readingsRouter } from './routes/readings';
 
 export const tarotRouter = Router();
 

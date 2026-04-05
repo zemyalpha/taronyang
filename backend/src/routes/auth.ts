@@ -15,7 +15,7 @@ interface TokenPayload {
 // --- 미들웨어 ---
 
 /** JWT에서 현재 사용자 추출 */
-export function authMiddleware(req: Request, _res: Response, next: express.NextFunction): void {
+export function authMiddleware(req: Request, res: Response, next: express.NextFunction): void {
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) {
     _res.status(401).json({ detail: '로그인이 필요합니다' });
@@ -36,7 +36,7 @@ export function authMiddleware(req: Request, _res: Response, next: express.NextF
 }
 
 /** 관리자 권한 확인 */
-export function adminMiddleware(req: Request, _res: Response, next: express.NextFunction): void {
+export function adminMiddleware(req: Request, res: Response, next: express.NextFunction): void {
   const user = (req as any).user as User;
   if (!user?.is_admin) {
     _res.status(403).json({ detail: '관리자 권한이 필요합니다' });
