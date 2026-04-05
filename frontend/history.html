@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상담 기록 — 타로냥</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: { navy: '#0a0a2e', 'dark-purple': '#1a1a3e', lavender: '#a78bfa', gold: '#fbbf24' },
+                fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Noto Sans KR', 'sans-serif'] }
+            }}
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-navy text-gray-100 font-sans min-h-screen">
+
+    <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/static/index.html" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
+            <div class="flex items-center gap-4 text-sm">
+                <a href="/static/tarot.html" class="hover:text-lavender transition">타로 상담</a>
+                <span class="text-lavender">상담 기록</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-20 pb-10 px-4 max-w-2xl mx-auto">
+        <h1 class="font-serif text-2xl text-lavender mb-6">📜 상담 기록</h1>
+
+        <!-- 로그인 필요 -->
+        <div id="need-login" class="hidden text-center py-16">
+            <div class="text-4xl mb-4">🔒</div>
+            <p class="text-gray-400 mb-4">상담 기록을 보려면 로그인해주세요</p>
+            <a href="/static/login.html" class="inline-block bg-gradient-to-r from-purple-700 to-lavender text-white px-6 py-3 rounded-full font-bold">로그인하기</a>
+        </div>
+
+        <!-- 기록 목록 -->
+        <div id="readings-list" class="space-y-4"></div>
+
+        <!-- 빈 상태 -->
+        <div id="empty-state" class="hidden text-center py-16">
+            <div class="text-4xl mb-4">📋</div>
+            <p class="text-gray-400 mb-4">아직 상담 기록이 없어요</p>
+            <a href="/static/tarot.html" class="inline-block bg-gradient-to-r from-purple-700 to-lavender text-white px-6 py-3 rounded-full font-bold">첫 상담하기 🃏</a>
+        </div>
+    </main>
+
+    <script>
+        async function loadReadings() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                document.getElementById('need-login').classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/readings', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    document.getElementById('need-login').classList.remove('hidden');
+                    return;
+                }
+                const readings = await res.json();
+                if (!readings.length) {
+                    document.getElementById('empty-state').classList.remove('hidden');
+                    return;
+                }
+
+                const catEmoji = { love: '💕', money: '💰', career: '💼', general: '🌟' };
+                const list = document.getElementById('readings-list');
+                list.innerHTML = readings.map(r => `
+                    <div class="bg-dark-purple/60 border border-lavender/15 rounded-2xl p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-lg">${catEmoji[r.category] || '🌟'} ${r.category}</span>
+                            <span class="text-xs text-gray-500">${new Date(r.created_at).toLocaleDateString('ko-KR')}</span>
+                        </div>
+                        ${r.question ? `<p class="text-sm text-gray-400 mb-2">Q: ${r.question}</p>` : ''}
+                        <p class="text-sm text-gray-200 line-clamp-3">${r.interpretation.substring(0, 150)}...</p>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('empty-state').classList.remove('hidden');
+            }
+        }
+
+        loadReadings();
+    </script>
+</body>
+</html>

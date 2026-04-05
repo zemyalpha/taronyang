@@ -15,6 +15,7 @@ from services.tarot_prompt import (
     CATEGORY_NAMES,
 )
 from services.llm import tarot_reading, call_llm
+from routers.readings import save_reading, check_free_limit, increment_free_count
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +129,12 @@ async def read_tarot(req: ReadRequest):
     except Exception as e:
         logger.error("AI 해석 실패: %s", e, exc_info=True)
         raise HTTPException(500, "AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.")
+
+    # 상담 기록 저장 (비회원도 저장)
+    try:
+        save_reading(None, req.category, req.question or "", cards, interpretation)
+    except Exception as e:
+        logger.warning("기록 저장 실패: %s", e)
 
     return {
         "cards": [
