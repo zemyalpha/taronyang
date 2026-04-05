@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 — 타로냥</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0a0a2e',
+                        'dark-purple': '#1a1a3e',
+                        lavender: '#a78bfa',
+                        gold: '#fbbf24',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif KR', 'serif'],
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-navy text-gray-100 font-sans min-h-screen flex items-center justify-center px-4">
+
+    <div class="w-full max-w-sm">
+        <!-- 로고 -->
+        <div class="text-center mb-8">
+            <a href="/static/index.html" class="text-4xl">🔮</a>
+            <h1 class="font-serif text-2xl text-lavender mt-2">타로냥</h1>
+        </div>
+
+        <!-- 탭 -->
+        <div class="flex mb-6 border-b border-lavender/20">
+            <button id="tab-login" onclick="showTab('login')" class="flex-1 py-3 text-center text-lavender border-b-2 border-lavender font-bold">로그인</button>
+            <button id="tab-signup" onclick="showTab('signup')" class="flex-1 py-3 text-center text-gray-400 border-b-2 border-transparent hover:text-lavender transition">회원가입</button>
+        </div>
+
+        <!-- 로그인 폼 -->
+        <form id="form-login" onsubmit="doLogin(event)" class="space-y-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">이메일</label>
+                <input type="email" id="login-email" required placeholder="example@email.com" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
+                <input type="password" id="login-password" required placeholder="6자 이상" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
+            </div>
+            <div id="login-error" class="text-softred text-sm hidden"></div>
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">로그인</button>
+        </form>
+
+        <!-- 회원가입 폼 -->
+        <form id="form-signup" onsubmit="doSignup(event)" class="space-y-4 hidden">
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">이메일</label>
+                <input type="email" id="signup-email" required placeholder="example@email.com" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
+                <input type="password" id="signup-password" required placeholder="6자 이상" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">닉네임 (선택)</label>
+                <input type="text" id="signup-nickname" placeholder="타로냥러버" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
+            </div>
+            <div id="signup-error" class="text-softred text-sm hidden"></div>
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">회원가입</button>
+        </form>
+
+        <!-- 비회원 -->
+        <div class="text-center mt-6">
+            <a href="/static/tarot.html" class="text-sm text-gray-400 hover:text-lavender transition">비회원으로 이용하기 →</a>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('form-signup').classList.toggle('hidden', tab !== 'signup');
+            document.getElementById('tab-login').classList.toggle('text-lavender', tab === 'login');
+            document.getElementById('tab-login').classList.toggle('border-lavender', tab === 'login');
+            document.getElementById('tab-login').classList.toggle('text-gray-400', tab !== 'login');
+            document.getElementById('tab-login').classList.toggle('border-transparent', tab !== 'login');
+            document.getElementById('tab-signup').classList.toggle('text-lavender', tab === 'signup');
+            document.getElementById('tab-signup').classList.toggle('border-lavender', tab === 'signup');
+            document.getElementById('tab-signup').classList.toggle('text-gray-400', tab !== 'signup');
+            document.getElementById('tab-signup').classList.toggle('border-transparent', tab !== 'signup');
+        }
+
+        async function doLogin(e) {
+            e.preventDefault();
+            const errEl = document.getElementById('login-error');
+            errEl.classList.add('hidden');
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('login-email').value,
+                        password: document.getElementById('login-password').value,
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || '로그인 실패');
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/static/index.html';
+            } catch (e) {
+                errEl.textContent = e.message;
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function doSignup(e) {
+            e.preventDefault();
+            const errEl = document.getElementById('signup-error');
+            errEl.classList.add('hidden');
+            try {
+                const res = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('signup-email').value,
+                        password: document.getElementById('signup-password').value,
+                        nickname: document.getElementById('signup-nickname').value || null,
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || '회원가입 실패');
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/static/index.html';
+            } catch (e) {
+                errEl.textContent = e.message;
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        // 공통 인증 헬퍼
+        function authHeaders() {
+            const token = localStorage.getItem('token');
+            return token ? { 'Authorization': `Bearer ${token}` } : {};
+        }
+        function isLoggedIn() { return !!localStorage.getItem('token'); }
+        function getUser() { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } }
+        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/static/login.html'; }
+    </script>
+</body>
+</html>
