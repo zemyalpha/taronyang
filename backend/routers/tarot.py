@@ -1,9 +1,10 @@
 """
 타로 API 라우터
 """
+from __future__ import annotations
 import logging
 import random
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -25,7 +26,7 @@ router = APIRouter(prefix="/api/tarot", tags=["tarot"])
 
 class CardSelection(BaseModel):
     """셔플에서 선택한 카드 (id + 방향)"""
-    id: int | str
+    id: Union[int, str]
     is_upright: bool = True
 
 
@@ -37,7 +38,7 @@ class ChatMessage(BaseModel):
 
 class CardInfo(BaseModel):
     """카드 정보"""
-    id: int | str
+    id: Union[int, str]
     name: str
     name_en: str
     symbol: str
