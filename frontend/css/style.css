@@ -1,149 +1,358 @@
-/* 타로냥 커스텀 스타일 */
+/* 🔮 타로냥 - 스타일시트 */
 
-/* 별 배경 */
-.starfield {
-    background-image:
-        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
-        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.2), transparent),
-        radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.2), transparent),
-        radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 200px 60px, rgba(255,255,255,0.2), transparent),
-        radial-gradient(2px 2px at 250px 20px, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 300px 50px, rgba(255,255,255,0.4), transparent),
-        radial-gradient(2px 2px at 350px 70px, rgba(255,255,255,0.2), transparent),
-        radial-gradient(1px 1px at 400px 30px, rgba(255,255,255,0.3), transparent);
-    background-size: 420px 100px;
-    animation: twinkle 8s ease-in-out infinite alternate;
+:root {
+    --bg-primary: #0a0a2e;
+    --bg-card: #1a1a3e;
+    --bg-card-hover: #252550;
+    --accent-purple: #a78bfa;
+    --accent-gold: #fbbf24;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --positive: #86efac;
+    --negative: #fca5a5;
+    --btn-gradient: linear-gradient(135deg, #7c3aed, #a78bfa);
+    --font-title: 'Noto Serif KR', serif;
+    --font-body: 'Noto Sans KR', sans-serif;
+    --border-radius: 16px;
+    --max-width: 480px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* 별 반짝임 배경 */
+.stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+    will-change: opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .star { animation: none; opacity: 0.5; }
 }
 
 @keyframes twinkle {
-    0% { opacity: 0.5; }
+    0%, 100% { opacity: 0.2; }
     50% { opacity: 1; }
-    100% { opacity: 0.6; }
 }
 
-/* 부드러운 바운스 */
-@keyframes bounce-slow {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-}
-.animate-bounce-slow {
-    animation: bounce-slow 3s ease-in-out infinite;
-}
-
-/* 타로카드 3D */
-.tarot-card {
-    perspective: 800px;
-    width: 110px;
-    height: 170px;
-    cursor: pointer;
-}
-.tarot-card-inner {
+/* 컨테이너 */
+.container {
     position: relative;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-style: preserve-3d;
+    z-index: 1;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
 }
-.tarot-card.flipped .tarot-card-inner {
-    transform: rotateY(180deg);
-}
-.tarot-card-front, .tarot-card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 12px;
+
+/* 헤더 */
+.header {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    padding: 0.75rem;
+    padding: 16px 0;
+}
+
+.header-logo {
+    font-family: var(--font-title);
+    font-size: 20px;
+    color: var(--accent-purple);
+    text-decoration: none;
+}
+
+.header-login {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 16px;
+    border: 1px solid var(--text-secondary);
+    border-radius: 20px;
+    transition: all 0.3s;
+}
+
+.header-login:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+}
+
+/* 히어로 */
+.hero {
     text-align: center;
-}
-.tarot-card-front {
-    background: linear-gradient(135deg, #2d1b69 0%, #4c1d95 100%);
-    border: 2px solid rgba(167, 139, 250, 0.4);
-}
-.tarot-card-back {
-    background: linear-gradient(135deg, #1a1a4e 0%, #2d1b69 100%);
-    border: 2px solid rgba(251, 191, 36, 0.5);
-    transform: rotateY(180deg);
-}
-.tarot-card:hover:not(.flipped):not(.selected) {
-    transform: translateY(-8px);
-    transition: transform 0.3s ease;
-}
-.tarot-card.selected {
-    transform: translateY(-12px);
-}
-.tarot-card.selected .tarot-card-front {
-    border-color: #fbbf24;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+    padding: 40px 0 30px;
 }
 
-/* 셔플 애니메이션 */
-@keyframes shuffle-left {
-    0% { transform: translateX(0) rotate(0deg); }
-    25% { transform: translateX(-30px) rotate(-5deg); }
-    50% { transform: translateX(0) rotate(0deg); }
-    75% { transform: translateX(30px) rotate(5deg); }
-    100% { transform: translateX(0) rotate(0deg); }
-}
-@keyframes shuffle-right {
-    0% { transform: translateX(0) rotate(0deg); }
-    25% { transform: translateX(30px) rotate(5deg); }
-    50% { transform: translateX(0) rotate(0deg); }
-    75% { transform: translateX(-30px) rotate(-5deg); }
-    100% { transform: translateX(0) rotate(0deg); }
-}
-.shuffling .tarot-card:nth-child(odd) {
-    animation: shuffle-left 0.8s ease-in-out;
-}
-.shuffling .tarot-card:nth-child(even) {
-    animation: shuffle-right 0.8s ease-in-out;
+.hero-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
 }
 
-/* 채팅 말풍선 */
-.chat-bubble {
-    max-width: 80%;
-    padding: 0.75rem 1rem;
-    border-radius: 1rem;
+.hero-title {
+    font-family: var(--font-title);
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.hero-subtitle {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-bottom: 32px;
+}
+
+/* CTA 버튼 */
+.cta-button {
+    display: inline-block;
+    background: var(--btn-gradient);
+    color: white;
+    font-family: var(--font-body);
+    font-size: 18px;
+    font-weight: 700;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+}
+
+/* 섹션 */
+.section {
+    margin: 32px 0;
+}
+
+.section-title {
+    font-family: var(--font-title);
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-secondary);
+}
+
+/* 카테고리 카드 그리드 */
+.category-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.category-card {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: var(--text-primary);
+    border: 1px solid transparent;
+}
+
+.category-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-4px);
+    border-color: var(--accent-purple);
+}
+
+.category-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.category-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.category-desc {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* 이용 안내 */
+.steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.step {
+    text-align: center;
+    padding: 16px 8px;
+    background: var(--bg-card);
+    border-radius: 12px;
+}
+
+.step-num {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent-purple);
+    margin-bottom: 4px;
+}
+
+.step-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* 오늘의 운세 카드 */
+.daily-card {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    text-align: center;
+    border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+.daily-label {
+    font-size: 12px;
+    color: var(--accent-gold);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.daily-text {
+    font-family: var(--font-title);
+    font-size: 16px;
     line-height: 1.6;
 }
-.chat-bubble.user {
-    background: rgba(167, 139, 250, 0.2);
-    border: 1px solid rgba(167, 139, 250, 0.3);
-    margin-left: auto;
-    border-bottom-right-radius: 0.25rem;
-}
-.chat-bubble.assistant {
-    background: rgba(30, 30, 70, 0.6);
-    border: 1px solid rgba(167, 139, 250, 0.15);
-    margin-right: auto;
-    border-bottom-left-radius: 0.25rem;
+
+/* 후기 */
+.reviews {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-/* 로딩 애니메이션 */
-@keyframes dot-pulse {
-    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-    40% { opacity: 1; transform: scale(1); }
+.review-item {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 16px;
 }
-.loading-dots span {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #a78bfa;
-    margin: 0 3px;
-    animation: dot-pulse 1.4s ease-in-out infinite;
-}
-.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-/* 스크롤바 커스텀 */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0a0a2e; }
-::-webkit-scrollbar-thumb { background: #a78bfa40; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #a78bfa60; }
+.review-text {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.review-stars {
+    color: var(--accent-gold);
+    font-size: 12px;
+}
+
+/* 요금제 */
+.pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.pricing-card {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: 24px 16px;
+    text-align: center;
+}
+
+.pricing-card.premium {
+    border: 1px solid var(--accent-purple);
+    position: relative;
+}
+
+.pricing-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-purple);
+    color: white;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 10px;
+}
+
+.pricing-name {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.pricing-price {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 16px;
+}
+
+.pricing-features {
+    list-style: none;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.pricing-features li {
+    margin-bottom: 6px;
+}
+
+.pricing-period {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* 푸터 */
+.footer {
+    text-align: center;
+    padding: 32px 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+/* 통계 */
+.stats {
+    text-align: center;
+    padding: 16px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.stats-count {
+    color: var(--accent-gold);
+    font-weight: 700;
+}
+
+/* 반응형 */
+@media (max-width: 375px) {
+    .hero-title { font-size: 26px; }
+    .category-grid { gap: 8px; }
+    .steps { grid-template-columns: repeat(2, 1fr); }
+    .pricing-grid { grid-template-columns: 1fr; }
+}
