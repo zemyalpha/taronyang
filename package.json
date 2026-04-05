@@ -1,0 +1,32 @@
+{
+  "name": "taronyang",
+  "version": "1.0.0",
+  "description": "AI 타로/운세 웹앱 서비스",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zemyalpha/taronyang.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zemyalpha/taronyang/issues"
+  },
+  "homepage": "https://github.com/zemyalpha/taronyang#readme",
+  "lint-staged": {
+    "backend/src/**/*.ts": [
+      "cd backend && npx tsc --noEmit",
+      "cd backend && npx eslint --fix"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0"
+  }
+}
