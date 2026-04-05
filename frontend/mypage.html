@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 — 타로냥</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: { navy: '#0a0a2e', 'dark-purple': '#1a1a3e', lavender: '#a78bfa', gold: '#fbbf24' },
+                fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Noto Sans KR', 'sans-serif'] }
+            }}
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-navy text-gray-100 font-sans min-h-screen">
+
+    <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/static/index.html" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
+            <div class="flex items-center gap-4 text-sm">
+                <span class="text-lavender">마이페이지</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-20 pb-10 px-4 max-w-lg mx-auto">
+        <!-- 로그인 필요 -->
+        <div id="need-login" class="hidden text-center py-16">
+            <div class="text-4xl mb-4">🔒</div>
+            <p class="text-gray-400 mb-4">로그인이 필요해요</p>
+            <a href="/static/login.html" class="inline-block bg-gradient-to-r from-purple-700 to-lavender text-white px-6 py-3 rounded-full font-bold">로그인하기</a>
+        </div>
+
+        <!-- 프로필 -->
+        <div id="profile" class="hidden">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 rounded-full bg-lavender/20 text-lavender text-3xl flex items-center justify-center mx-auto mb-3">🐱</div>
+                <h2 id="user-nickname" class="text-xl font-bold"></h2>
+                <p id="user-email" class="text-gray-400 text-sm"></p>
+                <span id="user-plan" class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold bg-lavender/20 text-lavender"></span>
+            </div>
+
+            <!-- 정보 수정 -->
+            <div class="bg-dark-purple/60 border border-lavender/15 rounded-2xl p-5 mb-4">
+                <h3 class="text-gold font-bold mb-4">프로필 수정</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">닉네임</label>
+                        <input id="edit-nickname" class="w-full bg-navy/60 border border-lavender/20 rounded-xl px-4 py-2.5 text-gray-100 focus:border-lavender/60 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">생년월일 (별자리 자동 계산)</label>
+                        <input id="edit-birth" type="date" class="w-full bg-navy/60 border border-lavender/20 rounded-xl px-4 py-2.5 text-gray-100 focus:border-lavender/60 focus:outline-none">
+                    </div>
+                    <button onclick="updateProfile()" class="w-full py-2.5 bg-lavender/20 text-lavender rounded-xl hover:bg-lavender/30 transition font-bold">저장</button>
+                </div>
+            </div>
+
+            <!-- 메뉴 -->
+            <div class="space-y-2">
+                <a href="/static/history.html" class="block bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 hover:border-lavender/40 transition">
+                    <span class="text-gold">📜</span> 상담 기록
+                </a>
+                <a href="/static/tarot.html" class="block bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 hover:border-lavender/40 transition">
+                    <span class="text-gold">🃏</span> 타로 상담
+                </a>
+                <a href="/static/daily.html" class="block bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 hover:border-lavender/40 transition">
+                    <span class="text-gold">⭐</span> 오늘의 운세
+                </a>
+                <button onclick="doLogout()" class="w-full text-left bg-dark-purple/60 border border-softred/15 rounded-xl p-4 hover:border-softred/40 transition text-softred">
+                    🚪 로그아웃
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function loadProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) { document.getElementById('need-login').classList.remove('hidden'); return; }
+
+            try {
+                const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { localStorage.clear(); document.getElementById('need-login').classList.remove('hidden'); return; }
+                const user = await res.json();
+                document.getElementById('user-nickname').textContent = user.nickname;
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('user-plan').textContent = user.subscription_status === 'premium' ? '💎 프리미엄' : '🆓 무료 플랜';
+                document.getElementById('edit-nickname').value = user.nickname;
+                document.getElementById('profile').classList.remove('hidden');
+            } catch (e) {
+                document.getElementById('need-login').classList.remove('hidden');
+            }
+        }
+
+        async function updateProfile() {
+            const token = localStorage.getItem('token');
+            const nickname = document.getElementById('edit-nickname').value;
+            const birth = document.getElementById('edit-birth').value;
+            try {
+                const res = await fetch('/api/auth/me', {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nickname, birth_date: birth || null })
+                });
+                if (res.ok) alert('저장되었습니다! ✨');
+                else alert('저장 실패 😿');
+            } catch (e) { alert('저장 실패 😿'); }
+        }
+
+        function doLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/static/index.html';
+        }
+
+        loadProfile();
+    </script>
+</body>
+</html>
