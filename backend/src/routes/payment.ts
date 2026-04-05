@@ -6,6 +6,21 @@ import { authMiddleware } from './auth';
 
 export const paymentRouter = Router();
 
+/** 포트원 API 토큰 발급 (임시 구현) */
+async function getPortOneToken(): Promise<string> {
+  if (!config.portOneImpKey || !config.portOneImpSecret) {
+    throw new Error('포트원 API 키가 설정되지 않았습니다');
+  }
+  const res = await fetch('https://api.iamport.kr/users/getToken', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ imp_key: config.portOneImpKey, imp_secret: config.portOneImpSecret }),
+  });
+  const data = await res.json() as any;
+  if (data.code !== 0) throw new Error(`포트원 토큰 발급 실패: ${data.message}`);
+  return data.response.access_token;
+}
+
 /** 요금 정보 */
 paymentRouter.get('/price', (_req: Request, res: Response) => {
   res.json({ premium_price: config.premiumPrice, currency: 'KRW', interval: 'monthly' });
@@ -19,8 +34,27 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
     return;
   }
 
-  // 포트원 API 검증 (실제 구현 시)
   try {
+    // 포트원 결제 검증
+    const token = await getPortOneToken();
+    const payRes = await fetch(`https://api.iamport.kr/payments/${imp_uid}`, {
+      headers: { Authorization: token },
+    });
+    const payData = await payRes.json() as any;
+    if (payData.code !== 0) {
+      res.status(400).json({ detail: `결제 조회 실패: ${payData.message}` });
+      return;
+    }
+    if (payData.response.status !== 'paid') {
+      res.status(400).json({ detail: '결제가 완료되지 않았습니다' });
+      return;
+    }
+    if (payData.response.amount !== config.premiumPrice) {
+      res.status(400).json({ detail: `결제 금액 불일치: ${payData.response.amount} != ${config.premiumPrice}` });
+      return;
+    }
+
+    // 프리미엄 활성화
     const db = getDb();
     const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     db.prepare("UPDATE users SET subscription_status = 'premium', subscription_expires_at = ? WHERE id = ?")

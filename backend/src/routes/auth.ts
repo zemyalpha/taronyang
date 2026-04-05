@@ -110,7 +110,11 @@ authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
   const user = (req as any).user as User;
   const { nickname, birth_date } = req.body;
 
-  const { getDb } = require('../database');
+/** 내 정보 수정 */
+authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
+  const user = (req as any).user as User;
+  const { nickname, birth_date } = req.body;
+
   const db = getDb();
   const updates: string[] = [];
   const params: any[] = [];

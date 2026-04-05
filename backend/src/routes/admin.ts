@@ -70,6 +70,7 @@ adminRouter.get('/readings', authMiddleware, adminMiddleware, (req: Request, res
 /** 사용자 삭제 */
 adminRouter.delete('/users/:id', authMiddleware, adminMiddleware, (req: Request, res: Response) => {
   const db = getDb();
+  db.prepare('DELETE FROM daily_horoscopes WHERE user_id = ?').run(req.params.id);
   db.prepare('DELETE FROM readings WHERE user_id = ?').run(req.params.id);
   db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
 

@@ -1,4 +1,5 @@
 /** 상담 기록 저장 서비스 및 라우터 */
+import crypto from 'crypto';
 import { Router, Request, Response } from 'express';
 import { getDb } from '../database';
 import { authMiddleware } from './auth';
