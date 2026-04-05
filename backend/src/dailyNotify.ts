@@ -146,6 +146,16 @@ export async function sendDailyNotifications(): Promise<void> {
 
   const db = getDb();
 
+  // DB에서 발송 완료 여부 확인 (서버 재시작 시에도 안전)
+  const today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const alreadySent = db.prepare(
+    'SELECT COUNT(*) as cnt FROM daily_horoscopes WHERE date = ? AND email_sent = 1'
+  ).get(today) as any;
+  if (alreadySent.cnt >= 12) {
+    console.log(`오늘(${today}) 이미 발송 완료 — 건너뜀`);
+    return;
+  }
+
   // DB에서 알림 수신 동의한 사용자만 직접 조회
   const enabled = db.prepare(
     "SELECT id, email, nickname, zodiac_sign, settings FROM users " +
@@ -176,6 +186,9 @@ export async function sendDailyNotifications(): Promise<void> {
   sent = results.filter(r => r.status === 'fulfilled' && r.value).length;
 
   console.log(`📧 일운 이메일 발송 완료: ${sent}/${enabled.length}`);
+
+  // 발송 완료 기록
+  db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
 }
 
 /** 스케줄러 시작 */

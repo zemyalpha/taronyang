@@ -1,6 +1,6 @@
 /** 알림 설정 API 라우터 */
 import { Router, Request, Response } from 'express';
-import { getDb, getUserById } from '../database';
+import { getDb } from '../database';
 import { authMiddleware } from './auth';
 import { generateDailyHoroscope } from '../dailyNotify';
 
@@ -17,11 +17,6 @@ function getSettings(user: any): UserSettings {
   catch { return {}; }
 }
 
-function saveSettings(userId: string, settings: UserSettings): void {
-  const db = getDb();
-  db.prepare('UPDATE users SET settings = ? WHERE id = ?').run(JSON.stringify(settings), userId);
-}
-
 /** 알림 설정 조회 */
 notifyRouter.get('/settings', authMiddleware, (req: Request, res: Response) => {
   const user = (req as any).user;
@@ -34,16 +29,16 @@ notifyRouter.get('/settings', authMiddleware, (req: Request, res: Response) => {
   });
 });
 
-/** 알림 설정 변경 */
+/** 알림 설정 변경 (json_set으로 race condition 방지) */
 notifyRouter.put('/settings', authMiddleware, (req: Request, res: Response) => {
   const user = (req as any).user;
-  const settings = getSettings(user);
-
-  if (req.body.daily_email !== undefined) settings.daily_email = req.body.daily_email;
-  if (req.body.notify_time) settings.notify_time = req.body.notify_time;
-  if (req.body.notify_channel) settings.notify_channel = req.body.notify_channel;
-
-  saveSettings(user.id, settings);
+  const db = getDb();
+  const field = req.body.daily_email !== undefined ? '$.daily_email'
+    : req.body.notify_time ? '$.notify_time' : '$.notify_channel';
+  const value = req.body.daily_email !== undefined ? req.body.daily_email
+    : req.body.notify_time ? req.body.notify_time : req.body.notify_channel;
+  db.prepare('UPDATE users SET settings = json_set(COALESCE(settings, \'{}\'), ?, ?) WHERE id = ?')
+    .run(field, typeof value === 'boolean' ? (value ? 1 : 0) : value, user.id);
   res.json({ ok: true });
 });
 
