@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>요금제 — 타로냥</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: { navy: '#0a0a2e', 'dark-purple': '#1a1a3e', lavender: '#a78bfa', gold: '#fbbf24' },
+                fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Noto Sans KR', 'sans-serif'] }
+            }}
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-navy text-gray-100 font-sans min-h-screen">
+
+    <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/static/index.html" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
+            <a href="/static/mypage.html" class="text-sm text-gray-400 hover:text-lavender transition">마이페이지</a>
+        </div>
+    </nav>
+
+    <main class="pt-20 pb-10 px-4 max-w-3xl mx-auto">
+        <h1 class="font-serif text-3xl text-center text-lavender mb-12">💎 프리미엄 구독</h1>
+
+        <!-- 현재 상태 -->
+        <div id="current-status" class="hidden text-center mb-8">
+            <span id="status-badge" class="inline-block px-4 py-2 rounded-full text-sm font-bold"></span>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- 무료 -->
+            <div class="bg-dark-purple/60 border border-lavender/20 rounded-2xl p-8">
+                <h3 class="text-xl font-bold text-gray-200 mb-1">무료 플랜</h3>
+                <div class="text-3xl font-bold text-gold mb-4">₩0</div>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li>✅ 매일 1회 타로 상담</li>
+                    <li>✅ 기본 AI 해석</li>
+                    <li>✅ 오늘의 운세</li>
+                    <li class="text-gray-600">❌ 추가 대화</li>
+                    <li class="text-gray-600">❌ 일운 알림</li>
+                    <li class="text-gray-600">❌ 상담 기록</li>
+                </ul>
+            </div>
+
+            <!-- 프리미엄 -->
+            <div class="bg-gradient-to-b from-lavender/20 to-dark-purple/60 border border-lavender/50 rounded-2xl p-8 relative">
+                <div class="absolute -top-3 right-6 bg-gold text-navy text-xs font-bold px-3 py-1 rounded-full">추천</div>
+                <h3 class="text-xl font-bold text-gray-200 mb-1">프리미엄</h3>
+                <div class="text-3xl font-bold text-gold mb-1">₩9,900<span class="text-base font-normal text-gray-400">/월</span></div>
+                <ul class="space-y-2 text-gray-400 text-sm mt-4">
+                    <li>✅ 무제한 타로 상담</li>
+                    <li>✅ 상세 AI 해석</li>
+                    <li>✅ 추가 대화 (최대 5회)</li>
+                    <li>✅ 매일 아침 운세 알림</li>
+                    <li>✅ 상담 기록 저장</li>
+                </ul>
+                <button id="btn-subscribe" onclick="subscribe()" class="mt-6 w-full py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">
+                    프리미엄 시작하기 ✨
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+    <script>
+        async function checkStatus() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                const res = await fetch('/api/payment/status', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) return;
+                const data = await res.json();
+                const badge = document.getElementById('status-badge');
+                const el = document.getElementById('current-status');
+                el.classList.remove('hidden');
+                if (data.status === 'premium') {
+                    badge.textContent = '💎 프리미엄 구독 중';
+                    badge.className = 'inline-block px-4 py-2 rounded-full text-sm font-bold bg-lavender/20 text-lavender';
+                    document.getElementById('btn-subscribe').textContent = '이미 구독 중입니다';
+                    document.getElementById('btn-subscribe').disabled = true;
+                } else {
+                    badge.textContent = '🆓 무료 플랜';
+                    badge.className = 'inline-block px-4 py-2 rounded-full text-sm font-bold bg-gray-500/20 text-gray-400';
+                }
+            } catch (e) {}
+        }
+
+        function subscribe() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('로그인이 필요합니다');
+                window.location.href = '/static/login.html';
+                return;
+            }
+
+            const IMP = window.IMP;
+            if (!IMP) {
+                alert('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+            IMP.init('');  // 포트원 가맹점 식별코드 필요
+
+            IMP.request_pay({
+                pg: 'kakaopay',
+                pay_method: 'card',
+                merchant_uid: 'taronyang_' + Date.now(),
+                name: '타로냥 프리미엄 (월간)',
+                amount: 9900,
+                buyer_email: '',
+            }, async function(rsp) {
+                if (rsp.success) {
+                    try {
+                        const res = await fetch('/api/payment/verify', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ imp_uid: rsp.imp_uid })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            alert('프리미엄이 활성화되었습니다! ✨');
+                            checkStatus();
+                        } else {
+                            alert(data.detail || '결제 검증에 실패했습니다');
+                        }
+                    } catch (e) {
+                        alert('결제 검증 오류');
+                    }
+                } else {
+                    alert('결제가 취소되었습니다');
+                }
+            });
+        }
+
+        checkStatus();
+    </script>
+</body>
+</html>
