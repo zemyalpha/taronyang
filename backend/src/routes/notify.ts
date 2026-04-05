@@ -7,7 +7,7 @@ import { generateDailyHoroscope } from '../dailyNotify';
 export const notifyRouter = Router();
 
 interface UserSettings {
-  daily_email?: boolean;
+  daily_email?: number; // json_set으로 1/0 저장
   notify_time?: string;
   notify_channel?: string;
 }
@@ -22,23 +22,35 @@ notifyRouter.get('/settings', authMiddleware, (req: Request, res: Response) => {
   const user = (req as any).user;
   const settings = getSettings(user);
   res.json({
-    daily_email: settings.daily_email !== false,
+    daily_email: settings.daily_email !== 0,
     notify_time: settings.notify_time || '07:00',
     notify_channel: settings.notify_channel || 'email',
     zodiac_sign: user.zodiac_sign || '',
   });
 });
 
-/** 알림 설정 변경 (json_set으로 race condition 방지) */
+/** 알림 설정 변경 (json_set + 트랜잭션) */
 notifyRouter.put('/settings', authMiddleware, (req: Request, res: Response) => {
   const user = (req as any).user;
+  const { daily_email, notify_time, notify_channel } = req.body;
   const db = getDb();
-  const field = req.body.daily_email !== undefined ? '$.daily_email'
-    : req.body.notify_time ? '$.notify_time' : '$.notify_channel';
-  const value = req.body.daily_email !== undefined ? req.body.daily_email
-    : req.body.notify_time ? req.body.notify_time : req.body.notify_channel;
-  db.prepare('UPDATE users SET settings = json_set(COALESCE(settings, \'{}\'), ?, ?) WHERE id = ?')
-    .run(field, typeof value === 'boolean' ? (value ? 1 : 0) : value, user.id);
+
+  const update = db.transaction(() => {
+    if (daily_email !== undefined) {
+      db.prepare("UPDATE users SET settings = json_set(COALESCE(settings, '{}'), '$.daily_email', ?) WHERE id = ?")
+        .run(daily_email ? 1 : 0, user.id);
+    }
+    if (notify_time !== undefined) {
+      db.prepare("UPDATE users SET settings = json_set(COALESCE(settings, '{}'), '$.notify_time', ?) WHERE id = ?")
+        .run(notify_time, user.id);
+    }
+    if (notify_channel !== undefined) {
+      db.prepare("UPDATE users SET settings = json_set(COALESCE(settings, '{}'), '$.notify_channel', ?) WHERE id = ?")
+        .run(notify_channel, user.id);
+    }
+  });
+
+  update();
   res.json({ ok: true });
 });
 
@@ -70,7 +82,7 @@ notifyRouter.get('/horoscope/:sign', async (req: Request, res: Response) => {
     res.status(400).json({ detail: '유효하지 않은 별자리입니다' });
     return;
   }
-  const today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const today = getKstDate();
 
   try {
     const horoscope = await generateDailyHoroscope(sign, today);
@@ -79,3 +91,8 @@ notifyRouter.get('/horoscope/:sign', async (req: Request, res: Response) => {
     res.status(500).json({ detail: '운세 생성에 실패했습니다' });
   }
 });
+
+/** KST 기준 오늘 날짜 반환 */
+export function getKstDate(): string {
+  return new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+}

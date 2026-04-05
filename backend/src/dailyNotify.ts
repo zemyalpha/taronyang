@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import { config } from './config';
 import { getDb } from './database';
 import { callLlm } from './llm';
+import { getKstDate } from './routes/notify';
 
 const ZODIAC_SIGNS = [
   '양자리', '황소자리', '쌍둥이자리', '게자리', '사자자리', '처녀자리',
@@ -59,7 +60,7 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
 
 /** 12별자리 전체 일운 생성 */
 export async function generateAllHoroscopes(): Promise<Record<string, string>> {
-  const today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const today = getKstDate();
   const entries = await Promise.all(
     ZODIAC_SIGNS.map(async (sign) => [sign, await generateDailyHoroscope(sign, today)] as const)
   );
@@ -147,11 +148,11 @@ export async function sendDailyNotifications(): Promise<void> {
   const db = getDb();
 
   // DB에서 발송 완료 여부 확인 (서버 재시작 시에도 안전)
-  const today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const today = getKstDate();
   const alreadySent = db.prepare(
     'SELECT COUNT(*) as cnt FROM daily_horoscopes WHERE date = ? AND email_sent = 1'
   ).get(today) as any;
-  if (alreadySent.cnt >= 12) {
+  if (alreadySent.cnt >= ZODIAC_SIGNS.length) {
     console.log(`오늘(${today}) 이미 발송 완료 — 건너뜀`);
     return;
   }
@@ -169,7 +170,8 @@ export async function sendDailyNotifications(): Promise<void> {
   }
 
   const horoscopes = await generateAllHoroscopes();
-  const todayStr = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+  const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+  const todayStr = kstNow.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
   let sent = 0;
 
   const results = await Promise.allSettled(enabled.map(async (sub) => {
