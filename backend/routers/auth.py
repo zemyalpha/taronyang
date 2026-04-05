@@ -1,7 +1,7 @@
 """인증 API 라우터"""
 import logging
 from fastapi import APIRouter, HTTPException, Depends, Request
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 
 from db.database import create_user, verify_user, get_user_by_id
@@ -159,18 +159,30 @@ def _calc_zodiac(birth_date: str) -> str | None:
     try:
         month = int(birth_date.split("-")[1])
         day = int(birth_date.split("-")[2])
-        if (month == 3 and day >= 21) or (month == 4 and day <= 19): return "양자리"
-        elif (month == 4 and day >= 20) or (month == 5 and day <= 20): return "황소자리"
-        elif (month == 5 and day >= 21) or (month == 6 and day <= 21): return "쌍둥이자리"
-        elif (month == 6 and day >= 22) or (month == 7 and day <= 22): return "게자리"
-        elif (month == 7 and day >= 23) or (month == 8 and day <= 22): return "사자자리"
-        elif (month == 8 and day >= 23) or (month == 9 and day <= 23): return "처녀자리"
-        elif (month == 9 and day >= 24) or (month == 10 and day <= 22): return "천칭자리"
-        elif (month == 10 and day >= 23) or (month == 11 and day <= 22): return "전갈자리"
-        elif (month == 11 and day >= 23) or (month == 12 and day <= 24): return "궁수자리"
-        elif (month == 12 and day >= 25) or (month == 1 and day <= 19): return "염소자리"
-        elif (month == 1 and day >= 20) or (month == 2 and day <= 18): return "물병자리"
-        elif (month == 2 and day >= 19) or (month == 3 and day <= 20): return "물고기자리"
+        if (month == 3 and day >= 21) or (month == 4 and day <= 19):
+            return "양자리"
+        elif (month == 4 and day >= 20) or (month == 5 and day <= 20):
+            return "황소자리"
+        elif (month == 5 and day >= 21) or (month == 6 and day <= 21):
+            return "쌍둥이자리"
+        elif (month == 6 and day >= 22) or (month == 7 and day <= 22):
+            return "게자리"
+        elif (month == 7 and day >= 23) or (month == 8 and day <= 22):
+            return "사자자리"
+        elif (month == 8 and day >= 23) or (month == 9 and day <= 23):
+            return "처녀자리"
+        elif (month == 9 and day >= 24) or (month == 10 and day <= 22):
+            return "천칭자리"
+        elif (month == 10 and day >= 23) or (month == 11 and day <= 22):
+            return "전갈자리"
+        elif (month == 11 and day >= 23) or (month == 12 and day <= 24):
+            return "궁수자리"
+        elif (month == 12 and day >= 25) or (month == 1 and day <= 19):
+            return "염소자리"
+        elif (month == 1 and day >= 20) or (month == 2 and day <= 18):
+            return "물병자리"
+        elif (month == 2 and day >= 19) or (month == 3 and day <= 20):
+            return "물고기자리"
     except Exception:
         pass
     return None

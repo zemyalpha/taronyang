@@ -135,7 +135,8 @@ async def google_callback(code: str) -> dict:
             return None
 
         # ID 토큰 디코딩 (간이 버전 — 실제 운영은 google-auth 라이브러리 권장)
-        import base64, json
+        import base64
+        import json
         parts = id_token.split(".")
         payload = json.loads(base64.urlsafe_b64decode(parts[1] + "=="))
         return {

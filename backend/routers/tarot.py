@@ -15,7 +15,7 @@ from services.tarot_prompt import (
     CATEGORY_NAMES,
 )
 from services.llm import tarot_reading, call_llm
-from routers.readings import save_reading, check_free_limit, increment_free_count
+from routers.readings import save_reading
 
 logger = logging.getLogger(__name__)
 

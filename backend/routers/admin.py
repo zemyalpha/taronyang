@@ -1,10 +1,8 @@
 """관리자 API 라우터"""
 import logging
-from datetime import date
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
 
-from db.database import get_db, get_user_by_id
+from db.database import get_db
 from routers.auth import get_current_user
 
 logger = logging.getLogger(__name__)

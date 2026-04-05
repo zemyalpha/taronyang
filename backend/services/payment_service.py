@@ -1,7 +1,6 @@
 """포트원(아임포트) 결제 연동"""
 import os
 import httpx
-import json
 import logging
 from datetime import datetime, timedelta
 from db.database import get_db

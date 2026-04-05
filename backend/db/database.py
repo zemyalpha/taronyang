@@ -1,11 +1,8 @@
 """데이터베이스 모델 및 연결"""
 import os
-from datetime import datetime, timedelta
 import sqlite3
 import uuid
-import hashlib
 import bcrypt
-from pathlib import Path
 
 DB_PATH = os.getenv("DATABASE_PATH", "./taronyang.db")
 

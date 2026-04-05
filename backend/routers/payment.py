@@ -1,6 +1,6 @@
 """결제 API 라우터"""
 import logging
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from routers.auth import get_current_user
@@ -33,7 +33,7 @@ async def get_price():
 async def verify_and_activate(req: VerifyRequest, user=Depends(get_current_user)):
     """결제 검증 후 프리미엄 활성화"""
     try:
-        payment = await verify_payment(req.imp_uid)
+        await verify_payment(req.imp_uid)
         activate_premium(user["id"])
         return {"ok": True, "message": "프리미엄이 활성화되었습니다! ✨"}
     except Exception as e:
