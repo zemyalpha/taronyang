@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "🔍 pre-commit: TypeScript 타입체크..."
+(cd backend && npx tsc --noEmit) || exit 1
+echo "🔍 pre-commit: ESLint (errors only)..."
+(cd backend && npx eslint src/ --quiet) || exit 1
+echo "✅ pre-commit 통과!"

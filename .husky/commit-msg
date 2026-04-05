@@ -1,0 +1,15 @@
+# 커밋 메시지 형식 검증
+# 허용: feat:, fix:, docs:, style:, refactor:, test:, chore:, ci:, perf:, revert:
+MSG="$(cat "$1")"
+PATTERN="^(feat|fix|docs|style|refactor|test|chore|ci|perf|revert)(\(.+\))?: .{1,100}"
+
+if ! echo "$MSG" | head -1 | grep -qE "$PATTERN"; then
+  echo "❌ 커밋 메시지 형식 오류!"
+  echo ""
+  echo "형식: <type>(<scope>): <description>"
+  echo ""
+  echo "type: feat, fix, docs, style, refactor, test, chore, ci, perf, revert"
+  echo "예시: feat: 로그인 페이지 추가"
+  echo "예시: fix(auth): JWT 만료 처리 수정"
+  exit 1
+fi
