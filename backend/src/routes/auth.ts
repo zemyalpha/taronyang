@@ -1,5 +1,5 @@
 /** 인증 API 라우터 */
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
 import { createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, User } from '../database';
@@ -15,31 +15,31 @@ interface TokenPayload {
 // --- 미들웨어 ---
 
 /** JWT에서 현재 사용자 추출 */
-export function authMiddleware(req: Request, res: Response, next: express.NextFunction): void {
+export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) {
-    _res.status(401).json({ detail: '로그인이 필요합니다' });
+    res.status(401).json({ detail: '로그인이 필요합니다' });
     return;
   }
   try {
     const payload = jwt.verify(auth.slice(7), config.jwtSecret) as TokenPayload;
     const user = getUserById(payload.user_id);
     if (!user) {
-      _res.status(401).json({ detail: '사용자를 찾을 수 없습니다' });
+      res.status(401).json({ detail: '사용자를 찾을 수 없습니다' });
       return;
     }
     (req as any).user = user;
     next();
   } catch {
-    _res.status(401).json({ detail: '토큰이 만료되었거나 유효하지 않습니다' });
+    res.status(401).json({ detail: '토큰이 만료되었거나 유효하지 않습니다' });
   }
 }
 
 /** 관리자 권한 확인 */
-export function adminMiddleware(req: Request, res: Response, next: express.NextFunction): void {
+export function adminMiddleware(req: Request, res: Response, next: NextFunction): void {
   const user = (req as any).user as User;
   if (!user?.is_admin) {
-    _res.status(403).json({ detail: '관리자 권한이 필요합니다' });
+    res.status(403).json({ detail: '관리자 권한이 필요합니다' });
     return;
   }
   next();

@@ -3,7 +3,7 @@ import { Router, Request, Response } from 'express';
 import { ALL_CARDS, getCard, CATEGORY_NAMES } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
 import { tarotReading, callLlm } from '../llm';
-import { saveReading, readingsRouter } from './routes/readings';
+import { saveReading } from './readings';
 
 export const tarotRouter = Router();
 
@@ -64,7 +64,7 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
     }
 
     res.json({
-      cards: cards.map((c) => ({
+      cards: cards.map((c: any) => ({
         id: c.id,
         name: c.name,
         name_en: c.name_en,
