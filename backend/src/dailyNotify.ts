@@ -59,7 +59,7 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
 
 /** 12별자리 전체 일운 생성 */
 export async function generateAllHoroscopes(): Promise<Record<string, string>> {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
   const entries = await Promise.all(
     ZODIAC_SIGNS.map(async (sign) => [sign, await generateDailyHoroscope(sign, today)] as const)
   );
@@ -146,27 +146,15 @@ export async function sendDailyNotifications(): Promise<void> {
 
   const db = getDb();
 
-  // 알림 수신 동의한 사용자 (settings JSON에 daily_email: true)
-  const subscribers = db.prepare(
-    `SELECT id, email, nickname, zodiac_sign, settings FROM users
-     WHERE zodiac_sign IS NOT NULL AND zodiac_sign != '' AND email IS NOT NULL`
+  // DB에서 알림 수신 동의한 사용자만 직접 조회
+  const enabled = db.prepare(
+    "SELECT id, email, nickname, zodiac_sign, settings FROM users " +
+    "WHERE zodiac_sign IS NOT NULL AND zodiac_sign != '' AND email IS NOT NULL " +
+    "AND (json_extract(settings, '$.daily_email') IS NULL OR json_extract(settings, '$.daily_email') != 0)"
   ).all() as any[];
 
-  if (!subscribers.length) {
-    console.log('구독자 없음 — 발송 건너뜀');
-    return;
-  }
-
-  // settings에서 daily_email이 true인 사용자 필터
-  const enabled = subscribers.filter(u => {
-    try {
-      const s = JSON.parse(u.settings || '{}');
-      return s.daily_email !== false; // 기본값 true
-    } catch { return true; }
-  });
-
   if (!enabled.length) {
-    console.log('알림 수신 동의자 없음');
+    console.log('구독자 없음 — 발송 건너뜀');
     return;
   }
 
@@ -174,9 +162,9 @@ export async function sendDailyNotifications(): Promise<void> {
   const todayStr = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
   let sent = 0;
 
-  await Promise.all(enabled.map(async (sub) => {
+  for (const sub of enabled) {
     const horoscope = horoscopes[sub.zodiac_sign];
-    if (!horoscope) return;
+    if (!horoscope) continue;
 
     const nickname = sub.nickname || '회원';
     const html = buildEmailHtml(nickname, sub.zodiac_sign, horoscope);
@@ -184,7 +172,7 @@ export async function sendDailyNotifications(): Promise<void> {
 
     const ok = await sendEmail(sub.email, subject, html);
     if (ok) sent++;
-  }));
+  }
 
   console.log(`📧 일운 이메일 발송 완료: ${sent}/${enabled.length}`);
 }
@@ -197,9 +185,8 @@ export function startDailyScheduler(): void {
 
   setInterval(async () => {
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    const today = new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
     const hour = now.getHours();
-    const minute = now.getMinutes();
 
     if (hour >= 7 && lastSentDate !== today) {
       lastSentDate = today;
