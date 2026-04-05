@@ -162,17 +162,18 @@ export async function sendDailyNotifications(): Promise<void> {
   const todayStr = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
   let sent = 0;
 
-  for (const sub of enabled) {
+  const results = await Promise.allSettled(enabled.map(async (sub) => {
     const horoscope = horoscopes[sub.zodiac_sign];
-    if (!horoscope) continue;
+    if (!horoscope) return;
 
     const nickname = sub.nickname || '회원';
     const html = buildEmailHtml(nickname, sub.zodiac_sign, horoscope);
     const subject = `🔮 ${nickname}님의 ${todayStr} 운세 — ${sub.zodiac_sign}`;
 
-    const ok = await sendEmail(sub.email, subject, html);
-    if (ok) sent++;
-  }
+    return sendEmail(sub.email, subject, html);
+  }));
+
+  sent = results.filter(r => r.status === 'fulfilled' && r.value).length;
 
   console.log(`📧 일운 이메일 발송 완료: ${sent}/${enabled.length}`);
 }
@@ -185,8 +186,9 @@ export function startDailyScheduler(): void {
 
   setInterval(async () => {
     const now = new Date();
-    const today = new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const hour = now.getHours();
+    const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const today = kstNow.toISOString().split('T')[0];
+    const hour = kstNow.getUTCHours();
 
     if (hour >= 7 && lastSentDate !== today) {
       lastSentDate = today;

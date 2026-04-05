@@ -75,7 +75,7 @@ notifyRouter.get('/horoscope/:sign', async (req: Request, res: Response) => {
     res.status(400).json({ detail: '유효하지 않은 별자리입니다' });
     return;
   }
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   try {
     const horoscope = await generateDailyHoroscope(sign, today);
