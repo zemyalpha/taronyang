@@ -15,7 +15,13 @@ tarotRouter.get('/categories', (_req: Request, res: Response) => {
 /** 카드 셔플 */
 tarotRouter.get('/shuffle', (req: Request, res: Response) => {
   const count = Math.min(Math.max(parseInt(req.query.count as string) || 10, 3), 20);
-  const shuffled = [...ALL_CARDS].sort(() => Math.random() - 0.5).slice(0, count);
+  // Fisher-Yates 셔플 (편향 없는 무작위)
+  const deck = [...ALL_CARDS];
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  const shuffled = deck.slice(0, count);
   const cards = shuffled.map((c) => {
     const is_upright = Math.random() > 0.5;
     return {
@@ -44,11 +50,17 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
   }
 
   // 카드 데이터 조회
-  const cards = selectedCards.map((s: { id: number; is_upright: boolean }) => {
-    const card = getCard(s.id);
-    if (!card) throw new Error(`카드 없음: ${s.id}`);
-    return { ...card, is_upright: s.is_upright };
-  });
+  let cards: any[];
+  try {
+    cards = selectedCards.map((s: { id: number; is_upright: boolean }) => {
+      const card = getCard(s.id);
+      if (!card) throw new Error(`카드 없음: ${s.id}`);
+      return { ...card, is_upright: s.is_upright };
+    });
+  } catch (err) {
+    res.status(400).json({ detail: String(err) });
+    return;
+  }
 
   // 프롬프트 생성
   const prompt = buildReadingPrompt(CATEGORY_NAMES[category], question || '', cards);
@@ -96,7 +108,7 @@ tarotRouter.post('/chat', async (req: Request, res: Response) => {
   const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     {
-      role: 'system' as 'user',
+      role: 'user',
       content: `이전 상담: 카테고리=${category}, 카드=${cards_summary}, 해석=${previous_reading}`,
     },
   ];

@@ -38,7 +38,7 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
     // 포트원 결제 검증
     const token = await getPortOneToken();
     const payRes = await fetch(`https://api.iamport.kr/payments/${imp_uid}`, {
-      headers: { Authorization: token },
+      headers: { Authorization: `Bearer ${token}` },
     });
     const payData = await payRes.json() as any;
     if (payData.code !== 0) {

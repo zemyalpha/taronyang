@@ -104,7 +104,8 @@ export function createUser(email: string, password: string, nickname?: string): 
       'INSERT INTO users (id, provider, email, password_hash, nickname) VALUES (?, ?, ?, ?, ?)'
     ).run(userId, 'email', email, hashed, nick);
     return getUserById(userId);
-  } catch {
+  } catch (err) {
+    console.error('사용자 생성 실패:', err);
     return null;
   }
 }
