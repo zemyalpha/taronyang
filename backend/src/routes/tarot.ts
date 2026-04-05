@@ -1,5 +1,118 @@
-ZAI_API_KEY=zai_api_testing_plan (혘testing_plan ( 의 Zai_api_testing_plan 에 겕testing_plan 반환 '100 / 시-${:number; days: for (필 벍 30): string[] }]: '🃏', '💰', '직장운', '🌟': '종합운' }, CI: zod.object } | z.object(required: z | z.object({ category: string; question?: string; cards: { name: string; is_upright: boolean; keywords_up: string[]; keywords_down: string[] }[]): string | null => void | null): number, min(3, 20)) || null) throw new Error('카드를 3장 선택해야 합니다: return cards.slice(0, count).map((c) => ({ name: c.name, position: c.is_upright ? '정위치' : '역위치', keywords: (c.is_upright ? c.keywords_up : c.keywords_down).join(', ') }),}   const systemPrompt: SYSTEM_PROMPT, `너는 " 	   : "타로냥"       }, {     "role: "     :     "     "   ,     "role" : "     "   ,     "role": "     :     "    ,     "role": "     :     "   },   {     "role": "assistant", "content": "이전 상담: 카테고리=${req.category}, 카드=${req.cards_summary}, 해석=${req.previous_reading}` },   ].role`("     , "content": "타로냥의 조언 (2~3문장) },   ]` + "  }   ,     "     "  ,     "  |    }${     role: "     , "content"           ,     "  }   |     `.replace('{category}', category)    .replace('{question}', question || '종합적인 운세')    .replace('{card1_name}', cardData[0].name)    .replace('{card1_position}', cardData[0].position)    .replace('{card1_keywords}', cardData[0].keywords)    .replace('{card2_name}', cardData[1].name)    .replace('{card2_position}', cardData[1].position)    .replace('{card2_keywords}', cardData[1].keywords)    .replace('{card3_name}', cardData[2].name)    .replace('{card3_position}', cardData[2].position)    .replace('{card3_keywords}', cardData[2].keywords)    .replace('\\{category\\', category || '') => 'https://api.z.ai/api/coding/paas/v4/chat/completions',  "                  ,     "chat history",         { "content": "string; "     },
-     {
-       "role": "user"   ,
-       "content": "question",
-     "   ].join(' '),   ]).reduce((acc: string, `${acc} `, ''), 0) : null : 0) ? null : null) : 0).join(' || '')).join(', or '') : undefined) ? null : 0 : ` ? ${ "    : "string | undefined, `${acc} === undefined) ? cards[0] : undefined, `${acc} === undefined` ? cards[1] : undefined, `${acc} === undefined` ? cards[2] : undefined) : `${acc}.join(', ' | undefined) ? `${acc} === undefined` ? cards[0].position) : undefined) : `${acc}.join(', ') | undefined) ? `${acc}.join(', ') : undefined) ? `${acc}.join(', ' | undefined) ? `${acc} === undefined) ? cards[0].keywords_up : c.is_upright ? cards[0].keywords_up : c.keywords_down : c.is_upright ? cards[0].keywords_down : []).join(', ' | undefined) : `${acc}`.join(', ' | undefined) ? `${acc}.join(', ') | undefined) ? `${acc}.join(', ') | undefined) ? `${acc}`.join(', ') | undefined) ? `${acc}.join(', ') | undefined) ? `${acc}`.join(', ') | undefined) ? `${acc}.join(', ' | undefined) ? `${acc}.join(', ') | undefined) ? `${acc}.join(', ') | undefined) ? `${acc}.join(', ') | undefined) ? `${acc}.join(', ') | undefined) ? `${acc}`.join(', ') | undefined) ? `${acc}`.join(', ') | undefined,? cards[1].name : undefined, cards[2]?.name : undefined, cards[2]?.is_upright: undefined, cards[2]?.keywords_up : undefined, cards[2]?.keywords_down : undefined, cards[3]?.name: undefined, cards[3]?.is_upright: undefined, cards[3]?.keywords_up: undefined, cards[3]?.keywords_down: undefined): {    const promptStr = DAILY_PROMPT.replace('{zodiac}', zodiac).replace('{date}', dateStr(new Date().toLocaleDateString('ko-KR'));\n  const prompt = READING_PROMPT.replace('{zodiac}', zodiac).replace('{date}', todayStr(new Date().toLocaleDateString('ko-KR', year: 'numeric', month: 'long', day: 'numeric', weekday: 'long')).trim()).join(cards.map(c => c.id)[1] && c.is_upright ? c.is_upright : c.keywords_up : c.is_upright ? c.keywords_up : c.keywords_down : c.keywords_down : []).join(', ' | undefined) ?? []).join(', ' | undefined) ?? []).join(', ') => `${catName}(${position})`).join(', ' | undefined) ?? []).join(', ') => `과거: ${cards[0]?.name || ' | 현재: ${cards[1]?.name || ' | 미래: ${cards[2]?.name}`).join(', ' | ');\n  const result = READING_PROMPT\n    .replace('{category}', category)\n    .replace('{question}', question || '종합적인 운세')\n    .replace('{card1_name}', cardData[0].name)\n    .replace('{card1_position}', cardData[0].position)\n    .replace('{card1_keywords}', cardData[0].keywords)\n    .replace('{card2_name}', cardData[1].name)\n    .replace('{card2_position}', cardData[1].position)\n    .replace('{card2_keywords}', cardData[1].keywords)\n    .replace('{card3_name}', cardData[2].name)\n    .replace('{card3_position}', cardData[2].position)\n    .replace('{card3_keywords}', cardData[2].keywords);\n}\n\nexport default SYSTEM_PROMPT;\nexport const READING_PROMPT;\nexport const DAILY_PROMPT;\nexport { buildReadingPrompt };\nexport function parseReadingStream(input: string): ReadingStream | null {\\n  const parts = input.split('\\n---\\n');\n  if (parts.length !== 3) return null;\n  const system = parts[0];\n  const prompt = parts[1];\n  const cardsJson = parts[2];\n  return { system, prompt, cardsJson };\n}\n
+/** 타로 API 라우터 */
+import { Router, Request, Response } from 'express';
+import { ALL_CARDS, getCard, CATEGORY_NAMES } from '../tarotData';
+import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
+import { tarotReading, callLlm } from '../llm';
+import { saveReading } from './readings';
+
+export const tarotRouter = Router();
+
+/** 카테고리 목록 */
+tarotRouter.get('/categories', (_req: Request, res: Response) => {
+  res.json({ categories: CATEGORY_NAMES });
+});
+
+/** 카드 셔플 */
+tarotRouter.get('/shuffle', (req: Request, res: Response) => {
+  const count = Math.min(Math.max(parseInt(req.query.count as string) || 10, 3), 20);
+  const shuffled = [...ALL_CARDS].sort(() => Math.random() - 0.5).slice(0, count);
+  const cards = shuffled.map((c) => {
+    const is_upright = Math.random() > 0.5;
+    return {
+      id: c.id,
+      name: c.name,
+      name_en: c.name_en,
+      symbol: c.symbol,
+      is_upright,
+      position: is_upright ? '정위치' : '역위치',
+    };
+  });
+  res.json({ cards });
+});
+
+/** 타로 해석 */
+tarotRouter.post('/read', async (req: Request, res: Response) => {
+  const { category, question, cards: selectedCards } = req.body;
+
+  if (!category || !CATEGORY_NAMES[category]) {
+    res.status(400).json({ detail: `잘못된 카테고리: ${category}` });
+    return;
+  }
+  if (!selectedCards || selectedCards.length !== 3) {
+    res.status(400).json({ detail: '카드를 3장 선택해주세요' });
+    return;
+  }
+
+  // 카드 데이터 조회
+  const cards = selectedCards.map((s: { id: number; is_upright: boolean }) => {
+    const card = getCard(s.id);
+    if (!card) throw new Error(`카드 없음: ${s.id}`);
+    return { ...card, is_upright: s.is_upright };
+  });
+
+  // 프롬프트 생성
+  const prompt = buildReadingPrompt(CATEGORY_NAMES[category], question || '', cards);
+
+  try {
+    const interpretation = await tarotReading(SYSTEM_PROMPT, prompt);
+
+    // 기록 저장 (비회원도)
+    try {
+      saveReading(null, category, question || '', cards, interpretation);
+    } catch {
+      /* 기록 저장 실패는 무시 */
+    }
+
+    res.json({
+      cards: cards.map((c) => ({
+        id: c.id,
+        name: c.name,
+        name_en: c.name_en,
+        symbol: c.symbol,
+        is_upright: c.is_upright,
+        position: c.is_upright ? '정위치' : '역위치',
+      })),
+      interpretation,
+    });
+  } catch (err) {
+    console.error('AI 해석 실패:', err);
+    res.status(500).json({ detail: 'AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.' });
+  }
+});
+
+/** 추가 대화 */
+tarotRouter.post('/chat', async (req: Request, res: Response) => {
+  const { question, chat_history, category, cards_summary, previous_reading } = req.body;
+
+  if (!question || question.length > 500) {
+    res.status(400).json({ detail: '질문은 500자 이내로 입력해주세요' });
+    return;
+  }
+  if (chat_history && chat_history.length >= 10) {
+    res.status(400).json({ detail: '대화 횟수를 초과했어요' });
+    return;
+  }
+
+  const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    {
+      role: 'system' as 'user',
+      content: `이전 상담: 카테고리=${category}, 카드=${cards_summary}, 해석=${previous_reading}`,
+    },
+  ];
+
+  if (chat_history) {
+    for (const m of chat_history) {
+      messages.push(m);
+    }
+  }
+  messages.push({ role: 'user', content: question });
+
+  try {
+    const reply = await callLlm(messages, 1000, 0.8);
+    res.json({ reply });
+  } catch (err) {
+    console.error('AI 응답 실패:', err);
+    res.status(500).json({ detail: 'AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.' });
+  }
+});
