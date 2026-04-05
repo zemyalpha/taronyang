@@ -3,17 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔮 타로냥 - AI 타로/운세</title>
-    <meta name="description" content="AI 타로로 당신의 이야기를 듣다">
+    <title>🔮 타로냥 — AI 타로 운세</title>
+    <meta name="description" content="AI가 읽어주는 당신의 운세. 78장 타로카드로 연애운, 재물운, 직장운, 종합운을 확인하세요.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0a0a2e',
+                        'dark-purple': '#1a1a3e',
+                        lavender: '#a78bfa',
+                        gold: '#fbbf24',
+                        softgreen: '#86efac',
+                        softred: '#fca5a5',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif KR', 'serif'],
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body>
-    <!-- Built during Phase 2 -->
-    <div id="app">
-        <h1>🔮 타로냥</h1>
-        <p>AI 타로로 당신의 이야기를 듣다</p>
-    </div>
+<body class="bg-navy text-gray-100 font-sans min-h-screen">
+
+    <!-- 네비게이션 -->
+    <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="flex items-center gap-2 text-xl font-serif font-bold text-lavender">
+                🔮 타로냥
+            </a>
+            <div class="flex items-center gap-4 text-sm">
+                <a href="/static/tarot.html" class="hover:text-lavender transition">타로 상담</a>
+                <a href="/static/daily.html" class="hover:text-lavender transition">오늘의 운세</a>
+                <a href="#pricing" class="bg-lavender/20 text-lavender px-3 py-1.5 rounded-full hover:bg-lavender/30 transition">시작하기</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 히어로 섹션 -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        <!-- 배경 별 효과 -->
+        <div class="absolute inset-0 starfield"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-navy via-dark-purple/50 to-navy"></div>
+
+        <div class="relative z-10 text-center px-4 max-w-3xl">
+            <div class="text-7xl mb-6 animate-bounce-slow">🔮</div>
+            <h1 class="font-serif text-5xl md:text-6xl font-bold text-lavender mb-4 leading-tight">
+                타로냥
+            </h1>
+            <p class="text-xl md:text-2xl text-gold mb-2 font-serif">AI가 읽어주는 당신의 운세</p>
+            <p class="text-gray-400 mb-10 text-lg">78장의 타로카드, 당신의 이야기를 듣습니다</p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/static/tarot.html" class="bg-gradient-to-r from-purple-700 to-lavender text-white px-8 py-4 rounded-full text-lg font-bold shadow-lg shadow-lavender/30 hover:shadow-lavender/50 hover:scale-105 transition-all">
+                    🃏 타로 상담받기
+                </a>
+                <a href="/static/daily.html" class="border border-lavender/40 text-lavender px-8 py-4 rounded-full text-lg hover:bg-lavender/10 transition-all">
+                    ⭐ 오늘의 운세
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 기능 소개 -->
+    <section class="py-20 px-4">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="font-serif text-3xl text-center text-lavender mb-12">✨ 이런 분께 추천해요</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/50 transition">
+                    <div class="text-4xl mb-4">💕</div>
+                    <h3 class="text-gold font-bold text-lg mb-2">연애운이 궁금하신 분</h3>
+                    <p class="text-gray-400 text-sm">그 사람의 마음, 우리의 미래는? 연애운 타로로 확인하세요</p>
+                </div>
+                <div class="bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/50 transition">
+                    <div class="text-4xl mb-4">💰</div>
+                    <h3 class="text-gold font-bold text-lg mb-2">재물운을 알고 싶은 분</h3>
+                    <p class="text-gray-400 text-sm">투자, 이직, 금전 흐름을 타로카드로 점검하세요</p>
+                </div>
+                <div class="bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/50 transition">
+                    <div class="text-4xl mb-4">🌟</div>
+                    <h3 class="text-gold font-bold text-lg mb-2">오늘의 운을 확인하는 분</h3>
+                    <p class="text-gray-400 text-sm">매일 아침, 오늘의 에너지를 카드로 받아보세요</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 사용법 -->
+    <section class="py-20 px-4 bg-dark-purple/30">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="font-serif text-3xl text-center text-lavender mb-12">🐱 이렇게 이용해요</h2>
+            <div class="grid md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div class="w-14 h-14 rounded-full bg-lavender/20 text-lavender text-2xl flex items-center justify-center mx-auto mb-3">1</div>
+                    <h3 class="font-bold text-gold mb-1">카테고리 선택</h3>
+                    <p class="text-gray-400 text-sm">연애, 재물, 직장, 종합</p>
+                </div>
+                <div>
+                    <div class="w-14 h-14 rounded-full bg-lavender/20 text-lavender text-2xl flex items-center justify-center mx-auto mb-3">2</div>
+                    <h3 class="font-bold text-gold mb-1">카드 선택</h3>
+                    <p class="text-gray-400 text-sm">셔플된 카드 중 3장</p>
+                </div>
+                <div>
+                    <div class="w-14 h-14 rounded-full bg-lavender/20 text-lavender text-2xl flex items-center justify-center mx-auto mb-3">3</div>
+                    <h3 class="font-bold text-gold mb-1">AI 해석</h3>
+                    <p class="text-gray-400 text-sm">과거·현재·미래 해석</p>
+                </div>
+                <div>
+                    <div class="w-14 h-14 rounded-full bg-lavender/20 text-lavender text-2xl flex items-center justify-center mx-auto mb-3">4</div>
+                    <h3 class="font-bold text-gold mb-1">추가 대화</h3>
+                    <p class="text-gray-400 text-sm">더 궁금한 점 물어보기</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 요금제 -->
+    <section id="pricing" class="py-20 px-4">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="font-serif text-3xl text-center text-lavender mb-12">💎 요금제</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- 무료 -->
+                <div class="bg-dark-purple/60 border border-lavender/20 rounded-2xl p-8">
+                    <h3 class="text-xl font-bold text-gray-200 mb-1">무료 플랜</h3>
+                    <div class="text-3xl font-bold text-gold mb-4">₩0</div>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li>✅ 매일 1회 타로 상담</li>
+                        <li>✅ 기본 AI 해석</li>
+                        <li>✅ 오늘의 운세</li>
+                        <li class="text-gray-600">❌ 추가 대화</li>
+                        <li class="text-gray-600">❌ 일운 알림</li>
+                    </ul>
+                    <a href="/static/tarot.html" class="mt-6 block text-center border border-lavender/40 text-lavender py-3 rounded-full hover:bg-lavender/10 transition">무료로 시작</a>
+                </div>
+                <!-- 프리미엄 -->
+                <div class="bg-gradient-to-b from-lavender/20 to-dark-purple/60 border border-lavender/50 rounded-2xl p-8 relative">
+                    <div class="absolute -top-3 right-6 bg-gold text-navy text-xs font-bold px-3 py-1 rounded-full">추천</div>
+                    <h3 class="text-xl font-bold text-gray-200 mb-1">프리미엄</h3>
+                    <div class="text-3xl font-bold text-gold mb-1">₩9,900<span class="text-base font-normal text-gray-400">/월</span></div>
+                    <ul class="space-y-2 text-gray-400 text-sm mt-4">
+                        <li>✅ 무제한 타로 상담</li>
+                        <li>✅ 상세 AI 해석</li>
+                        <li>✅ 추가 대화 (최대 5회)</li>
+                        <li>✅ 매일 아침 운세 알림</li>
+                        <li>✅ 상담 기록 저장</li>
+                    </ul>
+                    <a href="#" class="mt-6 block text-center bg-gradient-to-r from-purple-700 to-lavender text-white py-3 rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">프리미엄 시작</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="py-8 px-4 border-t border-lavender/10 text-center text-gray-500 text-sm">
+        <p>🔮 타로냥 — AI 타로 운세 서비스</p>
+        <p class="mt-1">타로 해석은 참고용이며, 절대적인 진리가 아닙니다.</p>
+    </footer>
+
 </body>
 </html>

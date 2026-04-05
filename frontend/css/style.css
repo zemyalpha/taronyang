@@ -1,24 +1,149 @@
-/* 🔮 타로냥 - 스타일시트 */
+/* 타로냥 커스텀 스타일 */
 
-:root {
-    --bg-primary: #0a0a2e;
-    --bg-card: #1a1a3e;
-    --accent-purple: #a78bfa;
-    --accent-gold: #fbbf24;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --positive: #86efac;
-    --negative: #fca5a5;
-    --btn-gradient: linear-gradient(135deg, #7c3aed, #a78bfa);
-    --font-title: 'Noto Serif KR', serif;
-    --font-body: 'Noto Sans KR', sans-serif;
+/* 별 배경 */
+.starfield {
+    background-image:
+        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 200px 60px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(2px 2px at 250px 20px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 300px 50px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(2px 2px at 350px 70px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 400px 30px, rgba(255,255,255,0.3), transparent);
+    background-size: 420px 100px;
+    animation: twinkle 8s ease-in-out infinite alternate;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-    font-family: var(--font-body);
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    min-height: 100vh;
+@keyframes twinkle {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
+
+/* 부드러운 바운스 */
+@keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+.animate-bounce-slow {
+    animation: bounce-slow 3s ease-in-out infinite;
+}
+
+/* 타로카드 3D */
+.tarot-card {
+    perspective: 800px;
+    width: 110px;
+    height: 170px;
+    cursor: pointer;
+}
+.tarot-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+.tarot-card.flipped .tarot-card-inner {
+    transform: rotateY(180deg);
+}
+.tarot-card-front, .tarot-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    text-align: center;
+}
+.tarot-card-front {
+    background: linear-gradient(135deg, #2d1b69 0%, #4c1d95 100%);
+    border: 2px solid rgba(167, 139, 250, 0.4);
+}
+.tarot-card-back {
+    background: linear-gradient(135deg, #1a1a4e 0%, #2d1b69 100%);
+    border: 2px solid rgba(251, 191, 36, 0.5);
+    transform: rotateY(180deg);
+}
+.tarot-card:hover:not(.flipped):not(.selected) {
+    transform: translateY(-8px);
+    transition: transform 0.3s ease;
+}
+.tarot-card.selected {
+    transform: translateY(-12px);
+}
+.tarot-card.selected .tarot-card-front {
+    border-color: #fbbf24;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+}
+
+/* 셔플 애니메이션 */
+@keyframes shuffle-left {
+    0% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-30px) rotate(-5deg); }
+    50% { transform: translateX(0) rotate(0deg); }
+    75% { transform: translateX(30px) rotate(5deg); }
+    100% { transform: translateX(0) rotate(0deg); }
+}
+@keyframes shuffle-right {
+    0% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(30px) rotate(5deg); }
+    50% { transform: translateX(0) rotate(0deg); }
+    75% { transform: translateX(-30px) rotate(-5deg); }
+    100% { transform: translateX(0) rotate(0deg); }
+}
+.shuffling .tarot-card:nth-child(odd) {
+    animation: shuffle-left 0.8s ease-in-out;
+}
+.shuffling .tarot-card:nth-child(even) {
+    animation: shuffle-right 0.8s ease-in-out;
+}
+
+/* 채팅 말풍선 */
+.chat-bubble {
+    max-width: 80%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    line-height: 1.6;
+}
+.chat-bubble.user {
+    background: rgba(167, 139, 250, 0.2);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    margin-left: auto;
+    border-bottom-right-radius: 0.25rem;
+}
+.chat-bubble.assistant {
+    background: rgba(30, 30, 70, 0.6);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    margin-right: auto;
+    border-bottom-left-radius: 0.25rem;
+}
+
+/* 로딩 애니메이션 */
+@keyframes dot-pulse {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+}
+.loading-dots span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #a78bfa;
+    margin: 0 3px;
+    animation: dot-pulse 1.4s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* 스크롤바 커스텀 */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a2e; }
+::-webkit-scrollbar-thumb { background: #a78bfa40; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a78bfa60; }

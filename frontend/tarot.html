@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🃏 타로 상담 — 타로냥</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0a0a2e',
+                        'dark-purple': '#1a1a3e',
+                        lavender: '#a78bfa',
+                        gold: '#fbbf24',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif KR', 'serif'],
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-navy text-gray-100 font-sans min-h-screen">
+
+    <!-- 네비게이션 -->
+    <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/static/index.html" class="flex items-center gap-2 text-xl font-serif font-bold text-lavender">
+                🔮 타로냥
+            </a>
+            <div class="flex items-center gap-4 text-sm">
+                <a href="/static/index.html" class="hover:text-lavender transition">홈</a>
+                <a href="/static/tarot.html" class="text-lavender">타로 상담</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-20 pb-10 px-4 max-w-3xl mx-auto">
+
+        <!-- Step 1: 카테고리 선택 -->
+        <div id="step-category" class="step">
+            <h2 class="font-serif text-2xl text-center text-lavender mb-2">어떤 운이 궁금하신가요?</h2>
+            <p class="text-center text-gray-400 mb-8">카테고리를 선택해주세요</p>
+            <div class="grid grid-cols-2 gap-4" id="categories">
+                <button onclick="selectCategory('love')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                    <div class="text-4xl mb-2">💕</div>
+                    <div class="font-bold text-gold">연애운</div>
+                </button>
+                <button onclick="selectCategory('money')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                    <div class="text-4xl mb-2">💰</div>
+                    <div class="font-bold text-gold">재물운</div>
+                </button>
+                <button onclick="selectCategory('career')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                    <div class="text-4xl mb-2">💼</div>
+                    <div class="font-bold text-gold">직장운</div>
+                </button>
+                <button onclick="selectCategory('general')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                    <div class="text-4xl mb-2">🌟</div>
+                    <div class="font-bold text-gold">종합운</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: 질문 입력 -->
+        <div id="step-question" class="step hidden">
+            <h2 class="font-serif text-2xl text-center text-lavender mb-2">구체적인 질문이 있으신가요?</h2>
+            <p class="text-center text-gray-400 mb-8">없으면 그냥 넘어가셔도 좋아요</p>
+            <div class="space-y-4">
+                <textarea id="user-question" rows="3" placeholder="예: 새로운 인연이 있을까요? (선택사항)" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none resize-none"></textarea>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="prevStep('category')" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">이전</button>
+                    <button onclick="goToShuffle()" class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">카드 뽑기 🃏</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: 카드 셔플 & 선택 -->
+        <div id="step-shuffle" class="step hidden">
+            <h2 class="font-serif text-2xl text-center text-lavender mb-2">마음에 끌리는 카드를 3장 선택하세요</h2>
+            <p class="text-center text-gray-400 mb-2">선택: <span id="selected-count">0</span>/3</p>
+            <div id="card-area" class="flex flex-wrap justify-center gap-3 my-6"></div>
+            <div class="text-center">
+                <button id="btn-read" onclick="doReading()" disabled class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                    해석 받기 ✨
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: 해석 결과 -->
+        <div id="step-result" class="step hidden">
+            <h2 class="font-serif text-2xl text-center text-lavender mb-6">🔮 타로냥의 해석</h2>
+            <!-- 선택한 카드 표시 -->
+            <div id="result-cards" class="flex justify-center gap-4 mb-8"></div>
+            <!-- 해석 텍스트 -->
+            <div id="result-text" class="bg-dark-purple/40 border border-lavender/15 rounded-2xl p-6 leading-relaxed whitespace-pre-wrap text-gray-200 mb-6"></div>
+            <!-- 추가 대화 -->
+            <div id="chat-section">
+                <h3 class="text-gold font-bold mb-3">💬 더 궁금한 점이 있으시면 물어보세요</h3>
+                <div id="chat-history" class="space-y-3 mb-4 max-h-64 overflow-y-auto"></div>
+                <div class="flex gap-2">
+                    <input id="chat-input" type="text" placeholder="질문을 입력하세요..." maxlength="500" class="flex-1 bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none" onkeydown="if(event.key==='Enter')sendChat()">
+                    <button onclick="sendChat()" class="px-5 py-3 bg-lavender/20 text-lavender rounded-xl hover:bg-lavender/30 transition">전송</button>
+                </div>
+            </div>
+            <div class="text-center mt-8">
+                <button onclick="resetReading()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 상담받기 🔄</button>
+            </div>
+        </div>
+
+        <!-- 로딩 -->
+        <div id="loading" class="hidden text-center py-20">
+            <div class="text-5xl mb-4 animate-bounce-slow">🔮</div>
+            <p class="text-lavender text-lg">타로냥이 카드를 읽고 있어요...</p>
+            <div class="loading-dots mt-4"><span></span><span></span><span></span></div>
+        </div>
+
+    </main>
+
+    <script>
+        // 상태
+        const API = '';  // 같은 origin이면 빈 문자열
+        let category = '';
+        let question = '';
+        let shuffledCards = [];
+        let selectedCards = [];
+        let lastReading = '';
+        let chatHistory = [];
+
+        // API 기본 URL (필요시 수정)
+        function apiUrl(path) {
+            return API + path;
+        }
+
+        // Step 전환
+        function showStep(id) {
+            document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+            document.getElementById('step-' + id).classList.remove('hidden');
+        }
+        function prevStep(step) { showStep(step); }
+
+        // 카테고리 선택
+        function selectCategory(cat) {
+            category = cat;
+            // 선택 UI
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('border-gold', 'bg-lavender/10'));
+            event.currentTarget.classList.add('border-gold', 'bg-lavender/10');
+            showStep('question');
+        }
+
+        // 셔플 페이지로
+        async function goToShuffle() {
+            question = document.getElementById('user-question').value.trim();
+            showStep('shuffle');
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('card-area').innerHTML = '';
+            selectedCards = [];
+
+            try {
+                const res = await fetch(apiUrl('/api/tarot/shuffle?count=10'));
+                const data = await res.json();
+                shuffledCards = data.cards;
+                renderShuffledCards();
+            } catch (e) {
+                alert('카드를 불러오지 못했어요. 다시 시도해주세요.');
+                showStep('question');
+            }
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        // 셔플된 카드 렌더링
+        function renderShuffledCards() {
+            const area = document.getElementById('card-area');
+            area.innerHTML = '';
+            area.classList.add('shuffling');
+            setTimeout(() => area.classList.remove('shuffling'), 900);
+
+            shuffledCards.forEach((card, i) => {
+                const div = document.createElement('div');
+                div.className = 'tarot-card';
+                div.style.animationDelay = (i * 0.05) + 's';
+                div.innerHTML = `
+                    <div class="tarot-card-inner">
+                        <div class="tarot-card-front">
+                            <div class="text-3xl mb-1">🃏</div>
+                            <div class="text-xs text-lavender/60">${card.position}</div>
+                        </div>
+                        <div class="tarot-card-back">
+                            <div class="text-2xl mb-1">${card.symbol}</div>
+                            <div class="text-xs font-bold text-gold">${card.name}</div>
+                            <div class="text-xs text-gray-400">${card.name_en}</div>
+                            <div class="text-xs text-lavender/60 mt-1">${card.position}</div>
+                        </div>
+                    </div>
+                `;
+                div.onclick = () => toggleCard(i, div);
+                area.appendChild(div);
+            });
+        }
+
+        // 카드 선택 토글
+        function toggleCard(index, el) {
+            const idx = selectedCards.findIndex(s => s.index === index);
+            if (idx >= 0) {
+                selectedCards.splice(idx, 1);
+                el.classList.remove('selected');
+            } else {
+                if (selectedCards.length >= 3) return;
+                selectedCards.push({ index, card: shuffledCards[index] });
+                el.classList.add('selected');
+                // 뒤집기 애니메이션
+                setTimeout(() => el.classList.add('flipped'), 100);
+            }
+            document.getElementById('selected-count').textContent = selectedCards.length;
+            document.getElementById('btn-read').disabled = selectedCards.length !== 3;
+        }
+
+        // 타로 해석
+        async function doReading() {
+            document.getElementById('loading').classList.remove('hidden');
+            showStep('result');
+
+            const cards = selectedCards.map(s => ({
+                id: s.card.id,
+                is_upright: s.card.is_upright
+            }));
+
+            try {
+                const res = await fetch(apiUrl('/api/tarot/read'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, question, cards })
+                });
+                const data = await res.json();
+                lastReading = data.interpretation;
+
+                // 결과 카드 표시
+                const rc = document.getElementById('result-cards');
+                const positions = ['과거', '현재', '미래'];
+                rc.innerHTML = data.cards.map((c, i) => `
+                    <div class="text-center">
+                        <div class="text-3xl mb-1">${c.symbol}</div>
+                        <div class="text-sm font-bold text-gold">${c.name}</div>
+                        <div class="text-xs text-lavender/60">${positions[i]} · ${c.position}</div>
+                    </div>
+                `).join('');
+
+                // 해석 텍스트
+                document.getElementById('result-text').textContent = data.interpretation;
+            } catch (e) {
+                document.getElementById('result-text').textContent = '해석을 불러오지 못했어요 😿 다시 시도해주세요.';
+            }
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        // 추가 대화
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+
+            addChatBubble('user', msg);
+            chatHistory.push({ role: 'user', content: msg });
+
+            // 로딩 표시
+            const loadingEl = addChatBubble('assistant', '...');
+            loadingEl.id = 'chat-loading';
+
+            try {
+                const res = await fetch(apiUrl('/api/tarot/chat'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category,
+                        cards_summary: selectedCards.map(s => s.card.name).join(', '),
+                        previous_reading: lastReading,
+                        chat_history: chatHistory.slice(0, -1),
+                        question: msg
+                    })
+                });
+                const data = await res.json();
+                loadingEl.textContent = data.reply;
+                chatHistory.push({ role: 'assistant', content: data.reply });
+            } catch (e) {
+                loadingEl.textContent = '응답을 받지 못했어요 😿';
+            }
+        }
+
+        function addChatBubble(role, text) {
+            const div = document.createElement('div');
+            div.className = `chat-bubble ${role} text-sm`;
+            div.textContent = text;
+            document.getElementById('chat-history').appendChild(div);
+            document.getElementById('chat-history').scrollTop = 99999;
+            return div;
+        }
+
+        // 초기화
+        function resetReading() {
+            category = '';
+            question = '';
+            selectedCards = [];
+            lastReading = '';
+            chatHistory = [];
+            document.getElementById('user-question').value = '';
+            document.getElementById('chat-history').innerHTML = '';
+            showStep('category');
+        }
+    </script>
+</body>
+</html>
