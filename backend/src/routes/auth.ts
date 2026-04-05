@@ -2,7 +2,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
-import { createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, User } from '../database';
+import { createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, getDb, User } from '../database';
 
 export const authRouter = Router();
 
@@ -104,11 +104,6 @@ authRouter.get('/me', authMiddleware, (req: Request, res: Response) => {
   const user = (req as any).user as User;
   res.json(makeUserResponse(user));
 });
-
-/** 내 정보 수정 */
-authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
-  const user = (req as any).user as User;
-  const { nickname, birth_date } = req.body;
 
 /** 내 정보 수정 */
 authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
