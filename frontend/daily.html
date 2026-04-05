@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⭐ 오늘의 운세 — 타로냥</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0a0a2e',
+                        'dark-purple': '#1a1a3e',
+                        lavender: '#a78bfa',
+                        gold: '#fbbf24',
+                        softgreen: '#86efac',
+                        softred: '#fca5a5',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif KR', 'serif'],
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-navy text-gray-100 font-sans min-h-screen">
+
+    <!-- 네비게이션 -->
+    <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/static/index.html" class="flex items-center gap-2 text-xl font-serif font-bold text-lavender">
+                🔮 타로냥
+            </a>
+            <div class="flex items-center gap-4 text-sm">
+                <a href="/static/index.html" class="hover:text-lavender transition">홈</a>
+                <a href="/static/tarot.html" class="hover:text-lavender transition">타로 상담</a>
+                <span class="text-lavender">오늘의 운세</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-20 pb-10 px-4 max-w-2xl mx-auto">
+
+        <!-- 별자리 선택 -->
+        <div id="zodiac-select" class="text-center py-10">
+            <h1 class="font-serif text-3xl text-lavender mb-2">⭐ 오늘의 운세</h1>
+            <p class="text-gray-400 mb-8">별자리를 선택하세요</p>
+            <div class="grid grid-cols-3 gap-3" id="zodiac-grid">
+                <button onclick="selectZodiac('양자리','♈')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♈</div><div class="text-sm mt-1">양자리</div><div class="text-xs text-gray-500">3/21-4/19</div>
+                </button>
+                <button onclick="selectZodiac('황소자리','♉')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♉</div><div class="text-sm mt-1">황소자리</div><div class="text-xs text-gray-500">4/20-5/20</div>
+                </button>
+                <button onclick="selectZodiac('쌍둥이자리','♊')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♊</div><div class="text-sm mt-1">쌍둥이자리</div><div class="text-xs text-gray-500">5/21-6/21</div>
+                </button>
+                <button onclick="selectZodiac('게자리','♋')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♋</div><div class="text-sm mt-1">게자리</div><div class="text-xs text-gray-500">6/22-7/22</div>
+                </button>
+                <button onclick="selectZodiac('사자자리','♌')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♌</div><div class="text-sm mt-1">사자자리</div><div class="text-xs text-gray-500">7/23-8/22</div>
+                </button>
+                <button onclick="selectZodiac('처녀자리','♍')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♍</div><div class="text-sm mt-1">처녀자리</div><div class="text-xs text-gray-500">8/23-9/23</div>
+                </button>
+                <button onclick="selectZodiac('천칭자리','♎')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♎</div><div class="text-sm mt-1">천칭자리</div><div class="text-xs text-gray-500">9/24-10/22</div>
+                </button>
+                <button onclick="selectZodiac('전갈자리','♏')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♏</div><div class="text-sm mt-1">전갈자리</div><div class="text-xs text-gray-500">10/23-11/22</div>
+                </button>
+                <button onclick="selectZodiac('궁수자리','♐')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♐</div><div class="text-sm mt-1">궁수자리</div><div class="text-xs text-gray-500">11/23-12/24</div>
+                </button>
+                <button onclick="selectZodiac('염소자리','♑')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♑</div><div class="text-sm mt-1">염소자리</div><div class="text-xs text-gray-500">12/25-1/19</div>
+                </button>
+                <button onclick="selectZodiac('물병자리','♒')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♒</div><div class="text-sm mt-1">물병자리</div><div class="text-xs text-gray-500">1/20-2/18</div>
+                </button>
+                <button onclick="selectZodiac('물고기자리','♓')" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                    <div class="text-2xl">♓</div><div class="text-sm mt-1">물고기자리</div><div class="text-xs text-gray-500">2/19-3/20</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- 로딩 -->
+        <div id="loading" class="hidden text-center py-20">
+            <div class="text-5xl mb-4 animate-bounce-slow">🔮</div>
+            <p class="text-lavender text-lg">타로냥이 운세를 읽고 있어요...</p>
+            <div class="loading-dots mt-4"><span></span><span></span><span></span></div>
+        </div>
+
+        <!-- 운세 결과 -->
+        <div id="result" class="hidden">
+            <div class="text-center mb-6">
+                <div id="result-symbol" class="text-5xl mb-2"></div>
+                <h2 id="result-zodiac" class="font-serif text-2xl text-lavender"></h2>
+                <p id="result-date" class="text-gray-400 text-sm"></p>
+            </div>
+
+            <!-- 한 줄 요약 -->
+            <div class="bg-lavender/10 border border-lavender/30 rounded-2xl p-5 text-center mb-6">
+                <p id="result-summary" class="text-lg font-serif text-gold"></p>
+            </div>
+
+            <!-- 운세 지수 -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">💕 연애운</div>
+                    <div id="score-love" class="text-xl"></div>
+                </div>
+                <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">💰 재물운</div>
+                    <div id="score-money" class="text-xl"></div>
+                </div>
+                <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">💼 직장운</div>
+                    <div id="score-career" class="text-xl"></div>
+                </div>
+                <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">🏃 건강운</div>
+                    <div id="score-health" class="text-xl"></div>
+                </div>
+            </div>
+
+            <!-- Lucky -->
+            <div class="flex gap-3 mb-6">
+                <div class="flex-1 bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">🎨 Lucky Color</div>
+                    <div id="lucky-color" class="font-bold text-gold"></div>
+                </div>
+                <div class="flex-1 bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">🔢 Lucky Number</div>
+                    <div id="lucky-number" class="font-bold text-gold"></div>
+                </div>
+            </div>
+
+            <!-- 상세 운세 -->
+            <div id="result-detail" class="bg-dark-purple/40 border border-lavender/15 rounded-2xl p-6 leading-relaxed whitespace-pre-wrap text-gray-200 mb-6"></div>
+
+            <!-- 공유/다시 -->
+            <div class="flex gap-3 justify-center">
+                <button onclick="resetDaily()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 선택하기 🔄</button>
+                <a href="/static/tarot.html" class="px-6 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">타로 상담 🃏</a>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let selectedZodiac = '';
+
+        function starsHtml(score) {
+            return '⭐'.repeat(score) + '☆'.repeat(5 - score);
+        }
+
+        async function selectZodiac(name, symbol) {
+            selectedZodiac = name;
+            document.querySelectorAll('.z-btn').forEach(b => b.classList.remove('border-gold', 'bg-lavender/10'));
+            event.currentTarget.classList.add('border-gold', 'bg-lavender/10');
+
+            document.getElementById('zodiac-select').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+
+            try {
+                // 백엔드 daily API가 아직 없으므로 LLM 직접 호출 (임시)
+                const res = await fetch('/api/tarot/shuffle?count=1');
+                const shuffleData = await res.json();
+                const card = shuffleData.cards[0];
+
+                // 프롬프트로 일운 생성
+                const prompt = `## 별자리: ${name}\n## 날짜: ${today}\n\n오늘의 운세를 작성해줘.\n\n구조:\n1. 오늘의 한 줄 요약 (1문장)\n2. 운세 지수 (연애/재물/직장/건강, 각각 1~5점)\n3. Lucky Color (하나)\n4. Lucky Number (1~9)\n5. 상세 운세 (3~4문장)\n\n타로냥 말투로 작성해. 따뜻하고 희망차게.`;
+
+                const readRes = await fetch('/api/tarot/read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category: 'general',
+                        question: `${name}의 오늘(${today}) 운세`,
+                        cards: [{ id: card.id, is_upright: card.is_upright }, { id: 0, is_upright: true }, { id: 1, is_upright: true }]
+                    })
+                });
+                const readData = await readRes.json();
+
+                // 결과 표시
+                document.getElementById('result-symbol').textContent = symbol;
+                document.getElementById('result-zodiac').textContent = name;
+                document.getElementById('result-date').textContent = today;
+                document.getElementById('result-summary').textContent = '오늘도 좋은 하루가 될 거예요! ✨';
+                document.getElementById('result-detail').textContent = readData.interpretation;
+
+                // 임시 점수 (랜덤)
+                const scores = { love: Math.ceil(Math.random()*3)+2, money: Math.ceil(Math.random()*3)+2, career: Math.ceil(Math.random()*3)+2, health: Math.ceil(Math.random()*3)+2 };
+                document.getElementById('score-love').innerHTML = starsHtml(scores.love);
+                document.getElementById('score-money').innerHTML = starsHtml(scores.money);
+                document.getElementById('score-career').innerHTML = starsHtml(scores.career);
+                document.getElementById('score-health').innerHTML = starsHtml(scores.health);
+                document.getElementById('lucky-color').textContent = ['레드','블루','그린','옐로우','퍼플','핑크','화이트'][Math.floor(Math.random()*7)];
+                document.getElementById('lucky-number').textContent = Math.ceil(Math.random()*9);
+
+            } catch (e) {
+                document.getElementById('result-detail').textContent = '운세를 불러오지 못했어요 😿 잠시 후 다시 시도해주세요.';
+            }
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
+        }
+
+        function resetDaily() {
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('zodiac-select').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
