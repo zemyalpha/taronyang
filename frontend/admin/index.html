@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 — 타로냥</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: {
+            colors: { navy: '#0a0a2e', 'dark-purple': '#1a1a3e', lavender: '#a78bfa', gold: '#fbbf24' },
+            fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Noto Sans KR', 'sans-serif'] }
+        }}}
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-navy text-gray-100 font-sans min-h-screen">
+
+    <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/static/index.html" class="text-xl font-serif font-bold text-lavender">🔮 타로냥 관리자</a>
+            <a href="/static/index.html" class="text-sm text-gray-400 hover:text-lavender transition">← 홈으로</a>
+        </div>
+    </nav>
+
+    <main class="pt-20 pb-10 px-4 max-w-6xl mx-auto">
+
+        <!-- 통계 카드 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="stats">
+            <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                <div class="text-sm text-gray-400">전체 사용자</div>
+                <div id="stat-users" class="text-2xl font-bold text-gold mt-1">-</div>
+            </div>
+            <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                <div class="text-sm text-gray-400">프리미엄</div>
+                <div id="stat-premium" class="text-2xl font-bold text-lavender mt-1">-</div>
+            </div>
+            <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                <div class="text-sm text-gray-400">전체 상담</div>
+                <div id="stat-readings" class="text-2xl font-bold text-gold mt-1">-</div>
+            </div>
+            <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
+                <div class="text-sm text-gray-400">오늘 신규</div>
+                <div id="stat-today" class="text-2xl font-bold text-softgreen mt-1">-</div>
+            </div>
+        </div>
+
+        <!-- 탭 -->
+        <div class="flex gap-4 mb-6 border-b border-lavender/20">
+            <button id="tab-users" onclick="showAdminTab('users')" class="py-3 px-4 text-lavender border-b-2 border-lavender font-bold">사용자</button>
+            <button id="tab-readings" onclick="showAdminTab('readings')" class="py-3 px-4 text-gray-400 border-b-2 border-transparent hover:text-lavender transition">상담 기록</button>
+        </div>
+
+        <!-- 사용자 목록 -->
+        <div id="panel-users">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-gray-400 border-b border-lavender/15">
+                        <th class="text-left py-2">이메일</th>
+                        <th class="text-left py-2">닉네임</th>
+                        <th class="text-left py-2">가입일</th>
+                        <th class="text-left py-2">구독</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table"></tbody>
+            </table>
+        </div>
+
+        <!-- 상담 기록 -->
+        <div id="panel-readings" class="hidden">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-gray-400 border-b border-lavender/15">
+                        <th class="text-left py-2">카테고리</th>
+                        <th class="text-left py-2">사용자</th>
+                        <th class="text-left py-2">질문</th>
+                        <th class="text-left py-2">날짜</th>
+                    </tr>
+                </thead>
+                <tbody id="readings-table"></tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/admin/stats', { headers });
+                if (res.status === 403) { alert('관리자 권한이 필요합니다'); window.location.href = '/static/index.html'; return; }
+                const data = await res.json();
+                document.getElementById('stat-users').textContent = data.total_users;
+                document.getElementById('stat-premium').textContent = data.premium_users;
+                document.getElementById('stat-readings').textContent = data.total_readings;
+                document.getElementById('stat-today').textContent = data.today_new_users;
+            } catch (e) {}
+        }
+
+        async function loadUsers() {
+            try {
+                const res = await fetch('/api/admin/users?limit=50', { headers });
+                const data = await res.json();
+                document.getElementById('users-table').innerHTML = data.users.map(u => `
+                    <tr class="border-b border-lavender/10">
+                        <td class="py-2">${u.email || '-'}</td>
+                        <td>${u.nickname}</td>
+                        <td class="text-gray-400">${new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
+                        <td>${u.subscription_status === 'premium' ? '<span class="text-lavender">💎</span>' : '<span class="text-gray-500">무료</span>'}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {}
+        }
+
+        async function loadReadings() {
+            try {
+                const res = await fetch('/api/admin/readings?limit=50', { headers });
+                const data = await res.json();
+                const catEmoji = { love: '💕', money: '💰', career: '💼', general: '🌟' };
+                document.getElementById('readings-table').innerHTML = data.readings.map(r => `
+                    <tr class="border-b border-lavender/10">
+                        <td class="py-2">${catEmoji[r.category] || '🌟'} ${r.category}</td>
+                        <td class="text-gray-400">${r.email || '비회원'}</td>
+                        <td class="truncate max-w-xs">${r.question || '-'}</td>
+                        <td class="text-gray-400">${new Date(r.created_at).toLocaleDateString('ko-KR')}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {}
+        }
+
+        function showAdminTab(tab) {
+            document.getElementById('panel-users').classList.toggle('hidden', tab !== 'users');
+            document.getElementById('panel-readings').classList.toggle('hidden', tab !== 'readings');
+            document.getElementById('tab-users').className = tab === 'users' ? 'py-3 px-4 text-lavender border-b-2 border-lavender font-bold' : 'py-3 px-4 text-gray-400 border-b-2 border-transparent hover:text-lavender transition';
+            document.getElementById('tab-readings').className = tab === 'readings' ? 'py-3 px-4 text-lavender border-b-2 border-lavender font-bold' : 'py-3 px-4 text-gray-400 border-b-2 border-transparent hover:text-lavender transition';
+        }
+
+        loadStats();
+        loadUsers();
+        loadReadings();
+    </script>
+</body>
+</html>

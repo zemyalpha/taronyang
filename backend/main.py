@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import config
-from routers import tarot, auth, readings, payment
+from routers import tarot, auth, readings, payment, admin
 
 app = FastAPI(title="타로냥 API", version="0.1.0")
 
@@ -25,6 +25,7 @@ app.include_router(tarot.router)
 app.include_router(auth.router)
 app.include_router(readings.router)
 app.include_router(payment.router)
+app.include_router(admin.router)
 
 # Static files
 app.mount("/static", StaticFiles(directory="../frontend"), name="static")
