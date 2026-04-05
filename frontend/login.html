@@ -78,6 +78,22 @@
         <div class="text-center mt-6">
             <a href="/static/tarot.html" class="text-sm text-gray-400 hover:text-lavender transition">비회원으로 이용하기 →</a>
         </div>
+
+        <!-- 소셜 로그인 -->
+        <div class="mt-8 pt-6 border-t border-lavender/20">
+            <p class="text-center text-sm text-gray-400 mb-4">또는 소셜 계정으로</p>
+            <div class="space-y-3" id="social-buttons">
+                <button onclick="socialLogin('kakao')" class="w-full py-3 bg-[#FEE500] text-[#3C1E1E] rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
+                    <span>💬</span> 카카오 로그인
+                </button>
+                <button onclick="socialLogin('naver')" class="w-full py-3 bg-[#03C75A] text-white rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
+                    <span>🟢</span> 네이버 로그인
+                </button>
+                <button onclick="socialLogin('google')" class="w-full py-3 bg-white text-gray-800 rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
+                    <span>🔵</span> 구글 로그인
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -151,6 +167,33 @@
         function isLoggedIn() { return !!localStorage.getItem('token'); }
         function getUser() { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } }
         function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/static/login.html'; }
+
+        // 소셜 로그인
+        async function socialLogin(provider) {
+            try {
+                const res = await fetch('/api/auth/oauth/urls');
+                const urls = await res.json();
+                if (urls[provider]) {
+                    window.location.href = urls[provider];
+                } else {
+                    alert('아직 설정되지 않은 로그인 방식이에요 😿');
+                }
+            } catch (e) {
+                alert('소셜 로그인 오류');
+            }
+        }
+
+        // OAuth 콜백 처리
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('oauth') === '1') {
+            const token = params.get('token');
+            const user = { id: params.get('user_id'), nickname: params.get('nickname') };
+            if (token) {
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+                window.location.href = '/static/index.html';
+            }
+        }
     </script>
 </body>
 </html>

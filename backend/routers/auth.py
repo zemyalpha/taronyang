@@ -6,6 +6,7 @@ from typing import Optional
 
 from db.database import create_user, verify_user, get_user_by_id
 from services.auth_service import create_jwt, verify_jwt
+from services.oauth_service import get_oauth_urls, kakao_callback, naver_callback, google_callback, find_or_create_oauth_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -173,3 +174,36 @@ def _calc_zodiac(birth_date: str) -> str | None:
     except Exception:
         pass
     return None
+
+
+# --- OAuth 엔드포인트 ---
+
+@router.get("/oauth/urls")
+async def oauth_urls():
+    """소셜 로그인 URL 목록"""
+    return get_oauth_urls()
+
+
+@router.get("/oauth/{provider}/callback")
+async def oauth_callback(provider: str, code: str, state: str = ""):
+    """소셜 로그인 콜백"""
+    if provider == "kakao":
+        info = await kakao_callback(code)
+    elif provider == "naver":
+        info = await naver_callback(code)
+    elif provider == "google":
+        info = await google_callback(code)
+    else:
+        raise HTTPException(400, f"지원하지 않는 로그인 방식: {provider}")
+
+    if not info:
+        raise HTTPException(400, "소셜 로그인에 실패했습니다")
+
+    user = find_or_create_oauth_user(info)
+    token = create_jwt({"user_id": user["id"]})
+
+    # 프론트엔드로 리다이렉트 (토큰 전달)
+    from fastapi.responses import RedirectResponse
+    import urllib.parse
+    params = urllib.parse.urlencode({"token": token, "user_id": user["id"], "nickname": user["nickname"]})
+    return RedirectResponse(url=f"/static/login.html?oauth=1&{params}")
