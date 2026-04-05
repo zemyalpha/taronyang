@@ -21,8 +21,8 @@
 
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/static/index.html" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
-            <a href="/static/mypage.html" class="text-sm text-gray-400 hover:text-lavender transition">마이페이지</a>
+            <a href="/index.html" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
+            <a href="/mypage.html" class="text-sm text-gray-400 hover:text-lavender transition">마이페이지</a>
         </div>
     </nav>
 
@@ -96,7 +96,7 @@
             const token = localStorage.getItem('token');
             if (!token) {
                 alert('로그인이 필요합니다');
-                window.location.href = '/static/login.html';
+                window.location.href = '/login.html';
                 return;
             }
 

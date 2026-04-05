@@ -33,13 +33,18 @@ app.use('/api/notifications', notifyRouter);
 const frontendPath = path.join(__dirname, '../../frontend');
 app.use('/static', express.static(frontendPath));
 
-// 루트
+// SPA 라우팅: 모든 HTML 파일 서빙
+const htmlFiles = ['index', 'tarot', 'daily', 'mypage', 'login', 'pricing', 'history'];
+for (const name of htmlFiles) {
+  app.get(`/${name}`, (_req, res) => {
+    res.sendFile(path.join(frontendPath, `${name}.html`));
+  });
+  app.get(`/${name}.html`, (_req, res) => {
+    res.sendFile(path.join(frontendPath, `${name}.html`));
+  });
+}
 app.get('/', (_req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
-});
-
-app.get('/mypage', (_req, res) => {
-  res.sendFile(path.join(frontendPath, 'mypage.html'));
 });
 
 // 헬스체크
