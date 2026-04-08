@@ -19,6 +19,9 @@ initDb();
 
 const app = express();
 
+// 리버스 프록시 환경에서 클라이언트 IP 및 프로토콜 식별
+app.set('trust proxy', 1);
+
 // 보안 헤더 (helmet)
 app.use(helmet({
   contentSecurityPolicy: false,
