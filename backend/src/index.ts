@@ -1,6 +1,8 @@
 /** Express 앱 진입점 */
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { config } from './config';
 import { initDb } from './database';
@@ -17,9 +19,58 @@ initDb();
 
 const app = express();
 
-// 미들웨어
-app.use(cors({ origin: '*', credentials: true }));
-app.use(express.json());
+// 리버스 프록시 환경에서 클라이언트 IP 및 프로토콜 식별
+app.set('trust proxy', 1);
+
+// 보안 헤더 (helmet)
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
+
+// 프로덕션 환경 HTTPS 강제
+if (config.nodeEnv === 'production') {
+  app.use((req, res, next) => {
+    const proto = req.headers['x-forwarded-proto'];
+    if (proto && proto !== 'https') {
+      return res.redirect(301, `https://${req.headers.host}${req.url}`);
+    }
+    next();
+  });
+}
+
+// CORS — 프로덕션에서는 프론트엔드 도메인만 허용
+const corsOrigins = config.nodeEnv === 'production'
+  ? [config.frontendUrl].filter(Boolean)
+  : '*';
+app.use(cors({
+  origin: corsOrigins,
+  credentials: true,
+}));
+
+// JSON 바디 파서
+app.use(express.json({ limit: '1mb' }));
+
+// API 레이트 리미팅 — 일반 API
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15분
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/', apiLimiter);
+
+// 인증 API 레이트 리미팅 — 더 엄격
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '인증 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/signup', authLimiter);
 
 // API 라우터
 app.use('/api/tarot', tarotRouter);
@@ -55,9 +106,15 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'taronyang', version: '0.1.0' });
 });
 
+// 프로덕션에서 기본 JWT 시크릿 검증
+if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-production') {
+  console.error('⚠️ 프로덕션 환경에서 기본 JWT 시크릿 사용 중. JWT_SECRET 환경변수를 설정하세요.');
+  process.exit(1);
+}
+
 // 서버 시작
 app.listen(config.port, config.host, () => {
-  console.log(`🔮 타로냥 API 서버: http://${config.host}:${config.port}`);
+  console.log(`🔮 타로냥 API 서버: http://${config.host}:${config.port} (${config.nodeEnv})`);
   startDailyScheduler();
 });
 
