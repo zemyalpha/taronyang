@@ -32,7 +32,7 @@
     <div class="w-full max-w-sm">
         <!-- 로고 -->
         <div class="text-center mb-8">
-            <a href="/static/index.html" class="text-4xl">🔮</a>
+            <a href="/" class="text-4xl">🔮</a>
             <h1 class="font-serif text-2xl text-lavender mt-2">타로냥</h1>
         </div>
 
@@ -76,7 +76,7 @@
 
         <!-- 비회원 -->
         <div class="text-center mt-6">
-            <a href="/static/tarot.html" class="text-sm text-gray-400 hover:text-lavender transition">비회원으로 이용하기 →</a>
+            <a href="/tarot" class="text-sm text-gray-400 hover:text-lavender transition">비회원으로 이용하기 →</a>
         </div>
 
         <!-- 소셜 로그인 -->
@@ -127,7 +127,7 @@
                 if (!res.ok) throw new Error(data.detail || '로그인 실패');
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                window.location.href = '/static/index.html';
+                window.location.href = '/';
             } catch (e) {
                 errEl.textContent = e.message;
                 errEl.classList.remove('hidden');
@@ -152,7 +152,7 @@
                 if (!res.ok) throw new Error(data.detail || '회원가입 실패');
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                window.location.href = '/static/index.html';
+                window.location.href = '/';
             } catch (e) {
                 errEl.textContent = e.message;
                 errEl.classList.remove('hidden');
@@ -166,7 +166,7 @@
         }
         function isLoggedIn() { return !!localStorage.getItem('token'); }
         function getUser() { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } }
-        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/static/login.html'; }
+        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; }
 
         // 소셜 로그인
         async function socialLogin(provider) {
@@ -191,7 +191,7 @@
             if (token) {
                 localStorage.setItem('token', token);
                 localStorage.setItem('user', JSON.stringify(user));
-                window.location.href = '/static/index.html';
+                window.location.href = '/';
             }
         }
     </script>

@@ -34,12 +34,12 @@
     <!-- 네비게이션 -->
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/static/index.html" class="flex items-center gap-2 text-xl font-serif font-bold text-lavender">
+            <a href="/" class="flex items-center gap-2 text-xl font-serif font-bold text-lavender">
                 🔮 타로냥
             </a>
             <div class="flex items-center gap-4 text-sm">
-                <a href="/static/index.html" class="hover:text-lavender transition">홈</a>
-                <a href="/static/tarot.html" class="hover:text-lavender transition">타로 상담</a>
+                <a href="/" class="hover:text-lavender transition">홈</a>
+                <a href="/tarot" class="hover:text-lavender transition">타로 상담</a>
                 <span class="text-lavender">오늘의 운세</span>
             </div>
         </div>
@@ -149,7 +149,7 @@
             <!-- 공유/다시 -->
             <div class="flex gap-3 justify-center">
                 <button onclick="resetDaily()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 선택하기 🔄</button>
-                <a href="/static/tarot.html" class="px-6 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">타로 상담 🃏</a>
+                <a href="/tarot" class="px-6 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">타로 상담 🃏</a>
             </div>
         </div>
 
@@ -172,6 +172,19 @@
 
             const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
 
+            document.getElementById('result-symbol').textContent = symbol;
+            document.getElementById('result-zodiac').textContent = name;
+            document.getElementById('result-date').textContent = today;
+            document.getElementById('result-summary').textContent = '오늘도 좋은 하루가 될 거예요! ✨';
+
+            const scores = { love: Math.ceil(Math.random()*3)+2, money: Math.ceil(Math.random()*3)+2, career: Math.ceil(Math.random()*3)+2, health: Math.ceil(Math.random()*3)+2 };
+            document.getElementById('score-love').innerHTML = starsHtml(scores.love);
+            document.getElementById('score-money').innerHTML = starsHtml(scores.money);
+            document.getElementById('score-career').innerHTML = starsHtml(scores.career);
+            document.getElementById('score-health').innerHTML = starsHtml(scores.health);
+            document.getElementById('lucky-color').textContent = ['레드','블루','그린','옐로우','퍼플','핑크','화이트'][Math.floor(Math.random()*7)];
+            document.getElementById('lucky-number').textContent = Math.ceil(Math.random()*9);
+
             try {
                 // 백엔드 daily API가 아직 없으므로 LLM 직접 호출 (임시)
                 const res = await fetch('/api/tarot/shuffle?count=1');
@@ -192,21 +205,7 @@
                 });
                 const readData = await readRes.json();
 
-                // 결과 표시
-                document.getElementById('result-symbol').textContent = symbol;
-                document.getElementById('result-zodiac').textContent = name;
-                document.getElementById('result-date').textContent = today;
-                document.getElementById('result-summary').textContent = '오늘도 좋은 하루가 될 거예요! ✨';
                 document.getElementById('result-detail').textContent = readData.interpretation;
-
-                // 임시 점수 (랜덤)
-                const scores = { love: Math.ceil(Math.random()*3)+2, money: Math.ceil(Math.random()*3)+2, career: Math.ceil(Math.random()*3)+2, health: Math.ceil(Math.random()*3)+2 };
-                document.getElementById('score-love').innerHTML = starsHtml(scores.love);
-                document.getElementById('score-money').innerHTML = starsHtml(scores.money);
-                document.getElementById('score-career').innerHTML = starsHtml(scores.career);
-                document.getElementById('score-health').innerHTML = starsHtml(scores.health);
-                document.getElementById('lucky-color').textContent = ['레드','블루','그린','옐로우','퍼플','핑크','화이트'][Math.floor(Math.random()*7)];
-                document.getElementById('lucky-number').textContent = Math.ceil(Math.random()*9);
 
             } catch (e) {
                 document.getElementById('result-detail').textContent = '운세를 불러오지 못했어요 😿 잠시 후 다시 시도해주세요.';

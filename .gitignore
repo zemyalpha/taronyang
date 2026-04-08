@@ -20,3 +20,8 @@ node_modules/
 
 # Logs
 *.log
+node_modules/
+backend/dist/
+backend/taronyang.db*
+test-results/
+playwright/.cache/
