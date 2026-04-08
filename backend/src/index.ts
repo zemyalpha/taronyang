@@ -1,6 +1,8 @@
 /** Express 앱 진입점 */
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import path from 'path';
 import os from 'os';
@@ -21,14 +23,63 @@ initDb();
 
 const app = express();
 
+// 리버스 프록시 환경에서 클라이언트 IP 및 프로토콜 식별
+app.set('trust proxy', 1);
+
+// 보안 헤더 (helmet)
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
+
+// 프로덕션 환경 HTTPS 강제
+if (config.nodeEnv === 'production') {
+  app.use((req, res, next) => {
+    const proto = req.headers['x-forwarded-proto'];
+    if (proto && proto !== 'https') {
+      return res.redirect(301, `https://${req.headers.host}${req.url}`);
+    }
+    next();
+  });
+}
+
+// CORS — 프로덕션에서는 프론트엔드 도메인만 허용
+const corsOrigins = config.nodeEnv === 'production'
+  ? [config.frontendUrl].filter(Boolean)
+  : '*';
+app.use(cors({
+  origin: corsOrigins,
+  credentials: true,
+}));
+
 // 요청 로깅 (morgan)
 app.use(morgan(':method :url :status :response-time ms - :res[content-length]', {
   skip: (req) => req.path === '/api/health',
 }));
 
-// 미들웨어
-app.use(cors({ origin: '*', credentials: true }));
-app.use(express.json());
+// JSON 바디 파서
+app.use(express.json({ limit: '1mb' }));
+
+// API 레이트 리미팅 — 일반 API
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/', apiLimiter);
+
+// 인증 API 레이트 리미팅 — 더 엄격
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '인증 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/signup', authLimiter);
 
 // API 라우터
 app.use('/api/tarot', tarotRouter);
@@ -115,6 +166,12 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
     ...(config.nodeEnv !== 'production' && { detail: err.message }),
   });
 });
+
+// 프로덕션에서 기본 JWT 시크릿 검증
+if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-production') {
+  console.error('⚠️ 프로덕션 환경에서 기본 JWT 시크릿 사용 중. JWT_SECRET 환경변수를 설정하세요.');
+  process.exit(1);
+}
 
 // 서버 시작
 app.listen(config.port, config.host, () => {
