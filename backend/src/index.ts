@@ -33,13 +33,21 @@ app.use('/api/notifications', notifyRouter);
 const frontendPath = path.join(__dirname, '../../frontend');
 app.use('/static', express.static(frontendPath));
 
-// 루트
-app.get('/', (_req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
-});
+const htmlPages = [
+  { route: '/', file: 'index.html' },
+  { route: '/tarot', file: 'tarot.html' },
+  { route: '/daily', file: 'daily.html' },
+  { route: '/history', file: 'history.html' },
+  { route: '/mypage', file: 'mypage.html' },
+  { route: '/login', file: 'login.html' },
+  { route: '/pricing', file: 'pricing.html' },
+  { route: '/admin', file: 'admin/index.html' },
+];
 
-app.get('/mypage', (_req, res) => {
-  res.sendFile(path.join(frontendPath, 'mypage.html'));
+htmlPages.forEach(({ route, file }) => {
+  app.get(route, (_req, res) => {
+    res.sendFile(path.join(frontendPath, file));
+  });
 });
 
 // 헬스체크

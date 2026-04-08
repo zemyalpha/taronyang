@@ -9,48 +9,83 @@
 6. **한국어 UI:** 모든 사용자 대면 텍스트는 한국어
 7. **타로냥 캐릭터:** "~냥", "~해요" 말투, 따뜻하고 공감력 높은 톤
 
+## 기술 스택
+- **백엔드:** Express + TypeScript (Node.js)
+- **프론트엔드:** 정적 HTML (8페이지)
+- **DB:** SQLite (better-sqlite3)
+- **LLM:** Z.ai GLM API
+- **배포:** Railway
+
 ## 현재 완료된 작업
-- ✅ Issue #1: 프로젝트 초기 설정 (모노레포, FastAPI, 기본 파일)
-- ✅ Issue #2: 타로카드 78장 데이터 (shared/tarot_data.py)
+- ✅ Issue #1: 프로젝트 초기 설정 (모노레포, Express + TypeScript)
+- ✅ Issue #2: 타로카드 78장 데이터 (backend/src/tarotData.ts)
 - ✅ Issue #3/#4: LLM 프롬프트 설계 + Z.ai API 연동 + 타로 API 라우터
-- ✅ Issue #17 (PR): 코드 리뷰 반영 및 수정 (MERGED)
+- ✅ 백엔드 빌드 성공 (dist/ 존재)
+- ✅ 프론트엔드 정적 HTML 8페이지 (index, tarot, daily, history, mypage, login, pricing, admin)
+- ✅ Express 라우팅 설정 (모든 페이지 서빙)
 
 ## 현재 코드 구조
 ```
 taronyang/
 ├── frontend/
-│   ├── index.html          (기본 HTML만 있음, 아직 UI 없음)
-│   ├── css/style.css       (빈 파일)
-│   └── js/app.js           (빈 파일)
+│   ├── index.html          (랜딩페이지)
+│   ├── tarot.html          (타로 상담)
+│   ├── daily.html          (오늘의 운세)
+│   ├── history.html        (상담 기록)
+│   ├── mypage.html         (마이페이지)
+│   ├── login.html          (로그인)
+│   ├── pricing.html        (요금제)
+│   ├── admin/              (관리자)
+│   ├── css/                (스타일시트)
+│   └── js/                 (클라이언트 스크립트)
 ├── backend/
-│   ├── main.py             (FastAPI 앱, CORS, 정적파일 서빙)
-│   ├── config.py           (환경변수 설정)
-│   ├── routers/tarot.py    (타로 API: 카테고리, 셔플, 해석, 채팅)
-│   ├── services/llm.py     (Z.ai GLM API 클라이언트)
-│   ├── services/tarot_prompt.py (프롬프트 템플릿)
-│   └── tests/test_tarot.py
-├── shared/
-│   └── tarot_data.py       (78장 카드 데이터 + get_card 함수)
+│   ├── src/
+│   │   ├── index.ts        (Express 앱 진입점, CORS, 정적파일 서빙)
+│   │   ├── config.ts       (환경변수 설정)
+│   │   ├── database.ts     (SQLite 초기화)
+│   │   ├── llm.ts          (Z.ai GLM API 클라이언트)
+│   │   ├── tarotData.ts    (78장 카드 데이터)
+│   │   ├── tarotPrompt.ts  (프롬프트 템플릿)
+│   │   ├── dailyNotify.ts  (데일리 알림 스케줄러)
+│   │   └── routes/
+│   │       ├── tarot.ts    (타로 API)
+│   │       ├── auth.ts     (인증 API)
+│   │       ├── readings.ts (상담 기록 API)
+│   │       ├── payment.ts  (결제 API)
+│   │       ├── admin.ts    (관리자 API)
+│   │       └── notify.ts   (알림 API)
+│   ├── dist/               (빌드 결과물)
+│   ├── package.json
+│   └── tsconfig.json
+├── shared/                 (공유 리소스)
+├── Procfile                (Railway 프로세스 설정)
+├── railway.json            (Railway 빌드/배포 설정)
+├── CONTEXT.md              (이 파일)
+├── DEPLOY.md               (배포 가이드)
 ├── SPEC.md                 (전체 설계 문서)
 └── .env.example
 ```
 
 ## 다음 해야 할 작업 (우선순위 순)
-1. **Issue #5:** 랜딩페이지 UI (frontend/index.html)
-2. **Issue #6:** 타로 상담 UI (카테고리→카드선택→해석)
-3. **Issue #7:** 카드 애니메이션 (CSS flip, 셔플)
-4. **Issue #8:** 오늘의 운세 페이지
+1. 프론트엔드 UI 구현 (SPEC.md 디자인 가이드 기반)
+2. 카드 애니메이션 (CSS flip, 셔플)
+3. OAuth 연동 (카카오, 네이버, 구글)
+4. 결제 연동 (포트원)
 
 ## 기존 실수 및 주의사항
-- backend/main.py에서 `from routers import tarot` 사용 → 상대경로 아님
-- config.py에서 `sys.path.insert`로 shared 패키지 경로 추가
 - frontend/index.html은 아직 거의 비어있음 → SPEC.md 디자인 가이드 참고해서 구현
 - CSS 컬러: 딥네이비 #0a0a2e, 라벤더퍼플 #a78bfa, 골드 #fbbf24
 - 폰트: Noto Serif KR (타이틀) + Noto Sans KR (본문)
+- dotenv로 backend/.env 파일에서 환경변수 로드
 
 ## API 엔드포인트 (이미 구현됨)
+- GET /api/health — 헬스체크
 - GET /api/tarot/categories — 카테고리 목록
 - GET /api/tarot/shuffle?count=10 — 카드 셔플
 - POST /api/tarot/read — 타로 해석
 - POST /api/tarot/chat — 추가 대화
-- GET /api/health — 헬스체크
+- POST /api/auth/* — 인증 관련
+- GET /api/readings/* — 상담 기록
+- POST /api/payment/* — 결제
+- GET /api/admin/* — 관리자
+- GET /api/notifications/* — 알림
