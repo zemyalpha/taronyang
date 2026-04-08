@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.taronyang.db-backup</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/zemyblue-mac-mini-m1/.paperclip/instances/default/projects/d047328c-4364-4172-9730-3243342fcb49/c17cee8d-9cb0-4d6a-9838-d1d2150faac0/taronyang/scripts/backup-db.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>3</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/tmp/taronyang-backup.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/taronyang-backup.err</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/zemyblue-mac-mini-m1/.paperclip/instances/default/projects/d047328c-4364-4172-9730-3243342fcb49/c17cee8d-9cb0-4d6a-9838-d1d2150faac0/taronyang</string>
+</dict>
+</plist>
