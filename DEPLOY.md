@@ -29,19 +29,35 @@ wrangler pages deploy . --project-name taronyang
 ### 3. API 프록시 설정
 Cloudflare Pages에서 백엔드 API로 프록시하려면 `functions/` 디렉토리 사용:
 
-```javascript
-// functions/api/[[path]].js
-export async function onRequest(context) {
-  const url = new URL(context.request.url);
-  const apiUrl = `http://192.168.0.87:8000/api/${url.pathname.replace('/api/', '')}`;
-  
-  return fetch(apiUrl, {
-    method: context.request.method,
-    headers: context.request.headers,
-    body: context.request.body,
-  });
-}
+`frontend/functions/api/[[path]].js` 파일이 이미 생성되어 있음.
+프록시는 `BACKEND_URL` 환경변수를 참조하며, 설정되지 않으면 `http://192.168.0.9:8000`으로 폴백.
+
+**중요: 공개 배포를 위해서는 Mac mini 백엔드가 인터넷에서 접근 가능해야 함.**
+사설 IP(`192.168.0.9`)는 Cloudflare 에지에서 접근할 수 없으므로 아래 방법 중 하나 필요:
+
+#### 방법 A: Cloudflare Tunnel (권장)
+```bash
+# cloudflared 설치
+brew install cloudflared
+
+# 터널 생성 및 실행
+cloudflared tunnel create taronyang
+cloudflared tunnel route dns taronyang api.taronyang.com
+cloudflared tunnel run --url http://localhost:8000 taronyang
 ```
+
+Cloudflare Pages 환경변수에 `BACKEND_URL=https://api.taronyang.com` 설정.
+
+#### 방법 B: Tailscale Funnel
+```bash
+# Tailscale 설치 후
+tailscale funnel 8000
+```
+
+Cloudflare Pages 환경변수에 Funnel URL 설정.
+
+#### 로컬 개발용
+사설 네트워크에서만 사용 시 기본값 그대로 사용 가능.
 
 ### 4. 커스텀 도메인
 Cloudflare 대시보드 → Pages → taronyang → Custom domains
@@ -96,6 +112,42 @@ railway domain
 
 ### 5. 커스텀 도메인 (선택)
 Railway 대시보드 → Settings → Domains → 커스텀 도메인 추가
+
+## Mac mini 백엔드 자동 실행 (launchd)
+
+`com.taronyang.backend.plist` 파일이 프로젝트 루트에 있음.
+
+### 설치
+```bash
+# plist 파일을 LaunchAgents에 복사
+cp com.taronyang.backend.plist ~/Library/LaunchAgents/
+
+# 서비스 등록 및 실행
+launchctl load ~/Library/LaunchAgents/com.taronyang.backend.plist
+
+# 상태 확인
+launchctl list | grep taronyang
+```
+
+### 관리 명령어
+```bash
+# 중지
+launchctl unload ~/Library/LaunchAgents/com.taronyang.backend.plist
+
+# 재시작
+launchctl unload ~/Library/LaunchAgents/com.taronyang.backend.plist
+launchctl load ~/Library/LaunchAgents/com.taronyang.backend.plist
+
+# 로그 확인
+tail -f /tmp/taronyang-backend.log
+tail -f /tmp/taronyang-backend.err
+```
+
+### 설정 변경 시
+plist의 `WorkingDirectory`나 Node.js 경로(`/opt/homebrew/bin/node`)가 변경되면:
+1. `launchctl unload`로 기존 서비스 중지
+2. plist 파일 수정
+3. `launchctl load`로 재등록
 
 ## 로컬 실행
 
