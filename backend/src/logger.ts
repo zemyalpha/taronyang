@@ -24,9 +24,10 @@ const consoleFormat = winston.format.combine(
   winston.format.errors({ stack: true }),
   winston.format.timestamp({ format: 'HH:mm:ss' }),
   winston.format.colorize(),
-  winston.format.printf(({ timestamp, level, message, service: _service, ...meta }) => {
-    const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-    return `${timestamp} [${level}]: ${message}${metaStr}`;
+  winston.format.printf((info) => {
+    const { timestamp, level, message, stack, service: _service, ...meta } = info;
+    const metaStr = Object.keys(meta).length ? ' ' + JSON.stringify(meta) : '';
+    return timestamp + ' [' + level + ']: ' + message + metaStr + (stack ? '\n' + stack : '');
   }),
 );
 
