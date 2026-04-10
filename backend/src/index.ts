@@ -1,10 +1,11 @@
 /** Express 앱 진입점 */
+import './instrument';
+import { Sentry } from './instrument';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
-import * as Sentry from '@sentry/node';
 import path from 'path';
 import os from 'os';
 import { config } from './config';
@@ -21,12 +22,6 @@ import { startDailyScheduler } from './dailyNotify';
 const startTime = new Date();
 
 if (config.sentryDsn) {
-  Sentry.init({
-    dsn: config.sentryDsn,
-    environment: config.nodeEnv,
-    integrations: [Sentry.expressIntegration()],
-    tracesSampleRate: config.nodeEnv === 'production' ? 0.1 : 1.0,
-  });
   logger.info('Sentry error tracking enabled');
 } else {
   logger.info('Sentry DSN not set — error tracking disabled');
@@ -76,6 +71,23 @@ app.use(morgan(':method :url :status :response-time ms - :res[content-length]', 
   skip: (req: express.Request) => req.path.startsWith('/api/health'),
 }));
 
+// API 응답시간 추적 미들웨어 (morgan 직후, 전체 미들웨어 체인 포함)
+app.use('/api/', (req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    if (duration > config.slowApiThreshold && !req.originalUrl.includes('/health')) {
+      logger.warn('Slow API response', {
+        method: req.method,
+        url: req.originalUrl,
+        status: res.statusCode,
+        duration_ms: duration,
+      });
+    }
+  });
+  next();
+});
+
 // JSON 바디 파서
 app.use(express.json({ limit: '1mb' }));
 
@@ -99,23 +111,6 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
-
-// API 응답시간 추적 미들웨어
-app.use('/api/', (req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    if (duration > config.slowApiThreshold && !req.originalUrl.includes('/health')) {
-      logger.warn('Slow API response', {
-        method: req.method,
-        url: req.originalUrl,
-        status: res.statusCode,
-        duration_ms: duration,
-      });
-    }
-  });
-  next();
-});
 
 // API 라우터
 app.use('/api/tarot', tarotRouter);
@@ -207,8 +202,7 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Unhandled error', {
-    message: err.message,
-    stack: err.stack,
+    err,
     path: _req.path,
     method: _req.method,
   });

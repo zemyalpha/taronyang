@@ -4,12 +4,14 @@ import fs from 'fs';
 import { config } from './config';
 
 const logDir = config.logDir;
+let logDirReady = false;
 try {
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
   }
+  logDirReady = true;
 } catch (err) {
-  console.error('Failed to create log directory:', err);
+  console.error('Failed to create log directory — file transports disabled:', err);
 }
 
 const logFormat = winston.format.combine(
@@ -32,18 +34,23 @@ const transports: winston.transport[] = [
   new winston.transports.Console({
     format: config.nodeEnv === 'production' ? logFormat : consoleFormat,
   }),
-  new winston.transports.File({
-    filename: path.join(logDir, 'error.log'),
-    level: 'error',
-    maxsize: 5 * 1024 * 1024,
-    maxFiles: 5,
-  }),
-  new winston.transports.File({
-    filename: path.join(logDir, 'combined.log'),
-    maxsize: 10 * 1024 * 1024,
-    maxFiles: 10,
-  }),
 ];
+
+if (logDirReady) {
+  transports.push(
+    new winston.transports.File({
+      filename: path.join(logDir, 'error.log'),
+      level: 'error',
+      maxsize: 5 * 1024 * 1024,
+      maxFiles: 5,
+    }),
+    new winston.transports.File({
+      filename: path.join(logDir, 'combined.log'),
+      maxsize: 10 * 1024 * 1024,
+      maxFiles: 10,
+    }),
+  );
+}
 
 export const logger = winston.createLogger({
   level: config.logLevel,
