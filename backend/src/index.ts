@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import morgan from 'morgan';
 import * as Sentry from '@sentry/node';
 import path from 'path';
 import os from 'os';
@@ -70,10 +71,10 @@ app.use(cors({
 }));
 
 // 요청 로깅 (winston morgan stream)
-app.use(require('morgan')(':method :url :status :response-time ms - :res[content-length]', {
+app.use(morgan(':method :url :status :response-time ms - :res[content-length]', {
   stream: morganStream,
-  skip: (req: { path: string }) => req.path === '/api/health',
-}));
+  skip: (req: express.Request) => req.path === '/api/health',
+} as Parameters<typeof morgan>[1]));
 
 // JSON 바디 파서
 app.use(express.json({ limit: '1mb' }));
@@ -104,12 +105,12 @@ app.use('/api/', (req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - start;
-    if (duration > 2000) {
+    if (duration > config.slowApiThreshold && req.path !== '/api/health') {
       logger.warn('Slow API response', {
         method: req.method,
-        path: req.path,
+        url: req.originalUrl,
         status: res.statusCode,
-        duration: `${duration}ms`,
+        duration_ms: duration,
       });
     }
   });
@@ -206,8 +207,7 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Unhandled error', {
-    message: err.message,
-    stack: err.stack,
+    err,
     path: _req.path,
     method: _req.method,
   });

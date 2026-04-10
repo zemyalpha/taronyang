@@ -63,4 +63,5 @@ export const config = {
   // Logging
   logLevel: process.env.LOG_LEVEL || 'info',
   logDir: process.env.LOG_DIR || './logs',
+  slowApiThreshold: parseInt(process.env.SLOW_API_THRESHOLD || '2000', 10),
 };
