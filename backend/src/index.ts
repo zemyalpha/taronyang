@@ -105,7 +105,7 @@ app.use('/api/', (req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - start;
-    if (duration > config.slowApiThreshold && req.path !== '/api/health') {
+    if (duration > config.slowApiThreshold && req.originalUrl !== '/api/health') {
       logger.warn('Slow API response', {
         method: req.method,
         url: req.originalUrl,
@@ -207,7 +207,8 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Unhandled error', {
-    err,
+    message: err.message,
+    stack: err.stack,
     path: _req.path,
     method: _req.method,
   });
