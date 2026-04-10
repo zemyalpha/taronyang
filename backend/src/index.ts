@@ -3,11 +3,12 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import morgan from 'morgan';
+import * as Sentry from '@sentry/node';
 import path from 'path';
 import os from 'os';
 import { config } from './config';
 import { initDb, getDb } from './database';
+import { logger, morganStream } from './logger';
 import { tarotRouter } from './routes/tarot';
 import { authRouter } from './routes/auth';
 import { readingsRouter } from './routes/readings';
@@ -18,13 +19,29 @@ import { startDailyScheduler } from './dailyNotify';
 
 const startTime = new Date();
 
+if (config.sentryDsn) {
+  Sentry.init({
+    dsn: config.sentryDsn,
+    environment: config.nodeEnv,
+    integrations: [Sentry.expressIntegration()],
+    tracesSampleRate: config.nodeEnv === 'production' ? 0.1 : 1.0,
+  });
+  logger.info('Sentry error tracking enabled');
+} else {
+  logger.info('Sentry DSN not set — error tracking disabled');
+}
+
 // DB 초기화
 initDb();
+logger.info('Database initialized', { path: config.databasePath });
 
 const app = express();
 
 // 리버스 프록시 환경에서 클라이언트 IP 및 프로토콜 식별
 app.set('trust proxy', 1);
+
+// Sentry 요청 핸들러 (가장 먼저) — v10은 자동으로 요청 데이터를 캡처
+// (별도 requestHandler 미들웨어 불필요)
 
 // 보안 헤더 (helmet)
 app.use(helmet({
@@ -52,9 +69,10 @@ app.use(cors({
   credentials: true,
 }));
 
-// 요청 로깅 (morgan)
-app.use(morgan(':method :url :status :response-time ms - :res[content-length]', {
-  skip: (req) => req.path === '/api/health',
+// 요청 로깅 (winston morgan stream)
+app.use(require('morgan')(':method :url :status :response-time ms - :res[content-length]', {
+  stream: morganStream,
+  skip: (req: { path: string }) => req.path === '/api/health',
 }));
 
 // JSON 바디 파서
@@ -80,6 +98,23 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
+
+// API 응답시간 추적 미들웨어
+app.use('/api/', (req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    if (duration > 2000) {
+      logger.warn('Slow API response', {
+        method: req.method,
+        path: req.path,
+        status: res.statusCode,
+        duration: `${duration}ms`,
+      });
+    }
+  });
+  next();
+});
 
 // API 라우터
 app.use('/api/tarot', tarotRouter);
@@ -112,7 +147,12 @@ htmlPages.forEach(({ route, file }) => {
 
 // 헬스체크 (기본)
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'taronyang', version: '0.1.0' });
+  res.json({
+    status: 'ok',
+    service: 'taronyang',
+    version: '0.1.0',
+    sentry: !!config.sentryDsn,
+  });
 });
 
 // 헬스체크 (상세 — 업타임 모니터링용)
@@ -158,24 +198,40 @@ app.get('/api/health/detail', (_req, res) => {
   });
 });
 
+// Sentry 에러 핸들러 (전역 에러 핸들러 직전)
+if (config.sentryDsn) {
+  Sentry.setupExpressErrorHandler(app);
+}
+
 // 전역 에러 핸들러
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(`❌ 처리되지 않은 에러: ${err.message}`, err.stack);
+  logger.error('Unhandled error', {
+    message: err.message,
+    stack: err.stack,
+    path: _req.path,
+    method: _req.method,
+  });
   res.status(500).json({
     error: '서버 내부 오류가 발생했습니다.',
     ...(config.nodeEnv !== 'production' && { detail: err.message }),
+    ...(config.sentryDsn && { sentryEventId: Sentry.lastEventId() }),
   });
 });
 
 // 프로덕션에서 기본 JWT 시크릿 검증
 if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-production') {
-  console.error('⚠️ 프로덕션 환경에서 기본 JWT 시크릿 사용 중. JWT_SECRET 환경변수를 설정하세요.');
+  logger.error('FATAL: Default JWT secret in production');
   process.exit(1);
 }
 
 // 서버 시작
 app.listen(config.port, config.host, () => {
-  console.log(`🔮 타로냥 API 서버: http://${config.host}:${config.port} (${config.nodeEnv})`);
+  logger.info(`Taronyang API server started`, {
+    host: config.host,
+    port: config.port,
+    env: config.nodeEnv,
+    sentry: !!config.sentryDsn,
+  });
   startDailyScheduler();
 });
 

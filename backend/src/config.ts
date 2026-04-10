@@ -56,4 +56,11 @@ export const config = {
 
   // CORS
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8000',
+
+  // Sentry
+  sentryDsn: process.env.SENTRY_DSN || '',
+
+  // Logging
+  logLevel: process.env.LOG_LEVEL || 'info',
+  logDir: process.env.LOG_DIR || './logs',
 };
