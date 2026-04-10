@@ -73,7 +73,7 @@ app.use(cors({
 // 요청 로깅 (winston morgan stream)
 app.use(morgan(':method :url :status :response-time ms - :res[content-length]', {
   stream: morganStream,
-  skip: (req: express.Request) => req.path === '/api/health',
+  skip: (req: express.Request) => req.path.startsWith('/api/health'),
 } as Parameters<typeof morgan>[1]));
 
 // JSON 바디 파서
@@ -105,7 +105,7 @@ app.use('/api/', (req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - start;
-    if (duration > config.slowApiThreshold && req.originalUrl !== '/api/health') {
+    if (duration > config.slowApiThreshold && !req.path.startsWith('/health')) {
       logger.warn('Slow API response', {
         method: req.method,
         url: req.originalUrl,
