@@ -61,7 +61,7 @@ export const config = {
   sentryDsn: process.env.SENTRY_DSN || '',
 
   // Logging
-  logLevel: process.env.LOG_LEVEL || 'info',
+  logLevel: process.env.LOG_LEVEL || 'http',
   logDir: process.env.LOG_DIR || './logs',
   slowApiThreshold: parseInt(process.env.SLOW_API_THRESHOLD || '2000', 10),
 };

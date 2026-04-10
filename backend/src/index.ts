@@ -105,7 +105,7 @@ app.use('/api/', (req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - start;
-    if (duration > config.slowApiThreshold && !req.originalUrl.includes('/health')) {
+    if (duration > config.slowApiThreshold && !req.originalUrl.startsWith('/api/health')) {
       logger.warn('Slow API response', {
         method: req.method,
         url: req.originalUrl,
