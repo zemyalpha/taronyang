@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import * as Sentry from '@sentry/node';
 
 const sentryDsn = process.env.SENTRY_DSN || '';
