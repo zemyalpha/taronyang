@@ -27,7 +27,12 @@ const consoleFormat = winston.format.combine(
         safeMeta[key] = value;
       }
     }
-    const metaStr = Object.keys(safeMeta).length ? ` ${JSON.stringify(safeMeta)}` : '';
+    let metaStr = '';
+    try {
+      metaStr = Object.keys(safeMeta).length ? ` ${JSON.stringify(safeMeta)}` : '';
+    } catch {
+      metaStr = ' [meta serialization failed]';
+    }
     return `${timestamp} [${level}]: ${message}${metaStr}${stack ? `\n${stack}` : ''}`;
   }),
 );

@@ -209,14 +209,11 @@ if (config.sentryDsn) {
 
 // 전역 에러 핸들러
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  logger.error(
-    // Winston accepts Error objects as first arg at runtime for errors({ stack: true }) format
-    err as unknown as string,
-    {
-      url: _req.originalUrl,
-      method: _req.method,
-    },
-  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (logger.error as any)(err, {
+    url: _req.originalUrl,
+    method: _req.method,
+  });
   res.status(500).json({
     error: '서버 내부 오류가 발생했습니다.',
     ...(config.nodeEnv !== 'production' && { detail: err.message }),
