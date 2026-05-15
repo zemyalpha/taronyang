@@ -209,9 +209,8 @@ if (config.sentryDsn) {
 
 // 전역 에러 핸들러
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  logger.error('Unhandled error', {
-    errorMessage: err.message,
-    errorStack: err.stack,
+  logger.error(err.message, {
+    stack: err.stack,
     url: _req.originalUrl,
     method: _req.method,
   });
