@@ -208,11 +208,12 @@ if (config.sentryDsn) {
 }
 
 // 전역 에러 핸들러
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (logger.error as any)(err, {
-    url: _req.originalUrl,
-    method: _req.method,
+app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error({
+    message: err.message,
+    stack: err.stack,
+    url: req.originalUrl,
+    method: req.method,
   });
   res.status(500).json({
     error: '서버 내부 오류가 발생했습니다.',
