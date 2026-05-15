@@ -208,14 +208,17 @@ if (config.sentryDsn) {
 }
 
 // 전역 에러 핸들러
-app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error({
     message: err.message,
     stack: err.stack,
     url: req.originalUrl,
     method: req.method,
   });
-  if (res.headersSent) return;
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
   res.status(500).json({
     error: '서버 내부 오류가 발생했습니다.',
     ...(config.nodeEnv !== 'production' && { detail: err.message }),
