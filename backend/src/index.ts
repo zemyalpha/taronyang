@@ -228,7 +228,7 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 
 // 프로덕션에서 기본 JWT 시크릿 검증
 if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-production') {
-  logger.error('FATAL: Default JWT secret in production');
+  console.error('FATAL: Default JWT secret in production');
   process.exit(1);
 }
 
