@@ -79,6 +79,23 @@ app.use(morgan<express.Request, express.Response>(
   },
 ));
 
+// API 응답시간 추적 미들웨어 — body 파싱 및 레이트 리밋 대기 시간 포함
+app.use('/api/', (req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    if (duration > config.slowApiThreshold && !req.originalUrl.startsWith('/api/health')) {
+      logger.warn('Slow API response', {
+        method: req.method,
+        url: req.originalUrl,
+        status: res.statusCode,
+        duration_ms: duration,
+      });
+    }
+  });
+  next();
+});
+
 // JSON 바디 파서
 app.use(express.json({ limit: '1mb' }));
 
@@ -102,23 +119,6 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
-
-// API 응답시간 추적 미들웨어
-app.use('/api/', (req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    if (duration > config.slowApiThreshold && !req.originalUrl.startsWith('/api/health')) {
-      logger.warn('Slow API response', {
-        method: req.method,
-        url: req.originalUrl,
-        status: res.statusCode,
-        duration_ms: duration,
-      });
-    }
-  });
-  next();
-});
 
 // API 라우터
 app.use('/api/tarot', tarotRouter);
@@ -215,6 +215,7 @@ app.use((err: Error, req: express.Request, res: express.Response, _next: express
     url: req.originalUrl,
     method: req.method,
   });
+  if (res.headersSent) return;
   res.status(500).json({
     error: '서버 내부 오류가 발생했습니다.',
     ...(config.nodeEnv !== 'production' && { detail: err.message }),

@@ -4,8 +4,12 @@ import fs from 'fs';
 import { config } from './config';
 
 const logDir = config.logDir;
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
+try {
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+} catch (err) {
+  console.error(`Failed to create log directory "${logDir}":`, err);
 }
 
 const commonFormat = winston.format.combine(
