@@ -19,7 +19,15 @@ const consoleFormat = winston.format.combine(
   winston.format.timestamp({ format: 'HH:mm:ss' }),
   winston.format.colorize(),
   winston.format.printf(({ timestamp, level, message, stack, service: _service, ...meta }) => {
-    const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
+    const safeMeta: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(meta)) {
+      if (value instanceof Error) {
+        safeMeta[key] = { message: value.message, stack: value.stack };
+      } else {
+        safeMeta[key] = value;
+      }
+    }
+    const metaStr = Object.keys(safeMeta).length ? ` ${JSON.stringify(safeMeta)}` : '';
     return `${timestamp} [${level}]: ${message}${metaStr}${stack ? `\n${stack}` : ''}`;
   }),
 );

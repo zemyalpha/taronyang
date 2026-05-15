@@ -75,7 +75,7 @@ app.use(morgan<express.Request, express.Response>(
   ':method :url :status :response-time ms - :res[content-length]',
   {
     stream: morganStream,
-    skip: (req) => req.path.startsWith('/api/health'),
+    skip: (req) => req.originalUrl.startsWith('/api/health'),
   },
 ));
 
@@ -210,8 +210,9 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Unhandled error', {
-    err,
-    path: _req.path,
+    errorMessage: err.message,
+    errorStack: err.stack,
+    url: _req.originalUrl,
     method: _req.method,
   });
   res.status(500).json({
