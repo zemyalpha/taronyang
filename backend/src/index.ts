@@ -209,8 +209,7 @@ if (config.sentryDsn) {
 
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (logger.error as any)(err, { url: req.originalUrl, method: req.method });
+  logger.error(err.message, { stack: err.stack, url: req.originalUrl, method: req.method });
   if (res.headersSent) {
     next(err);
     return;

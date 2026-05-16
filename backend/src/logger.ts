@@ -19,7 +19,6 @@ const commonFormat = winston.format.combine(
 );
 
 const consoleFormat = winston.format.combine(
-  winston.format.errors({ stack: true }),
   winston.format.timestamp({ format: 'HH:mm:ss' }),
   winston.format.colorize(),
   winston.format.printf(({ timestamp, level, message, stack, service: _service, ...meta }) => {
