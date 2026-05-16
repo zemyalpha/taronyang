@@ -10,7 +10,7 @@ try {
     fs.mkdirSync(logDir, { recursive: true });
   }
 } catch (err) {
-  console.error(`Failed to create log directory "${logDir}":`, err);
+  console.error(`Failed to create log directory "${logDir}". File transport logging may not work:`, err);
 }
 
 const commonFormat = winston.format.combine(
@@ -19,6 +19,7 @@ const commonFormat = winston.format.combine(
 );
 
 const consoleFormat = winston.format.combine(
+  winston.format.errors({ stack: true }),
   winston.format.timestamp({ format: 'HH:mm:ss' }),
   winston.format.colorize(),
   winston.format.printf(({ timestamp, level, message, stack, service: _service, ...meta }) => {

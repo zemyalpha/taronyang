@@ -209,12 +209,8 @@ if (config.sentryDsn) {
 
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error({
-    message: err.message,
-    stack: err.stack,
-    url: req.originalUrl,
-    method: req.method,
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (logger.error as any)(err, { url: req.originalUrl, method: req.method });
   if (res.headersSent) {
     next(err);
     return;
@@ -228,7 +224,7 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 
 // 프로덕션에서 기본 JWT 시크릿 검증
 if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-production') {
-  console.error('FATAL: Default JWT secret in production');
+  logger.error('FATAL: Default JWT secret in production');
   process.exit(1);
 }
 
