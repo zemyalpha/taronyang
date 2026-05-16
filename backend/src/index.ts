@@ -80,7 +80,7 @@ app.use(morgan<express.Request, express.Response>(
 ));
 
 // API 응답시간 추적 미들웨어
-app.use('/api/', (req, res, next) => {
+app.use('/api', (req, res, next) => {
   if (req.originalUrl.startsWith('/api/health')) {
     return next();
   }
