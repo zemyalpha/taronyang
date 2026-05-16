@@ -212,7 +212,7 @@ if (config.sentryDsn) {
 
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error({ message: err.message, stack: err.stack, url: req.originalUrl, method: req.method });
+  logger.child({ url: req.originalUrl, method: req.method }).error(err);
   if (res.headersSent) {
     next(err);
     return;
