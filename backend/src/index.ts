@@ -79,12 +79,15 @@ app.use(morgan<express.Request, express.Response>(
   },
 ));
 
-// API 응답시간 추적 미들웨어 — body 파싱 및 레이트 리밋 대기 시간 포함
+// API 응답시간 추적 미들웨어
 app.use('/api/', (req, res, next) => {
+  if (req.originalUrl.startsWith('/api/health')) {
+    return next();
+  }
   const start = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - start;
-    if (duration > config.slowApiThreshold && !req.originalUrl.startsWith('/api/health')) {
+    if (duration > config.slowApiThreshold) {
       logger.warn('Slow API response', {
         method: req.method,
         url: req.originalUrl,
@@ -209,7 +212,7 @@ if (config.sentryDsn) {
 
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error(err.message, { stack: err.stack, url: req.originalUrl, method: req.method });
+  logger.error(Object.assign(err, { url: req.originalUrl, method: req.method }));
   if (res.headersSent) {
     next(err);
     return;
