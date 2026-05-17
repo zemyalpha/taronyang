@@ -123,10 +123,10 @@ app.get('/api/health/detail', (_req, res) => {
   let userCount = 0;
   let readingCount = 0;
   try {
-    const stat = db.prepare('SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()').get() as { size: number };
-    dbSize = stat.size;
-    userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number }).c;
-    readingCount = (db.prepare('SELECT COUNT(*) as c FROM readings').get() as { c: number }).c;
+    const stat = db.prepare('SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()').get() as { size: number } | undefined;
+    dbSize = stat?.size ?? 0;
+    userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number } | undefined)?.c ?? 0;
+    readingCount = (db.prepare('SELECT COUNT(*) as c FROM readings').get() as { c: number } | undefined)?.c ?? 0;
   } catch {
     // DB 접근 불가 시 기본값
   }
@@ -215,10 +215,9 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const errorObj = err instanceof Error ? err : new Error(String(err));
-  logger.error({
-    message: errorObj.message,
+  logger.error(errorObj.message, {
     stack: errorObj.stack,
-    url: req.originalUrl,
+    url: req.path,
     method: req.method,
   });
   if (res.headersSent) {
