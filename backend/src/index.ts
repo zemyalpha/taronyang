@@ -75,7 +75,7 @@ app.use(morgan<express.Request, express.Response>(
   ':method :url :status :response-time ms - :res[content-length]',
   {
     stream: morganStream,
-    skip: (req) => req.originalUrl.startsWith('/api/health'),
+    skip: (req) => req.path === '/api/health' || req.path.startsWith('/api/health/'),
   },
 ));
 
