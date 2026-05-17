@@ -82,7 +82,7 @@ app.use(morgan<express.Request, express.Response>(
 
 // API 응답시간 추적 미들웨어
 app.use('/api', (req, res, next) => {
-  const fullPath = req.baseUrl + req.path;
+  const fullPath = req.originalUrl.split('?')[0];
   if (fullPath === '/api/health' || fullPath.startsWith('/api/health/')) {
     return next();
   }
@@ -217,7 +217,7 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
   const errorObj = err instanceof Error ? err : new Error(String(err));
   logger.error(errorObj.message, {
     stack: errorObj.stack,
-    url: req.path,
+    url: req.originalUrl.split('?')[0],
     method: req.method,
   });
   if (res.headersSent) {
