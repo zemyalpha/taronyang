@@ -81,7 +81,8 @@ app.use(morgan<express.Request, express.Response>(
 
 // API 응답시간 추적 미들웨어
 app.use('/api', (req, res, next) => {
-  if (req.originalUrl.startsWith('/api/health')) {
+  const fullPath = req.baseUrl + req.path;
+  if (fullPath === '/api/health' || fullPath.startsWith('/api/health/')) {
     return next();
   }
   const start = Date.now();
@@ -90,7 +91,7 @@ app.use('/api', (req, res, next) => {
     if (duration > config.slowApiThreshold) {
       logger.warn('Slow API response', {
         method: req.method,
-        url: req.originalUrl,
+        url: fullPath,
         status: res.statusCode,
         duration_ms: duration,
       });
@@ -212,7 +213,7 @@ if (config.sentryDsn) {
 
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error(err.message, { stack: err.stack, url: req.originalUrl, method: req.method });
+  logger.error(err.message, { stack: err.stack, url: req.path, method: req.method });
   if (res.headersSent) {
     next(err);
     return;
