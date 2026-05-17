@@ -70,9 +70,10 @@ app.use(cors({
   credentials: true,
 }));
 
-// 요청 로깅 (winston morgan stream)
+// 요청 로깅 (winston morgan stream — req.path로 쿼리스트링 제외)
+morgan.token('pathOnly', (req: express.Request) => req.path);
 app.use(morgan<express.Request, express.Response>(
-  ':method :url :status :response-time ms - :res[content-length]',
+  ':method :pathOnly :status :response-time ms - :res[content-length]',
   {
     stream: morganStream,
     skip: (req) => req.path === '/api/health' || req.path.startsWith('/api/health/'),
@@ -111,7 +112,7 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 });
-app.use('/api/', apiLimiter);
+app.use('/api', apiLimiter);
 
 // 인증 API 레이트 리미팅 — 더 엄격
 const authLimiter = rateLimit({
