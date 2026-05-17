@@ -215,8 +215,8 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const errorObj = err instanceof Error ? err : new Error(String(err));
-  logger.error(errorObj.message, {
-    stack: errorObj.stack,
+  logger.error({
+    message: errorObj,
     url: req.originalUrl.split('?')[0],
     method: req.method,
   });
