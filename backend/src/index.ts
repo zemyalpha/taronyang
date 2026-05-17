@@ -104,57 +104,7 @@ app.use('/api', (req, res, next) => {
 // JSON 바디 파서
 app.use(express.json({ limit: '1mb' }));
 
-// API 레이트 리미팅 — 일반 API
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
-});
-app.use('/api', apiLimiter);
-
-// 인증 API 레이트 리미팅 — 더 엄격
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: '인증 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
-});
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/signup', authLimiter);
-
-// API 라우터
-app.use('/api/tarot', tarotRouter);
-app.use('/api/auth', authRouter);
-app.use('/api/readings', readingsRouter);
-app.use('/api/payment', paymentRouter);
-app.use('/api/admin', adminRouter);
-app.use('/api/notifications', notifyRouter);
-
-// 정적 파일 (프론트엔드)
-const frontendPath = path.join(__dirname, '../../frontend');
-app.use('/static', express.static(frontendPath));
-
-const htmlPages = [
-  { route: '/', file: 'index.html' },
-  { route: '/tarot', file: 'tarot.html' },
-  { route: '/daily', file: 'daily.html' },
-  { route: '/history', file: 'history.html' },
-  { route: '/mypage', file: 'mypage.html' },
-  { route: '/login', file: 'login.html' },
-  { route: '/pricing', file: 'pricing.html' },
-  { route: '/admin', file: 'admin/index.html' },
-];
-
-htmlPages.forEach(({ route, file }) => {
-  app.get(route, (_req, res) => {
-    res.sendFile(path.join(frontendPath, file));
-  });
-});
-
-// 헬스체크 (기본)
+// 헬스체크 (기본) — 레이트 리미터보다 먼저 등록하여 모니터링 도구의 빈번한 호출에도 제한받지 않도록 함
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
@@ -204,6 +154,56 @@ app.get('/api/health/detail', (_req, res) => {
       users: userCount,
       readings: readingCount,
     },
+  });
+});
+
+// API 레이트 리미팅 — 일반 API
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api', apiLimiter);
+
+// 인증 API 레이트 리미팅 — 더 엄격
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '인증 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/signup', authLimiter);
+
+// API 라우터
+app.use('/api/tarot', tarotRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/readings', readingsRouter);
+app.use('/api/payment', paymentRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/notifications', notifyRouter);
+
+// 정적 파일 (프론트엔드)
+const frontendPath = path.join(__dirname, '../../frontend');
+app.use('/static', express.static(frontendPath));
+
+const htmlPages = [
+  { route: '/', file: 'index.html' },
+  { route: '/tarot', file: 'tarot.html' },
+  { route: '/daily', file: 'daily.html' },
+  { route: '/history', file: 'history.html' },
+  { route: '/mypage', file: 'mypage.html' },
+  { route: '/login', file: 'login.html' },
+  { route: '/pricing', file: 'pricing.html' },
+  { route: '/admin', file: 'admin/index.html' },
+];
+
+htmlPages.forEach(({ route, file }) => {
+  app.get(route, (_req, res) => {
+    res.sendFile(path.join(frontendPath, file));
   });
 });
 
