@@ -54,9 +54,11 @@ export const logger = winston.createLogger({
   defaultMeta: { service: 'taronyang' },
   transports,
   exceptionHandlers: [
+    new winston.transports.Console({ format: config.nodeEnv === 'production' ? winston.format.json() : consoleFormat }),
     new winston.transports.File({ filename: path.join(logDir, 'exceptions.log') }),
   ],
   rejectionHandlers: [
+    new winston.transports.Console({ format: config.nodeEnv === 'production' ? winston.format.json() : consoleFormat }),
     new winston.transports.File({ filename: path.join(logDir, 'rejections.log') }),
   ],
 });
