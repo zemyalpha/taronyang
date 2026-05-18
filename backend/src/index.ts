@@ -82,8 +82,7 @@ app.use(morgan<express.Request, express.Response>(
 
 // API 응답시간 추적 미들웨어
 app.use('/api', (req, res, next) => {
-  const fullPath = req.originalUrl.split('?')[0];
-  if (fullPath === '/api/health' || fullPath.startsWith('/api/health/')) {
+  if (req.path === '/health' || req.path.startsWith('/health/')) {
     return next();
   }
   const start = Date.now();
@@ -92,7 +91,7 @@ app.use('/api', (req, res, next) => {
     if (duration > config.slowApiThreshold) {
       logger.warn('Slow API response', {
         method: req.method,
-        url: fullPath,
+        url: req.path,
         status: res.statusCode,
         duration_ms: duration,
       });
@@ -127,8 +126,8 @@ app.get('/api/health/detail', (_req, res) => {
     dbSize = stat?.size ?? 0;
     userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number } | undefined)?.c ?? 0;
     readingCount = (db.prepare('SELECT COUNT(*) as c FROM readings').get() as { c: number } | undefined)?.c ?? 0;
-  } catch {
-    // DB 접근 불가 시 기본값
+  } catch (err) {
+    logger.error('Health check database query failed', { error: err });
   }
 
   res.json({
@@ -215,11 +214,7 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const errorObj = err instanceof Error ? err : new Error(String(err));
-  logger.error({
-    message: errorObj,
-    url: req.originalUrl.split('?')[0],
-    method: req.method,
-  });
+  logger.error(errorObj.message, { stack: errorObj.stack, url: req.path, method: req.method });
   if (res.headersSent) {
     next(err);
     return;
