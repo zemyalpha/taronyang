@@ -78,7 +78,7 @@ app.use(morgan<express.Request, express.Response>(
     stream: morganStream,
     skip: (req) => {
       const p = req.path;
-      return p === '/api/health' || p === '/api/health/detail';
+      return p.startsWith('/api/health');
     },
   },
 ));
@@ -124,18 +124,20 @@ app.get('/api/health/detail', (_req, res) => {
   let dbSize = 0;
   let userCount = 0;
   let readingCount = 0;
+  let dbHealthy = true;
   try {
     const stat = db.prepare('SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()').get() as { size: number } | undefined;
     dbSize = stat?.size ?? 0;
     userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number } | undefined)?.c ?? 0;
     readingCount = (db.prepare('SELECT COUNT(*) as c FROM readings').get() as { c: number } | undefined)?.c ?? 0;
   } catch (err) {
+    dbHealthy = false;
     const errorObj = err instanceof Error ? err : new Error(String(err));
-    logger.error('Health check database query failed', { stack: errorObj.stack });
+    logger.error('Health check database query failed', { message: errorObj.message, stack: errorObj.stack });
   }
 
   res.json({
-    status: 'ok',
+    status: dbHealthy ? 'ok' : 'error',
     service: 'taronyang',
     version: '0.1.0',
     uptime: Math.floor(uptime),
