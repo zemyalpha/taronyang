@@ -141,7 +141,7 @@ app.get('/api/health/detail', (_req, res) => {
   } catch (err) {
     dbHealthy = false;
     const errorObj = err instanceof Error ? err : new Error(String(err));
-    logger.warn('Health check database query failed', { message: errorObj.message, stack: errorObj.stack });
+    logger.warn('Health check database query failed', { error: errorObj.message, stack: errorObj.stack });
   }
 
   res.json({
