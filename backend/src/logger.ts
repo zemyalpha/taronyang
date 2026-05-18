@@ -30,6 +30,8 @@ const consoleFormat = winston.format.combine(
 const transports: winston.transport[] = [
   new winston.transports.Console({
     format: config.nodeEnv === 'production' ? winston.format.json() : consoleFormat,
+    handleExceptions: true,
+    handleRejections: true,
   }),
   new winston.transports.File({
     filename: path.join(logDir, 'error.log'),

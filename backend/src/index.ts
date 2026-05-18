@@ -130,7 +130,8 @@ app.get('/api/health/detail', (_req, res) => {
     userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number } | undefined)?.c ?? 0;
     readingCount = (db.prepare('SELECT COUNT(*) as c FROM readings').get() as { c: number } | undefined)?.c ?? 0;
   } catch (err) {
-    logger.error('Health check database query failed', { error: err instanceof Error ? err : new Error(String(err)) });
+    const errorObj = err instanceof Error ? err : new Error(String(err));
+    logger.error('Health check database query failed', { stack: errorObj.stack });
   }
 
   res.json({
