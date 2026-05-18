@@ -94,7 +94,7 @@ app.use('/api', (req, res, next) => {
     if (duration > config.slowApiThreshold) {
       logger.warn('Slow API response', {
         method: req.method,
-        url: req.path,
+        url: req.baseUrl + req.path,
         status: res.statusCode,
         duration_ms: duration,
       });
