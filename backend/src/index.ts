@@ -220,7 +220,7 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const errorObj = err instanceof Error ? err : new Error(String(err));
-  logger.error(errorObj.message, { stack: errorObj.stack, url: req.path, method: req.method });
+  (logger.error as (msg: unknown, meta?: object) => void)(errorObj, { url: req.path, method: req.method });
   if (res.headersSent) {
     next(err);
     return;
