@@ -94,7 +94,7 @@ app.use('/api', (req, res, next) => {
     if (duration > config.slowApiThreshold) {
       logger.warn('Slow API response', {
         method: req.method,
-        url: req.baseUrl + req.path,
+        url: req.originalUrl.split('?')[0],
         status: res.statusCode,
         duration_ms: duration,
       });
@@ -116,24 +116,32 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// 헬스체크 (상세 — 업타임 모니터링용)
+// 헬스체크 (상세 — 업타임 모니터링용) — prepared statements 캐시
+const healthStmts = (() => {
+  const db = getDb();
+  return {
+    dbSize: db.prepare('SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()'),
+    userCount: db.prepare('SELECT COUNT(*) as c FROM users'),
+    readingCount: db.prepare('SELECT COUNT(*) as c FROM readings'),
+  };
+})();
+
 app.get('/api/health/detail', (_req, res) => {
   const uptime = process.uptime();
   const memUsage = process.memoryUsage();
-  const db = getDb();
   let dbSize = 0;
   let userCount = 0;
   let readingCount = 0;
   let dbHealthy = true;
   try {
-    const stat = db.prepare('SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()').get() as { size: number } | undefined;
+    const stat = healthStmts.dbSize.get() as { size: number } | undefined;
     dbSize = stat?.size ?? 0;
-    userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number } | undefined)?.c ?? 0;
-    readingCount = (db.prepare('SELECT COUNT(*) as c FROM readings').get() as { c: number } | undefined)?.c ?? 0;
+    userCount = (healthStmts.userCount.get() as { c: number } | undefined)?.c ?? 0;
+    readingCount = (healthStmts.readingCount.get() as { c: number } | undefined)?.c ?? 0;
   } catch (err) {
     dbHealthy = false;
     const errorObj = err instanceof Error ? err : new Error(String(err));
-    logger.error('Health check database query failed', errorObj);
+    logger.warn('Health check database query failed', { message: errorObj.message, stack: errorObj.stack });
   }
 
   res.json({
@@ -220,7 +228,7 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const errorObj = err instanceof Error ? err : new Error(String(err));
-  (logger.error as (msg: unknown, meta?: object) => void)(errorObj, { url: req.path, method: req.method });
+  logger.error(errorObj.message, { stack: errorObj.stack, url: req.path, method: req.method });
   if (res.headersSent) {
     next(err);
     return;
