@@ -76,7 +76,10 @@ app.use(morgan<express.Request, express.Response>(
   ':method :pathOnly :status :response-time ms - :res[content-length]',
   {
     stream: morganStream,
-    skip: (req) => req.path === '/api/health' || req.path.startsWith('/api/health/'),
+    skip: (req) => {
+      const p = req.path;
+      return p === '/api/health' || p === '/api/health/detail';
+    },
   },
 ));
 
@@ -127,7 +130,7 @@ app.get('/api/health/detail', (_req, res) => {
     userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number } | undefined)?.c ?? 0;
     readingCount = (db.prepare('SELECT COUNT(*) as c FROM readings').get() as { c: number } | undefined)?.c ?? 0;
   } catch (err) {
-    logger.error('Health check database query failed', { error: err });
+    logger.error('Health check database query failed', { error: err instanceof Error ? err : new Error(String(err)) });
   }
 
   res.json({
@@ -229,7 +232,8 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 // 프로덕션에서 기본 JWT 시크릿 검증
 if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-production') {
   logger.error('FATAL: Default JWT secret in production');
-  process.exit(1);
+  logger.on('finish', () => process.exit(1));
+  logger.end();
 }
 
 // 서버 시작

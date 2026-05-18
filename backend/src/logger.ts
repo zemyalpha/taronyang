@@ -51,6 +51,12 @@ export const logger = winston.createLogger({
   format: commonFormat,
   defaultMeta: { service: 'taronyang' },
   transports,
+  exceptionHandlers: [
+    new winston.transports.File({ filename: path.join(logDir, 'exceptions.log') }),
+  ],
+  rejectionHandlers: [
+    new winston.transports.File({ filename: path.join(logDir, 'rejections.log') }),
+  ],
 });
 
 export const morganStream = {
