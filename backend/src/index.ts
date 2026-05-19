@@ -94,7 +94,7 @@ app.use('/api', (req, res, next) => {
     if (duration > config.slowApiThreshold) {
       logger.warn('Slow API response', {
         method: req.method,
-        url: req.originalUrl.split('?')[0],
+        url: req.baseUrl + req.path,
         status: res.statusCode,
         duration_ms: duration,
       });
@@ -141,7 +141,7 @@ app.get('/api/health/detail', (_req, res) => {
   } catch (err) {
     dbHealthy = false;
     const errorObj = err instanceof Error ? err : new Error(String(err));
-    logger.warn('Health check database query failed', { error: errorObj.message, stack: errorObj.stack });
+    logger.warn('Health check database query failed', { err: errorObj });
   }
 
   res.json({
@@ -228,7 +228,7 @@ if (config.sentryDsn) {
 // 전역 에러 핸들러
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const errorObj = err instanceof Error ? err : new Error(String(err));
-  logger.error(errorObj.message, { stack: errorObj.stack, url: req.path, method: req.method });
+  logger.error(errorObj.message, { err: errorObj, url: req.originalUrl.split('?')[0], method: req.method });
   if (res.headersSent) {
     next(err);
     return;
@@ -245,6 +245,7 @@ if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-produc
   logger.error('FATAL: Default JWT secret in production');
   logger.on('finish', () => process.exit(1));
   logger.end();
+  setTimeout(() => process.exit(1), 1000).unref();
 }
 
 // 서버 시작
