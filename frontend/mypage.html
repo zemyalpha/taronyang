@@ -127,9 +127,13 @@
         const headers = { 'Authorization': 'Bearer ' + token };
 
         function escapeHtml(str) {
-            const d = document.createElement('div');
-            d.textContent = str ?? '';
-            return d.innerHTML;
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         let toastTimeout;
@@ -169,7 +173,9 @@
                 const data = await res.json();
                 document.getElementById('notify_enabled').checked = data.daily_email !== false;
                 document.getElementById('notify_time').value = data.notify_time || '07:00';
-                document.getElementById('zodiac_sign').value = data.zodiac_sign || document.getElementById('zodiac_sign').value;
+                if (data.zodiac_sign) {
+                    document.getElementById('zodiac_sign').value = data.zodiac_sign;
+                }
             } catch(e) { console.error(e); }
         }
 

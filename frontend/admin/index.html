@@ -122,12 +122,18 @@
         async function loadUsers() {
             try {
                 const res = await fetch('/api/admin/users?limit=50', { headers });
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/';
+                    }
+                    return;
+                }
                 const data = await res.json();
                 document.getElementById('users-table').innerHTML = data.users.map(u => `
                     <tr class="border-b border-lavender/10">
                         <td class="py-2">${escapeHtml(u.email || '-')}</td>
                         <td>${escapeHtml(u.nickname || '')}</td>
-                        <td class="text-gray-400">${new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
+                        <td class="text-gray-400">${u.created_at ? new Date(u.created_at).toLocaleDateString('ko-KR') : '-'}</td>
                         <td>${u.subscription_status === 'premium' ? '<span class="text-lavender">💎</span>' : '<span class="text-gray-500">무료</span>'}</td>
                     </tr>
                 `).join('');
@@ -137,14 +143,20 @@
         async function loadReadings() {
             try {
                 const res = await fetch('/api/admin/readings?limit=50', { headers });
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/';
+                    }
+                    return;
+                }
                 const data = await res.json();
-                const catEmoji = { love: '💕', money: '💰', career: '💼', general: '🌟' };
+                const catEmoji = { love: '💕', money: '💰', career: '💼', general: '🌟', newyear: '🎊', compatibility: '💑' };
                 document.getElementById('readings-table').innerHTML = data.readings.map(r => `
                     <tr class="border-b border-lavender/10">
                         <td class="py-2">${catEmoji[r.category] || '🌟'} ${escapeHtml(r.category)}</td>
                         <td class="text-gray-400">${escapeHtml(r.email || '비회원')}</td>
                         <td class="truncate max-w-xs">${escapeHtml(r.question || '-')}</td>
-                        <td class="text-gray-400">${new Date(r.created_at).toLocaleDateString('ko-KR')}</td>
+                        <td class="text-gray-400">${r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '-'}</td>
                     </tr>
                 `).join('');
             } catch (e) {}

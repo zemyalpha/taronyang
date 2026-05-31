@@ -52,9 +52,13 @@
 
     <script>
         function escapeHtml(str) {
-            const d = document.createElement('div');
-            d.textContent = str ?? '';
-            return d.innerHTML;
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         async function loadReadings() {
@@ -84,12 +88,13 @@
                     return;
                 }
 
-                const catEmoji = { love: '💕', money: '💰', career: '💼', general: '🌟' };
+                const catLabels = { love: '연애', money: '재물', career: '진로', general: '종합', newyear: '신년운', compatibility: '궁합' };
+                const catEmoji = { love: '💕', money: '💰', career: '💼', general: '🌟', newyear: '🎊', compatibility: '💑' };
                 const list = document.getElementById('readings-list');
                 list.innerHTML = readings.map(r => `
                     <div class="bg-dark-purple/60 border border-lavender/15 rounded-2xl p-5">
                         <div class="flex justify-between items-start mb-2">
-                            <span class="text-lg">${catEmoji[r.category] || '🌟'} ${escapeHtml(r.category)}</span>
+                            <span class="text-lg">${catEmoji[r.category] || '🌟'} ${escapeHtml(catLabels[r.category] || r.category)}</span>
                             <span class="text-xs text-gray-500">${r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : ''}</span>
                         </div>
                         ${r.question ? `<p class="text-sm text-gray-400 mb-2">Q: ${escapeHtml(r.question)}</p>` : ''}
