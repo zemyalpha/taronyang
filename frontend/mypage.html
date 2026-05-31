@@ -1,202 +1,299 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>마이페이지 — 타로냥</title>
-<link rel="stylesheet" href="/static/css/style.css">
-<style>
-.profile-card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
-.profile-card h3 { color: #e94560; margin: 0 0 16px; }
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; color: #aaa; font-size: 13px; margin-bottom: 6px; }
-.form-group input, .form-group select {
-  width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px; color: #eee; font-size: 15px; box-sizing: border-box;
-}
-.btn-save {
-  background: #e94560; color: #fff; border: none; padding: 12px 30px; border-radius: 8px;
-  font-size: 15px; cursor: pointer; transition: opacity 0.2s;
-}
-.btn-save:hover { opacity: 0.85; }
-.history-item { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-.history-item .date { color: #888; font-size: 12px; }
-.history-item .category { color: #e94560; font-size: 13px; }
-.toggle-switch { position: relative; width: 48px; height: 26px; display: inline-block; }
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.toggle-switch .slider {
-  position: absolute; inset: 0; background: #444; border-radius: 26px; cursor: pointer; transition: 0.3s;
-}
-.toggle-switch .slider:before {
-  content: ""; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px;
-  background: #fff; border-radius: 50%; transition: 0.3s;
-}
-.toggle-switch input:checked + .slider { background: #e94560; }
-.toggle-switch input:checked + .slider:before { transform: translateX(22px); }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 — 타로냥</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: { navy: '#0a0a2e', 'dark-purple': '#1a1a3e', lavender: '#a78bfa', gold: '#fbbf24' },
+                fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Noto Sans KR', 'sans-serif'] }
+            }}
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body>
-<div class="container" style="max-width:600px; margin:0 auto; padding:20px;">
-  <a href="/" style="color:#aaa; text-decoration:none; font-size:14px;">← 홈으로</a>
-  <h1 style="color:#eee; margin:20px 0;">🐱 마이페이지</h1>
+<body class="bg-navy text-gray-100 font-sans min-h-screen">
 
-  <div class="profile-card">
-    <h3>프로필</h3>
-    <div class="form-group">
-      <label>이메일</label>
-      <input type="email" id="email" disabled>
-    </div>
-    <div class="form-group">
-      <label>닉네임</label>
-      <input type="text" id="nickname" placeholder="닉네임을 입력하세요">
-    </div>
-    <div class="form-group">
-      <label>별자리</label>
-      <select id="zodiac_sign">
-        <option value="">선택하세요</option>
-        <option value="양자리">♈ 양자리 (3/21~4/19)</option>
-        <option value="황소자리">♉ 황소자리 (4/20~5/20)</option>
-        <option value="쌍둥이자리">♊ 쌍둥이자리 (5/21~6/21)</option>
-        <option value="게자리">♋ 게자리 (6/22~7/22)</option>
-        <option value="사자자리">♌ 사자자리 (7/23~8/22)</option>
-        <option value="처녀자리">♍ 처녀자리 (8/23~9/23)</option>
-        <option value="천칭자리">♎ 천칭자리 (9/24~10/22)</option>
-        <option value="전갈자리">♏ 전갈자리 (10/23~11/22)</option>
-        <option value="사수자리">♐ 사수자리 (11/23~12/24)</option>
-        <option value="염소자리">♑ 염소자리 (12/25~1/19)</option>
-        <option value="물병자리">♒ 물병자리 (1/20~2/18)</option>
-        <option value="물고기자리">♓ 물고기자리 (2/19~3/20)</option>
-      </select>
-    </div>
-    <button class="btn-save" onclick="saveProfile()">저장</button>
-  </div>
+    <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
+            <div class="flex items-center gap-4 text-sm">
+                <a href="/" class="text-gray-400 hover:text-lavender transition">← 홈으로</a>
+                <a href="/pricing" class="text-gray-400 hover:text-lavender transition">요금제</a>
+            </div>
+        </div>
+    </nav>
 
-  <div class="profile-card">
-    <h3>📧 일운 알림</h3>
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-      <label class="toggle-switch">
-        <input type="checkbox" id="notify_enabled" checked>
-        <span class="slider"></span>
-      </label>
-      <span style="color:#eee;">매일 아침 운세 이메일 받기</span>
-    </div>
-    <div class="form-group">
-      <label>발송 시간</label>
-      <select id="notify_time">
-        <option value="06:00">오전 6시</option>
-        <option value="07:00" selected>오전 7시</option>
-        <option value="08:00">오전 8시</option>
-        <option value="09:00">오전 9시</option>
-      </select>
-    </div>
-    <button class="btn-save" onclick="saveNotification()">알림 설정 저장</button>
-  </div>
+    <main class="pt-20 pb-10 px-4 max-w-xl mx-auto">
+        <h1 class="font-serif text-2xl text-center text-lavender mb-8">🐱 마이페이지</h1>
 
-  <div class="profile-card">
-    <h3>💎 구독 상태</h3>
-    <p id="plan_status" style="color:#eee; font-size:16px;">로딩 중...</p>
-    <button class="btn-save" id="premium_btn" style="display:none; margin-top:12px;" onclick="location.href='/'">
-      프리미엄 구독하기
-    </button>
-  </div>
+        <div class="space-y-6">
+            <section class="bg-dark-purple/60 border border-lavender/15 rounded-2xl p-6">
+                <h3 class="font-serif text-lg text-lavender mb-4">프로필</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-400 text-xs mb-1">이메일</label>
+                        <input type="email" id="email" disabled class="w-full bg-dark-purple/80 border border-lavender/15 rounded-xl px-4 py-3 text-gray-400 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-xs mb-1">닉네임</label>
+                        <input type="text" id="nickname" placeholder="닉네임을 입력하세요" class="w-full bg-dark-purple/80 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-xs mb-1">별자리</label>
+                        <select id="zodiac_sign" class="w-full bg-dark-purple/80 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 focus:border-lavender/60 focus:outline-none">
+                            <option value="">선택하세요</option>
+                            <option value="양자리">♈ 양자리 (3/21~4/19)</option>
+                            <option value="황소자리">♉ 황소자리 (4/20~5/20)</option>
+                            <option value="쌍둥이자리">♊ 쌍둥이자리 (5/21~6/21)</option>
+                            <option value="게자리">♋ 게자리 (6/22~7/22)</option>
+                            <option value="사자자리">♌ 사자자리 (7/23~8/22)</option>
+                            <option value="처녀자리">♍ 처녀자리 (8/23~9/23)</option>
+                            <option value="천칭자리">♎ 천칭자리 (9/24~10/22)</option>
+                            <option value="전갈자리">♏ 전갈자리 (10/23~11/22)</option>
+                            <option value="사수자리">♐ 사수자리 (11/23~12/24)</option>
+                            <option value="염소자리">♑ 염소자리 (12/25~1/19)</option>
+                            <option value="물병자리">♒ 물병자리 (1/20~2/18)</option>
+                            <option value="물고기자리">♓ 물고기자리 (2/19~3/20)</option>
+                        </select>
+                    </div>
+                    <button onclick="saveProfile()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">저장</button>
+                </div>
+            </section>
 
-  <div class="profile-card">
-    <h3>📜 상담 기록</h3>
-    <div id="history_list">
-      <p style="color:#888;">상담 기록이 없습니다</p>
-    </div>
-  </div>
-</div>
+            <section class="bg-dark-purple/60 border border-lavender/15 rounded-2xl p-6">
+                <h3 class="font-serif text-lg text-lavender mb-4">📧 일운 알림</h3>
+                <div class="flex items-center gap-3 mb-4">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notify_enabled" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="text-gray-200 text-sm">매일 아침 운세 이메일 받기</span>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-xs mb-1">발송 시간</label>
+                    <select id="notify_time" class="w-full bg-dark-purple/80 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 focus:border-lavender/60 focus:outline-none">
+                        <option value="06:00">오전 6시</option>
+                        <option value="07:00" selected>오전 7시</option>
+                        <option value="08:00">오전 8시</option>
+                        <option value="09:00">오전 9시</option>
+                    </select>
+                </div>
+                <button onclick="saveNotification()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">알림 설정 저장</button>
+            </section>
 
-<script>
-const API = window.location.origin + '/api';
-const token = localStorage.getItem('token');
-if (!token) { alert('로그인이 필요합니다'); location.href = '/'; }
-const headers = { 'Authorization': 'Bearer ' + token };
+            <section class="bg-dark-purple/60 border border-lavender/15 rounded-2xl p-6">
+                <h3 class="font-serif text-lg text-lavender mb-4">💎 구독 상태</h3>
+                <p id="plan_status" class="text-gray-200 mb-3">로딩 중...</p>
+                <button id="premium_btn" class="hidden w-full py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition" onclick="location.href='/pricing'">
+                    프리미엄 구독하기 ✨
+                </button>
+            </section>
 
-async function loadProfile() {
-  try {
-    const res = await fetch(API + '/auth/me', { headers });
-    if (!res.ok) throw new Error();
-    const user = await res.json();
-    document.getElementById('email').value = user.email || '';
-    document.getElementById('nickname').value = user.nickname || '';
-    document.getElementById('zodiac_sign').value = user.zodiac_sign || '';
-  } catch { localStorage.removeItem('token'); location.href = '/'; }
-}
+            <section class="bg-dark-purple/60 border border-lavender/15 rounded-2xl p-6">
+                <h3 class="font-serif text-lg text-lavender mb-4">📜 상담 기록</h3>
+                <div id="history_list">
+                    <p class="text-gray-500 text-sm">상담 기록이 없습니다</p>
+                </div>
+            </section>
+        </div>
 
-async function loadNotifications() {
-  try {
-    const res = await fetch(API + '/notifications/settings', { headers });
-    const data = await res.json();
-    document.getElementById('notify_enabled').checked = data.daily_email !== false;
-    document.getElementById('notify_time').value = data.notify_time || '07:00';
-    document.getElementById('zodiac_sign').value = data.zodiac_sign || document.getElementById('zodiac_sign').value;
-  } catch(e) { console.error(e); }
-}
+        <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
+    </main>
 
-async function loadSubscription() {
-  try {
-    const res = await fetch(API + '/payment/status', { headers });
-    const data = await res.json();
-    const el = document.getElementById('plan_status');
-    if (data.status === 'premium') {
-      el.textContent = '💎 프리미엄 구독 중';
-      el.style.color = '#FFD700';
-    } else {
-      el.textContent = '🆓 무료 플랜';
-      document.getElementById('premium_btn').style.display = 'inline-block';
-    }
-  } catch(e) { console.error(e); }
-}
+    <style>
+        .toggle-switch { position: relative; width: 48px; height: 26px; display: inline-block; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-switch .slider {
+            position: absolute; inset: 0; background: #444; border-radius: 26px; cursor: pointer; transition: 0.3s;
+        }
+        .toggle-switch .slider:before {
+            content: ""; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px;
+            background: #fff; border-radius: 50%; transition: 0.3s;
+        }
+        .toggle-switch input:checked + .slider { background: #a78bfa; }
+        .toggle-switch input:checked + .slider:before { transform: translateX(22px); }
+    </style>
 
-async function loadHistory() {
-  try {
-    const res = await fetch(API + '/readings', { headers });
-    const readings = await res.json();
-    const list = document.getElementById('history_list');
-    if (!readings || !readings.length) {
-      list.innerHTML = '<p style="color:#888;">상담 기록이 없습니다</p>';
-      return;
-    }
-    list.innerHTML = readings.map(r => `
-      <div class="history-item">
-        <div class="category">${r.category}</div>
-        <div class="date">${new Date(r.created_at).toLocaleDateString('ko-KR')}</div>
-        <p style="color:#ddd; font-size:14px; margin:8px 0 0;">${r.question || '(질문 없음)'}</p>
-      </div>
-    `).join('');
-  } catch(e) { console.error(e); }
-}
+    <script>
+        const API = window.location.origin + '/api';
+        const token = localStorage.getItem('token');
+        if (!token) { location.href = '/login'; }
+        const headers = { 'Authorization': 'Bearer ' + token };
 
-async function saveProfile() {
-  const zodiac = document.getElementById('zodiac_sign').value;
-  if (zodiac) {
-    await fetch(API + '/notifications/zodiac', {
-      method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ zodiac_sign: zodiac })
-    });
-  }
-  alert('저장되었습니다! ✅');
-}
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
-async function saveNotification() {
-  await fetch(API + '/notifications/settings', {
-    method: 'PUT',
-    headers: { ...headers, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      daily_email: document.getElementById('notify_enabled').checked,
-      notify_time: document.getElementById('notify_time').value,
-      notify_channel: 'email'
-    })
-  });
-  alert('알림 설정이 저장되었습니다! 🔔');
-}
+        let toastTimeout;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.remove('opacity-0', 'pointer-events-none');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
+        }
 
-loadProfile();
-loadNotifications();
-loadSubscription();
-loadHistory();
-</script>
+        async function loadProfile() {
+            try {
+                const res = await fetch(API + '/auth/me', { headers });
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem('token');
+                        location.href = '/login';
+                    } else {
+                        showToast('프로필을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+                    }
+                    return;
+                }
+                const user = await res.json();
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('nickname').value = user.nickname || '';
+                document.getElementById('zodiac_sign').value = user.zodiac_sign || '';
+            } catch {
+                showToast('네트워크 연결 상태를 확인해주세요.');
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const res = await fetch(API + '/notifications/settings', { headers });
+                if (!res.ok) return;
+                const data = await res.json();
+                document.getElementById('notify_enabled').checked = data.daily_email !== false;
+                document.getElementById('notify_time').value = data.notify_time || '07:00';
+                if (data.zodiac_sign) {
+                    document.getElementById('zodiac_sign').value = data.zodiac_sign;
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadSubscription() {
+            const el = document.getElementById('plan_status');
+            try {
+                const res = await fetch(API + '/payment/status', { headers });
+                if (!res.ok) {
+                    el.textContent = '⚠️ 구독 정보를 불러올 수 없습니다';
+                    return;
+                }
+                const data = await res.json();
+                if (data.status === 'premium') {
+                    el.innerHTML = '<span class="text-gold font-bold">💎 프리미엄 구독 중</span>';
+                } else {
+                    el.textContent = '🆓 무료 플랜';
+                    document.getElementById('premium_btn').classList.remove('hidden');
+                }
+            } catch(e) {
+                console.error(e);
+                el.textContent = '⚠️ 구독 정보를 불러올 수 없습니다';
+            }
+        }
+
+        async function loadHistory() {
+            const list = document.getElementById('history_list');
+            try {
+                const res = await fetch(API + '/readings', { headers });
+                if (!res.ok) {
+                    list.innerHTML = '<p class="text-red-400 text-sm">상담 기록을 불러오지 못했습니다</p>';
+                    return;
+                }
+                const readings = await res.json();
+                if (!readings || !readings.length) {
+                    list.innerHTML = '<p class="text-gray-500 text-sm">상담 기록이 없습니다</p>';
+                    return;
+                }
+                const catMap = {
+                    love: '💕 연애', money: '💰 재물', career: '💼 진로',
+                    general: '🌟 종합', newyear: '🎊 신년운', compatibility: '💑 궁합'
+                };
+                list.innerHTML = readings.map(r => {
+                    const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '';
+                    return `
+                    <div class="bg-dark-purple/40 border border-lavender/10 rounded-xl p-4 mb-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-lavender text-xs font-bold">${catMap[r.category] || '🌟 ' + escapeHtml(r.category)}</span>
+                            <span class="text-gray-500 text-xs">${dateStr}</span>
+                        </div>
+                        <p class="text-gray-300 text-sm">${escapeHtml(r.question || '(질문 없음)')}</p>
+                    </div>`;
+                }).join('');
+            } catch(e) {
+                console.error(e);
+                list.innerHTML = '<p class="text-red-400 text-sm">상담 기록을 불러오지 못했습니다</p>';
+            }
+        }
+
+        async function saveProfile() {
+            try {
+                const nickname = document.getElementById('nickname').value.trim();
+                const zodiac = document.getElementById('zodiac_sign').value;
+
+                if (!nickname) {
+                    showToast('닉네임을 입력해주세요 🐱');
+                    return;
+                }
+
+                const res = await fetch(API + '/auth/me', {
+                    method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nickname })
+                });
+                if (!res.ok) throw new Error('닉네임 저장 실패');
+
+                try {
+                    const stored = JSON.parse(localStorage.getItem('user') || '{}');
+                    stored.nickname = nickname;
+                    localStorage.setItem('user', JSON.stringify(stored));
+                } catch {}
+
+                if (zodiac !== undefined && zodiac !== null) {
+                    const zodiacRes = await fetch(API + '/notifications/zodiac', {
+                        method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ zodiac_sign: zodiac })
+                    });
+                    if (!zodiacRes.ok) throw new Error('별자리 저장 실패');
+                }
+
+                showToast('저장되었습니다! ✅');
+            } catch(e) {
+                showToast(e.message || '저장에 실패했습니다 😿');
+            }
+        }
+
+        async function saveNotification() {
+            try {
+                const res = await fetch(API + '/notifications/settings', {
+                    method: 'PUT',
+                    headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        daily_email: document.getElementById('notify_enabled').checked,
+                        notify_time: document.getElementById('notify_time').value,
+                        notify_channel: 'email'
+                    })
+                });
+                if (!res.ok) throw new Error();
+                showToast('알림 설정이 저장되었습니다! 🔔');
+            } catch(e) {
+                showToast('알림 설정 저장에 실패했습니다 😿');
+            }
+        }
+
+        if (token) {
+            loadProfile();
+            loadNotifications();
+            loadSubscription();
+            loadHistory();
+        }
+    </script>
 </body>
 </html>

@@ -123,9 +123,31 @@
 
     </main>
 
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
+
     <script>
-        // 상태
-        const API = '';  // 같은 origin이면 빈 문자열
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        let toastTimeout;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.remove('opacity-0', 'pointer-events-none');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
+        }
+
+        const API = '';
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
         let category = '';
         let question = '';
         let shuffledCards = [];
@@ -163,12 +185,18 @@
             selectedCards = [];
 
             try {
-                const res = await fetch(apiUrl('/api/tarot/shuffle?count=10'));
+                const res = await fetch(apiUrl('/api/tarot/shuffle?count=10'), { headers });
+                if (!res.ok) {
+                    showToast('카드를 불러오지 못했어요. 다시 시도해주세요.');
+                    showStep('question');
+                    document.getElementById('loading').classList.add('hidden');
+                    return;
+                }
                 const data = await res.json();
                 shuffledCards = data.cards;
                 renderShuffledCards();
             } catch (e) {
-                alert('카드를 불러오지 못했어요. 다시 시도해주세요.');
+                showToast('카드를 불러오지 못했어요. 다시 시도해주세요.');
                 showStep('question');
             }
             document.getElementById('loading').classList.add('hidden');
@@ -189,13 +217,13 @@
                     <div class="tarot-card-inner">
                         <div class="tarot-card-front">
                             <div class="text-3xl mb-1">🃏</div>
-                            <div class="text-xs text-lavender/60">${card.position}</div>
+                            <div class="text-xs text-lavender/60">${escapeHtml(String(card.position))}</div>
                         </div>
                         <div class="tarot-card-back">
-                            <div class="text-2xl mb-1">${card.symbol}</div>
-                            <div class="text-xs font-bold text-gold">${card.name}</div>
-                            <div class="text-xs text-gray-400">${card.name_en}</div>
-                            <div class="text-xs text-lavender/60 mt-1">${card.position}</div>
+                            <div class="text-2xl mb-1">${escapeHtml(card.symbol)}</div>
+                            <div class="text-xs font-bold text-gold">${escapeHtml(card.name)}</div>
+                            <div class="text-xs text-gray-400">${escapeHtml(card.name_en || '')}</div>
+                            <div class="text-xs text-lavender/60 mt-1">${escapeHtml(String(card.position))}</div>
                         </div>
                     </div>
                 `;
@@ -234,9 +262,14 @@
             try {
                 const res = await fetch(apiUrl('/api/tarot/read'), {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...headers },
                     body: JSON.stringify({ category, question, cards })
                 });
+                if (!res.ok) {
+                    document.getElementById('result-text').textContent = '해석을 불러오지 못했어요 😿 다시 시도해주세요.';
+                    document.getElementById('loading').classList.add('hidden');
+                    return;
+                }
                 const data = await res.json();
                 lastReading = data.interpretation;
 
@@ -245,9 +278,9 @@
                 const positions = ['과거', '현재', '미래'];
                 rc.innerHTML = data.cards.map((c, i) => `
                     <div class="text-center">
-                        <div class="text-3xl mb-1">${c.symbol}</div>
-                        <div class="text-sm font-bold text-gold">${c.name}</div>
-                        <div class="text-xs text-lavender/60">${positions[i]} · ${c.position}</div>
+                        <div class="text-3xl mb-1">${escapeHtml(c.symbol)}</div>
+                        <div class="text-sm font-bold text-gold">${escapeHtml(c.name)}</div>
+                        <div class="text-xs text-lavender/60">${positions[i]} · ${escapeHtml(String(c.position))}</div>
                     </div>
                 `).join('');
 
@@ -276,7 +309,7 @@
             try {
                 const res = await fetch(apiUrl('/api/tarot/chat'), {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...headers },
                     body: JSON.stringify({
                         category,
                         cards_summary: selectedCards.map(s => s.card.name).join(', '),
@@ -285,6 +318,10 @@
                         question: msg
                     })
                 });
+                if (!res.ok) {
+                    loadingEl.textContent = '응답을 받지 못했어요 😿';
+                    return;
+                }
                 const data = await res.json();
                 loadingEl.textContent = data.reply;
                 chatHistory.push({ role: 'assistant', content: data.reply });

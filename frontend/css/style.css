@@ -349,10 +349,157 @@ body {
     font-weight: 700;
 }
 
+/* 타로 카드 3D 애니메이션 */
+.tarot-card {
+    width: 100px;
+    height: 150px;
+    perspective: 800px;
+    cursor: pointer;
+    opacity: 0;
+    animation: cardAppear 0.4s ease forwards;
+}
+
+.tarot-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    border-radius: 12px;
+    border: 2px solid rgba(167, 139, 250, 0.2);
+    background: var(--bg-card);
+}
+
+.tarot-card:hover .tarot-card-inner {
+    transform: translateY(-6px);
+    border-color: rgba(167, 139, 250, 0.5);
+    box-shadow: 0 8px 24px rgba(167, 139, 250, 0.2);
+}
+
+.tarot-card.selected .tarot-card-inner {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.4), 0 0 32px rgba(251, 191, 36, 0.15);
+}
+
+.tarot-card.flipped .tarot-card-inner {
+    transform: rotateY(180deg);
+}
+
+.tarot-card-front,
+.tarot-card-back {
+    position: absolute;
+    inset: 0;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+}
+
+.tarot-card-front {
+    background: linear-gradient(135deg, #1a1a3e 0%, #252550 100%);
+}
+
+.tarot-card-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, #1a1a3e 0%, #2d1a4e 100%);
+}
+
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 셔플 애니메이션 */
+.shuffling .tarot-card {
+    animation: shuffleCard 0.8s ease;
+}
+
+@keyframes shuffleCard {
+    0% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-30px) rotate(-10deg); }
+    50% { transform: translateX(30px) rotate(10deg); }
+    75% { transform: translateX(-15px) rotate(-5deg); }
+    100% { transform: translateX(0) rotate(0deg); }
+}
+
+/* 로딩 도트 애니메이션 */
+.loading-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.loading-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-purple);
+    animation: loadingDot 1.2s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes loadingDot {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* 채팅 버블 */
+.chat-bubble {
+    padding: 10px 14px;
+    border-radius: 12px;
+    max-width: 80%;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.chat-bubble.user {
+    background: var(--bg-card);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    margin-left: auto;
+    text-align: right;
+}
+
+.chat-bubble.assistant {
+    background: rgba(167, 139, 250, 0.1);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    margin-right: auto;
+}
+
+/* 느린 바운스 (수정구 로딩) */
+.animate-bounce-slow {
+    animation: bounceSlow 2s ease-in-out infinite;
+}
+
+@keyframes bounceSlow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
 /* 반응형 */
 @media (max-width: 375px) {
     .hero-title { font-size: 26px; }
     .category-grid { gap: 8px; }
     .steps { grid-template-columns: repeat(2, 1fr); }
     .pricing-grid { grid-template-columns: 1fr; }
+    .tarot-card {
+        width: 80px;
+        height: 120px;
+    }
 }

@@ -18,8 +18,8 @@
 
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/static/index.html" class="text-xl font-serif font-bold text-lavender">🔮 타로냥 관리자</a>
-            <a href="/static/index.html" class="text-sm text-gray-400 hover:text-lavender transition">← 홈으로</a>
+            <a href="/" class="text-xl font-serif font-bold text-lavender">🔮 타로냥 관리자</a>
+            <a href="/" class="text-sm text-gray-400 hover:text-lavender transition">← 홈으로</a>
         </div>
     </nav>
 
@@ -87,10 +87,30 @@
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         async function loadStats() {
             try {
                 const res = await fetch('/api/admin/stats', { headers });
-                if (res.status === 403) { alert('관리자 권한이 필요합니다'); window.location.href = '/static/index.html'; return; }
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/';
+                    } else {
+                        document.getElementById('stat-users').textContent = '오류';
+                        document.getElementById('stat-premium').textContent = '오류';
+                        document.getElementById('stat-readings').textContent = '오류';
+                        document.getElementById('stat-today').textContent = '오류';
+                    }
+                    return;
+                }
                 const data = await res.json();
                 document.getElementById('stat-users').textContent = data.total_users;
                 document.getElementById('stat-premium').textContent = data.premium_users;
@@ -102,12 +122,18 @@
         async function loadUsers() {
             try {
                 const res = await fetch('/api/admin/users?limit=50', { headers });
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/';
+                    }
+                    return;
+                }
                 const data = await res.json();
                 document.getElementById('users-table').innerHTML = data.users.map(u => `
                     <tr class="border-b border-lavender/10">
-                        <td class="py-2">${u.email || '-'}</td>
-                        <td>${u.nickname}</td>
-                        <td class="text-gray-400">${new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
+                        <td class="py-2">${escapeHtml(u.email || '-')}</td>
+                        <td>${escapeHtml(u.nickname || '')}</td>
+                        <td class="text-gray-400">${u.created_at ? new Date(u.created_at).toLocaleDateString('ko-KR') : '-'}</td>
                         <td>${u.subscription_status === 'premium' ? '<span class="text-lavender">💎</span>' : '<span class="text-gray-500">무료</span>'}</td>
                     </tr>
                 `).join('');
@@ -117,14 +143,20 @@
         async function loadReadings() {
             try {
                 const res = await fetch('/api/admin/readings?limit=50', { headers });
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/';
+                    }
+                    return;
+                }
                 const data = await res.json();
-                const catEmoji = { love: '💕', money: '💰', career: '💼', general: '🌟' };
+                const catEmoji = { love: '💕', money: '💰', career: '💼', general: '🌟', newyear: '🎊', compatibility: '💑' };
                 document.getElementById('readings-table').innerHTML = data.readings.map(r => `
                     <tr class="border-b border-lavender/10">
-                        <td class="py-2">${catEmoji[r.category] || '🌟'} ${r.category}</td>
-                        <td class="text-gray-400">${r.email || '비회원'}</td>
-                        <td class="truncate max-w-xs">${r.question || '-'}</td>
-                        <td class="text-gray-400">${new Date(r.created_at).toLocaleDateString('ko-KR')}</td>
+                        <td class="py-2">${catEmoji[r.category] || '🌟'} ${escapeHtml(r.category)}</td>
+                        <td class="text-gray-400">${escapeHtml(r.email || '비회원')}</td>
+                        <td class="truncate max-w-xs">${escapeHtml(r.question || '-')}</td>
+                        <td class="text-gray-400">${r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '-'}</td>
                     </tr>
                 `).join('');
             } catch (e) {}
