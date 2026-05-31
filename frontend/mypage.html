@@ -156,7 +156,6 @@
                 const user = await res.json();
                 document.getElementById('email').value = user.email || '';
                 document.getElementById('nickname').value = user.nickname || '';
-                document.getElementById('zodiac_sign').value = user.zodiac_sign || '';
             } catch {
                 showToast('네트워크 연결 상태를 확인해주세요.');
             }
