@@ -99,11 +99,13 @@
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
 
     <script>
+        let toastTimeout;
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
         }
 
         function showTab(tab) {

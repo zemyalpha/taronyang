@@ -128,18 +128,20 @@
     <script>
         function escapeHtml(str) {
             const d = document.createElement('div');
-            d.textContent = str;
+            d.textContent = str ?? '';
             return d.innerHTML;
         }
 
+        let toastTimeout;
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
         }
 
-        const API = '';  // 같은 origin이면 빈 문자열
+        const API = '';
         let category = '';
         let question = '';
         let shuffledCards = [];
