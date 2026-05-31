@@ -189,6 +189,7 @@
                 if (!res.ok) {
                     showToast('카드를 불러오지 못했어요. 다시 시도해주세요.');
                     showStep('question');
+                    document.getElementById('loading').classList.add('hidden');
                     return;
                 }
                 const data = await res.json();
