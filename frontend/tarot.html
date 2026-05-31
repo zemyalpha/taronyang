@@ -123,8 +123,22 @@
 
     </main>
 
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
+
     <script>
-        // 상태
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
+        }
+
         const API = '';  // 같은 origin이면 빈 문자열
         let category = '';
         let question = '';
@@ -168,7 +182,7 @@
                 shuffledCards = data.cards;
                 renderShuffledCards();
             } catch (e) {
-                alert('카드를 불러오지 못했어요. 다시 시도해주세요.');
+                showToast('카드를 불러오지 못했어요. 다시 시도해주세요.');
                 showStep('question');
             }
             document.getElementById('loading').classList.add('hidden');
@@ -189,13 +203,13 @@
                     <div class="tarot-card-inner">
                         <div class="tarot-card-front">
                             <div class="text-3xl mb-1">🃏</div>
-                            <div class="text-xs text-lavender/60">${card.position}</div>
+                            <div class="text-xs text-lavender/60">${escapeHtml(String(card.position))}</div>
                         </div>
                         <div class="tarot-card-back">
-                            <div class="text-2xl mb-1">${card.symbol}</div>
-                            <div class="text-xs font-bold text-gold">${card.name}</div>
-                            <div class="text-xs text-gray-400">${card.name_en}</div>
-                            <div class="text-xs text-lavender/60 mt-1">${card.position}</div>
+                            <div class="text-2xl mb-1">${escapeHtml(card.symbol)}</div>
+                            <div class="text-xs font-bold text-gold">${escapeHtml(card.name)}</div>
+                            <div class="text-xs text-gray-400">${escapeHtml(card.name_en || '')}</div>
+                            <div class="text-xs text-lavender/60 mt-1">${escapeHtml(String(card.position))}</div>
                         </div>
                     </div>
                 `;
@@ -245,9 +259,9 @@
                 const positions = ['과거', '현재', '미래'];
                 rc.innerHTML = data.cards.map((c, i) => `
                     <div class="text-center">
-                        <div class="text-3xl mb-1">${c.symbol}</div>
-                        <div class="text-sm font-bold text-gold">${c.name}</div>
-                        <div class="text-xs text-lavender/60">${positions[i]} · ${c.position}</div>
+                        <div class="text-3xl mb-1">${escapeHtml(c.symbol)}</div>
+                        <div class="text-sm font-bold text-gold">${escapeHtml(c.name)}</div>
+                        <div class="text-xs text-lavender/60">${positions[i]} · ${escapeHtml(String(c.position))}</div>
                     </div>
                 `).join('');
 

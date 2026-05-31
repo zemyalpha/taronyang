@@ -51,6 +51,12 @@
     </main>
 
     <script>
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
         async function loadReadings() {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -79,11 +85,11 @@
                 list.innerHTML = readings.map(r => `
                     <div class="bg-dark-purple/60 border border-lavender/15 rounded-2xl p-5">
                         <div class="flex justify-between items-start mb-2">
-                            <span class="text-lg">${catEmoji[r.category] || '🌟'} ${r.category}</span>
+                            <span class="text-lg">${catEmoji[r.category] || '🌟'} ${escapeHtml(r.category)}</span>
                             <span class="text-xs text-gray-500">${new Date(r.created_at).toLocaleDateString('ko-KR')}</span>
                         </div>
-                        ${r.question ? `<p class="text-sm text-gray-400 mb-2">Q: ${r.question}</p>` : ''}
-                        <p class="text-sm text-gray-200 line-clamp-3">${r.interpretation.substring(0, 150)}...</p>
+                        ${r.question ? `<p class="text-sm text-gray-400 mb-2">Q: ${escapeHtml(r.question)}</p>` : ''}
+                        <p class="text-sm text-gray-200 line-clamp-3">${escapeHtml(r.interpretation.substring(0, 150))}...</p>
                     </div>
                 `).join('');
             } catch (e) {

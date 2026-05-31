@@ -87,6 +87,12 @@
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
         async function loadStats() {
             try {
                 const res = await fetch('/api/admin/stats', { headers });
@@ -115,8 +121,8 @@
                 const data = await res.json();
                 document.getElementById('users-table').innerHTML = data.users.map(u => `
                     <tr class="border-b border-lavender/10">
-                        <td class="py-2">${u.email || '-'}</td>
-                        <td>${u.nickname}</td>
+                        <td class="py-2">${escapeHtml(u.email || '-')}</td>
+                        <td>${escapeHtml(u.nickname || '')}</td>
                         <td class="text-gray-400">${new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
                         <td>${u.subscription_status === 'premium' ? '<span class="text-lavender">💎</span>' : '<span class="text-gray-500">무료</span>'}</td>
                     </tr>
@@ -131,9 +137,9 @@
                 const catEmoji = { love: '💕', money: '💰', career: '💼', general: '🌟' };
                 document.getElementById('readings-table').innerHTML = data.readings.map(r => `
                     <tr class="border-b border-lavender/10">
-                        <td class="py-2">${catEmoji[r.category] || '🌟'} ${r.category}</td>
-                        <td class="text-gray-400">${r.email || '비회원'}</td>
-                        <td class="truncate max-w-xs">${r.question || '-'}</td>
+                        <td class="py-2">${catEmoji[r.category] || '🌟'} ${escapeHtml(r.category)}</td>
+                        <td class="text-gray-400">${escapeHtml(r.email || '비회원')}</td>
+                        <td class="truncate max-w-xs">${escapeHtml(r.question || '-')}</td>
                         <td class="text-gray-400">${new Date(r.created_at).toLocaleDateString('ko-KR')}</td>
                     </tr>
                 `).join('');
