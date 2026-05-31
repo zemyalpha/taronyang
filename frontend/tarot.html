@@ -142,6 +142,8 @@
         }
 
         const API = '';
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
         let category = '';
         let question = '';
         let shuffledCards = [];
@@ -179,7 +181,7 @@
             selectedCards = [];
 
             try {
-                const res = await fetch(apiUrl('/api/tarot/shuffle?count=10'));
+                const res = await fetch(apiUrl('/api/tarot/shuffle?count=10'), { headers });
                 const data = await res.json();
                 shuffledCards = data.cards;
                 renderShuffledCards();
@@ -250,7 +252,7 @@
             try {
                 const res = await fetch(apiUrl('/api/tarot/read'), {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...headers },
                     body: JSON.stringify({ category, question, cards })
                 });
                 const data = await res.json();
@@ -292,7 +294,7 @@
             try {
                 const res = await fetch(apiUrl('/api/tarot/chat'), {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...headers },
                     body: JSON.stringify({
                         category,
                         cards_summary: selectedCards.map(s => s.card.name).join(', '),
