@@ -165,6 +165,7 @@
         async function loadNotifications() {
             try {
                 const res = await fetch(API + '/notifications/settings', { headers });
+                if (!res.ok) return;
                 const data = await res.json();
                 document.getElementById('notify_enabled').checked = data.daily_email !== false;
                 document.getElementById('notify_time').value = data.notify_time || '07:00';
@@ -243,13 +244,11 @@
                 });
                 if (!res.ok) throw new Error('닉네임 저장 실패');
 
-                if (zodiac) {
-                    const zodiacRes = await fetch(API + '/notifications/zodiac', {
-                        method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ zodiac_sign: zodiac })
-                    });
-                    if (!zodiacRes.ok) throw new Error('별자리 저장 실패');
-                }
+                const zodiacRes = await fetch(API + '/notifications/zodiac', {
+                    method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ zodiac_sign: zodiac })
+                });
+                if (!zodiacRes.ok) throw new Error('별자리 저장 실패');
 
                 showToast('저장되었습니다! ✅');
             } catch(e) {

@@ -156,7 +156,7 @@
                         btn.textContent = '프리미엄 시작하기 ✨';
                     }
                 } else {
-                    showToast('결제가 취소되었습니다');
+                    showToast(rsp.error_msg || '결제에 실패했습니다');
                     btn.disabled = false;
                     btn.textContent = '프리미엄 시작하기 ✨';
                 }
