@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('상담 기록 페이지', () => {
   test('페이지 로드', async ({ page }) => {
-    await page.goto('/history');
+    await page.goto('/history', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/상담 기록/);
   });
 
   test('비로그인 → 로그인 안내 표시', async ({ page }) => {
-    await page.goto('/history');
+    await page.goto('/history', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#need-login')).toBeVisible();
   });
 });
@@ -32,16 +32,16 @@ test.describe('오늘의 운세 페이지', () => {
 });
 
 test.describe('마이페이지', () => {
-  test('비로그인 → 리다이렉트', async ({ page }) => {
-    await page.goto('/mypage');
-    await page.waitForURL(/\/$/, { timeout: 5000 }).catch(() => {});
-    expect(page.url()).toMatch(/\/$/);
+  test('비로그인 → 로그인 페이지 리다이렉트', async ({ page }) => {
+    await page.goto('/mypage', { waitUntil: 'domcontentloaded' });
+    await page.waitForURL(/\/login/, { timeout: 5000 });
+    expect(page.url()).toMatch(/\/login/);
   });
 });
 
 test.describe('요금제 페이지', () => {
   test('페이지 로드', async ({ page }) => {
-    await page.goto('/pricing');
+    await page.goto('/pricing', { waitUntil: 'domcontentloaded' });
     expect(page.url()).toContain('/pricing');
   });
 });
