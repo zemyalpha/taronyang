@@ -170,24 +170,35 @@
         }
 
         async function loadSubscription() {
+            const el = document.getElementById('plan_status');
             try {
                 const res = await fetch(API + '/payment/status', { headers });
+                if (!res.ok) {
+                    el.textContent = '⚠️ 구독 정보를 불러올 수 없습니다';
+                    return;
+                }
                 const data = await res.json();
-                const el = document.getElementById('plan_status');
                 if (data.status === 'premium') {
                     el.innerHTML = '<span class="text-gold font-bold">💎 프리미엄 구독 중</span>';
                 } else {
                     el.textContent = '🆓 무료 플랜';
                     document.getElementById('premium_btn').classList.remove('hidden');
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) {
+                console.error(e);
+                el.textContent = '⚠️ 구독 정보를 불러올 수 없습니다';
+            }
         }
 
         async function loadHistory() {
+            const list = document.getElementById('history_list');
             try {
                 const res = await fetch(API + '/readings', { headers });
+                if (!res.ok) {
+                    list.innerHTML = '<p class="text-red-400 text-sm">상담 기록을 불러오지 못했습니다</p>';
+                    return;
+                }
                 const readings = await res.json();
-                const list = document.getElementById('history_list');
                 if (!readings || !readings.length) {
                     list.innerHTML = '<p class="text-gray-500 text-sm">상담 기록이 없습니다</p>';
                     return;
@@ -196,16 +207,21 @@
                     love: '💕 연애', money: '💰 재물', career: '💼 진로',
                     general: '🌟 종합', newyear: '🎊 신년운', compatibility: '💑 궁합'
                 };
-                list.innerHTML = readings.map(r => `
+                list.innerHTML = readings.map(r => {
+                    const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '';
+                    return `
                     <div class="bg-dark-purple/40 border border-lavender/10 rounded-xl p-4 mb-3">
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-lavender text-xs font-bold">${catMap[r.category] || '🌟 ' + escapeHtml(r.category)}</span>
-                            <span class="text-gray-500 text-xs">${new Date(r.created_at).toLocaleDateString('ko-KR')}</span>
+                            <span class="text-gray-500 text-xs">${dateStr}</span>
                         </div>
                         <p class="text-gray-300 text-sm">${escapeHtml(r.question || '(질문 없음)')}</p>
-                    </div>
-                `).join('');
-            } catch(e) { console.error(e); }
+                    </div>`;
+                }).join('');
+            } catch(e) {
+                console.error(e);
+                list.innerHTML = '<p class="text-red-400 text-sm">상담 기록을 불러오지 못했습니다</p>';
+            }
         }
 
         async function saveProfile() {
@@ -213,20 +229,23 @@
                 const nickname = document.getElementById('nickname').value.trim();
                 const zodiac = document.getElementById('zodiac_sign').value;
 
-                if (nickname) {
-                    const res = await fetch(API + '/auth/me', {
-                        method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ nickname })
-                    });
-                    if (!res.ok) throw new Error('닉네임 저장 실패');
+                if (!nickname) {
+                    showToast('닉네임을 입력해주세요 🐱');
+                    return;
                 }
 
+                const res = await fetch(API + '/auth/me', {
+                    method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nickname })
+                });
+                if (!res.ok) throw new Error('닉네임 저장 실패');
+
                 if (zodiac) {
-                    const res = await fetch(API + '/notifications/zodiac', {
+                    const zodiacRes = await fetch(API + '/notifications/zodiac', {
                         method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ zodiac_sign: zodiac })
                     });
-                    if (!res.ok) throw new Error('별자리 저장 실패');
+                    if (!zodiacRes.ok) throw new Error('별자리 저장 실패');
                 }
 
                 showToast('저장되었습니다! ✅');

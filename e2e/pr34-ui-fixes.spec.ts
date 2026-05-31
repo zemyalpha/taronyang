@@ -122,7 +122,7 @@ test.describe('PR #34 — 프론트엔드 UI 누락 수정', () => {
       const btn = page.locator('#btn-subscribe');
       if (await btn.isVisible()) {
         await btn.click();
-        await page.waitForTimeout(1500);
+        await expect(page.locator('#toast')).not.toHaveClass(/opacity-0/, { timeout: 5000 });
       }
     });
 
