@@ -101,6 +101,9 @@
         }
 
         function subscribe() {
+            const btn = document.getElementById('btn-subscribe');
+            if (btn.disabled) return;
+
             const token = localStorage.getItem('token');
             if (!token) {
                 showToast('로그인이 필요합니다');
@@ -114,6 +117,9 @@
                 return;
             }
             IMP.init('');  // 포트원 가맹점 식별코드 필요
+
+            btn.disabled = true;
+            btn.textContent = '결제 진행 중...';
 
             IMP.request_pay({
                 pg: 'kakaopay',
@@ -139,12 +145,18 @@
                             checkStatus();
                         } else {
                             showToast(data.detail || '결제 검증에 실패했습니다');
+                            btn.disabled = false;
+                            btn.textContent = '프리미엄 시작하기 ✨';
                         }
                     } catch (e) {
                         showToast('결제 검증 오류');
+                        btn.disabled = false;
+                        btn.textContent = '프리미엄 시작하기 ✨';
                     }
                 } else {
                     showToast('결제가 취소되었습니다');
+                    btn.disabled = false;
+                    btn.textContent = '프리미엄 시작하기 ✨';
                 }
             });
         }

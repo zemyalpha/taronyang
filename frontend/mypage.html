@@ -126,6 +126,12 @@
         if (!token) { location.href = '/login'; }
         const headers = { 'Authorization': 'Bearer ' + token };
 
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
@@ -181,43 +187,66 @@
                 list.innerHTML = readings.map(r => `
                     <div class="bg-dark-purple/40 border border-lavender/10 rounded-xl p-4 mb-3">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-lavender text-xs font-bold">${catEmoji[r.category] || '🌟'} ${r.category}</span>
+                            <span class="text-lavender text-xs font-bold">${catEmoji[r.category] || '🌟'} ${escapeHtml(r.category)}</span>
                             <span class="text-gray-500 text-xs">${new Date(r.created_at).toLocaleDateString('ko-KR')}</span>
                         </div>
-                        <p class="text-gray-300 text-sm">${r.question || '(질문 없음)'}</p>
+                        <p class="text-gray-300 text-sm">${escapeHtml(r.question || '(질문 없음)')}</p>
                     </div>
                 `).join('');
             } catch(e) { console.error(e); }
         }
 
         async function saveProfile() {
-            const zodiac = document.getElementById('zodiac_sign').value;
-            if (zodiac) {
-                await fetch(API + '/notifications/zodiac', {
-                    method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ zodiac_sign: zodiac })
-                });
+            try {
+                const nickname = document.getElementById('nickname').value.trim();
+                const zodiac = document.getElementById('zodiac_sign').value;
+
+                if (nickname) {
+                    const res = await fetch(API + '/auth/me', {
+                        method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nickname })
+                    });
+                    if (!res.ok) throw new Error('닉네임 저장 실패');
+                }
+
+                if (zodiac) {
+                    const res = await fetch(API + '/notifications/zodiac', {
+                        method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ zodiac_sign: zodiac })
+                    });
+                    if (!res.ok) throw new Error('별자리 저장 실패');
+                }
+
+                showToast('저장되었습니다! ✅');
+            } catch(e) {
+                showToast('저장에 실패했습니다 😿');
             }
-            showToast('저장되었습니다! ✅');
         }
 
         async function saveNotification() {
-            await fetch(API + '/notifications/settings', {
-                method: 'PUT',
-                headers: { ...headers, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    daily_email: document.getElementById('notify_enabled').checked,
-                    notify_time: document.getElementById('notify_time').value,
-                    notify_channel: 'email'
-                })
-            });
-            showToast('알림 설정이 저장되었습니다! 🔔');
+            try {
+                const res = await fetch(API + '/notifications/settings', {
+                    method: 'PUT',
+                    headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        daily_email: document.getElementById('notify_enabled').checked,
+                        notify_time: document.getElementById('notify_time').value,
+                        notify_channel: 'email'
+                    })
+                });
+                if (!res.ok) throw new Error();
+                showToast('알림 설정이 저장되었습니다! 🔔');
+            } catch(e) {
+                showToast('알림 설정 저장에 실패했습니다 😿');
+            }
         }
 
-        loadProfile();
-        loadNotifications();
-        loadSubscription();
-        loadHistory();
+        if (token) {
+            loadProfile();
+            loadNotifications();
+            loadSubscription();
+            loadHistory();
+        }
     </script>
 </body>
 </html>

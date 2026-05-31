@@ -494,7 +494,7 @@ body {
 @media (max-width: 375px) {
     .hero-title { font-size: 26px; }
     .category-grid { gap: 8px; }
-    .steps { grid-template-columns: repeat(2, 2fr); }
+    .steps { grid-template-columns: repeat(2, 1fr); }
     .pricing-grid { grid-template-columns: 1fr; }
     .tarot-card {
         width: 80px;
