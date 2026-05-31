@@ -21,8 +21,8 @@
 
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/static/index.html" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
-            <a href="/static/mypage.html" class="text-sm text-gray-400 hover:text-lavender transition">마이페이지</a>
+            <a href="/" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
+            <a href="/mypage" class="text-sm text-gray-400 hover:text-lavender transition">마이페이지</a>
         </div>
     </nav>
 
@@ -69,7 +69,15 @@
     </main>
 
     <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
     <script>
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
+        }
+
         async function checkStatus() {
             const token = localStorage.getItem('token');
             if (!token) return;
@@ -95,14 +103,14 @@
         function subscribe() {
             const token = localStorage.getItem('token');
             if (!token) {
-                alert('로그인이 필요합니다');
-                window.location.href = '/static/login.html';
+                showToast('로그인이 필요합니다');
+                setTimeout(() => window.location.href = '/login', 1000);
                 return;
             }
 
             const IMP = window.IMP;
             if (!IMP) {
-                alert('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+                showToast('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');
                 return;
             }
             IMP.init('');  // 포트원 가맹점 식별코드 필요
@@ -127,16 +135,16 @@
                         });
                         const data = await res.json();
                         if (res.ok) {
-                            alert('프리미엄이 활성화되었습니다! ✨');
+                            showToast('프리미엄이 활성화되었습니다! ✨');
                             checkStatus();
                         } else {
-                            alert(data.detail || '결제 검증에 실패했습니다');
+                            showToast(data.detail || '결제 검증에 실패했습니다');
                         }
                     } catch (e) {
-                        alert('결제 검증 오류');
+                        showToast('결제 검증 오류');
                     }
                 } else {
-                    alert('결제가 취소되었습니다');
+                    showToast('결제가 취소되었습니다');
                 }
             });
         }

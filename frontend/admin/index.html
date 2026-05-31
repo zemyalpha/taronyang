@@ -18,8 +18,8 @@
 
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/static/index.html" class="text-xl font-serif font-bold text-lavender">🔮 타로냥 관리자</a>
-            <a href="/static/index.html" class="text-sm text-gray-400 hover:text-lavender transition">← 홈으로</a>
+            <a href="/" class="text-xl font-serif font-bold text-lavender">🔮 타로냥 관리자</a>
+            <a href="/" class="text-sm text-gray-400 hover:text-lavender transition">← 홈으로</a>
         </div>
     </nav>
 
@@ -90,7 +90,7 @@
         async function loadStats() {
             try {
                 const res = await fetch('/api/admin/stats', { headers });
-                if (res.status === 403) { alert('관리자 권한이 필요합니다'); window.location.href = '/static/index.html'; return; }
+                if (res.status === 403) { window.location.href = '/'; return; }
                 const data = await res.json();
                 document.getElementById('stat-users').textContent = data.total_users;
                 document.getElementById('stat-premium').textContent = data.premium_users;
