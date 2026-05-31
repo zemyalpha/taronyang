@@ -106,6 +106,7 @@
 
             const token = localStorage.getItem('token');
             if (!token) {
+                btn.disabled = true;
                 showToast('로그인이 필요합니다');
                 setTimeout(() => window.location.href = '/login', 1000);
                 return;

@@ -142,11 +142,21 @@
         async function loadProfile() {
             try {
                 const res = await fetch(API + '/auth/me', { headers });
-                if (!res.ok) throw new Error();
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem('token');
+                        location.href = '/login';
+                    } else {
+                        showToast('프로필을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+                    }
+                    return;
+                }
                 const user = await res.json();
                 document.getElementById('email').value = user.email || '';
                 document.getElementById('nickname').value = user.nickname || '';
-            } catch { localStorage.removeItem('token'); location.href = '/login'; }
+            } catch {
+                showToast('네트워크 연결 상태를 확인해주세요.');
+            }
         }
 
         async function loadNotifications() {
