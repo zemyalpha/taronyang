@@ -182,6 +182,11 @@
 
             try {
                 const res = await fetch(apiUrl('/api/tarot/shuffle?count=10'), { headers });
+                if (!res.ok) {
+                    showToast('카드를 불러오지 못했어요. 다시 시도해주세요.');
+                    showStep('question');
+                    return;
+                }
                 const data = await res.json();
                 shuffledCards = data.cards;
                 renderShuffledCards();
@@ -255,6 +260,10 @@
                     headers: { 'Content-Type': 'application/json', ...headers },
                     body: JSON.stringify({ category, question, cards })
                 });
+                if (!res.ok) {
+                    document.getElementById('result-text').textContent = '해석을 불러오지 못했어요 😿 다시 시도해주세요.';
+                    return;
+                }
                 const data = await res.json();
                 lastReading = data.interpretation;
 
@@ -303,6 +312,10 @@
                         question: msg
                     })
                 });
+                if (!res.ok) {
+                    loadingEl.textContent = '응답을 받지 못했어요 😿';
+                    return;
+                }
                 const data = await res.json();
                 loadingEl.textContent = data.reply;
                 chatHistory.push({ role: 'assistant', content: data.reply });

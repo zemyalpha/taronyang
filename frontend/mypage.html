@@ -249,7 +249,7 @@
                     localStorage.setItem('user', JSON.stringify(stored));
                 } catch {}
 
-                if (zodiac) {
+                if (zodiac !== undefined && zodiac !== null) {
                     const zodiacRes = await fetch(API + '/notifications/zodiac', {
                         method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ zodiac_sign: zodiac })
