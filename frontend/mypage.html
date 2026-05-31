@@ -244,6 +244,12 @@
                 });
                 if (!res.ok) throw new Error('닉네임 저장 실패');
 
+                try {
+                    const stored = JSON.parse(localStorage.getItem('user') || '{}');
+                    stored.nickname = nickname;
+                    localStorage.setItem('user', JSON.stringify(stored));
+                } catch {}
+
                 if (zodiac) {
                     const zodiacRes = await fetch(API + '/notifications/zodiac', {
                         method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
