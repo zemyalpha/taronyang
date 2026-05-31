@@ -71,11 +71,13 @@
     <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
     <script>
+        let toastTimeout;
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
         }
 
         async function checkStatus() {
@@ -106,7 +108,6 @@
 
             const token = localStorage.getItem('token');
             if (!token) {
-                btn.disabled = true;
                 showToast('로그인이 필요합니다');
                 setTimeout(() => window.location.href = '/login', 1000);
                 return;

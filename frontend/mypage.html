@@ -132,11 +132,13 @@
             return d.innerHTML;
         }
 
+        let toastTimeout;
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
         }
 
         async function loadProfile() {
@@ -154,6 +156,7 @@
                 const user = await res.json();
                 document.getElementById('email').value = user.email || '';
                 document.getElementById('nickname').value = user.nickname || '';
+                document.getElementById('zodiac_sign').value = user.zodiac_sign || '';
             } catch {
                 showToast('네트워크 연결 상태를 확인해주세요.');
             }
