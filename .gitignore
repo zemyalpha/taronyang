@@ -18,6 +18,10 @@ Thumbs.db
 # Node
 node_modules/
 
+# Coverage
+coverage/
+backend/coverage/
+
 # Logs
 *.log
 node_modules/
