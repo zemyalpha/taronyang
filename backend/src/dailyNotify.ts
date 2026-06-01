@@ -67,10 +67,20 @@ export async function generateAllHoroscopes(): Promise<Record<string, string>> {
   return Object.fromEntries(entries);
 }
 
-/** 이메일 HTML 템플릿 */
+function escapeHtml(str: string): string {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string): string {
   const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-  const horoscopeHtml = horoscope.replace(/\n/g, '<br>');
+  const safeNickname = escapeHtml(nickname);
+  const safeZodiac = escapeHtml(zodiacSign);
+  const horoscopeHtml = escapeHtml(horoscope).replace(/\n/g, '<br>');
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
@@ -84,8 +94,8 @@ function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string)
   </tr>
   <tr>
     <td style="padding:30px; color:#eee;">
-      <p style="font-size:18px; margin:0 0 5px;">${nickname}님, 안녕하세요! 🐱</p>
-      <p style="color:#aaa; font-size:13px; margin:0 0 20px;">${today} · ${zodiacSign}</p>
+      <p style="font-size:18px; margin:0 0 5px;">${safeNickname}님, 안녕하세요! 🐱</p>
+      <p style="color:#aaa; font-size:13px; margin:0 0 20px;">${today} · ${safeZodiac}</p>
       <div style="background:#0f3460; border-radius:8px; padding:20px; line-height:1.8; font-size:15px;">
         ${horoscopeHtml}
       </div>

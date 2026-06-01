@@ -49,7 +49,7 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
       res.status(400).json({ detail: '결제가 완료되지 않았습니다' });
       return;
     }
-    if (payData.response.amount !== config.premiumPrice) {
+    if (Number(payData.response.amount) !== Number(config.premiumPrice)) {
       res.status(400).json({ detail: `결제 금액 불일치: ${payData.response.amount} != ${config.premiumPrice}` });
       return;
     }
@@ -75,16 +75,18 @@ paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {
   }
 
   let status = user.subscription_status;
+  let expiresAt: string | null = user.subscription_expires_at;
   if (status === 'premium' && user.subscription_expires_at) {
     if (new Date(user.subscription_expires_at) < new Date()) {
       const db = getDb();
       db.prepare("UPDATE users SET subscription_status = 'free', subscription_expires_at = NULL WHERE id = ?")
         .run(user.id);
       status = 'free';
+      expiresAt = null;
     }
   }
 
-  res.json({ status, expires_at: user.subscription_expires_at });
+  res.json({ status, expires_at: expiresAt });
 });
 
 /** 구독 취소 */

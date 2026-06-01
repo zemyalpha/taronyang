@@ -68,6 +68,10 @@ authRouter.post('/signup', (req: Request, res: Response) => {
     res.status(400).json({ detail: '이메일과 비밀번호를 입력해주세요' });
     return;
   }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    res.status(400).json({ detail: '올바른 이메일 형식이 아닙니다' });
+    return;
+  }
   if (password.length < 6) {
     res.status(400).json({ detail: '비밀번호는 6자 이상이어야 합니다' });
     return;
@@ -91,6 +95,10 @@ authRouter.post('/signup', (req: Request, res: Response) => {
 /** 로그인 */
 authRouter.post('/login', (req: Request, res: Response) => {
   const { email, password } = req.body;
+  if (!email || !password) {
+    res.status(400).json({ detail: '이메일과 비밀번호를 입력해주세요' });
+    return;
+  }
   const user = verifyUser(email, password);
   if (!user) {
     res.status(401).json({ detail: '이메일 또는 비밀번호가 일치하지 않습니다' });
@@ -175,7 +183,7 @@ function calcZodiac(birthDate: string): string | null {
     if ((month === 10 && day >= 23) || (month === 11 && day <= 22))
       return '전갈자리';
     if ((month === 11 && day >= 23) || (month === 12 && day <= 24))
-      return '궁수자리';
+      return '사수자리';
     if ((month === 12 && day >= 25) || (month === 1 && day <= 19))
       return '염소자리';
     if ((month === 1 && day >= 20) || (month === 2 && day <= 18))

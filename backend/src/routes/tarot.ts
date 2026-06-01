@@ -4,6 +4,9 @@ import { ALL_CARDS, getCard, CATEGORY_NAMES } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
 import { tarotReading, callLlm } from '../llm';
 import { saveReading } from './readings';
+import { authMiddleware } from './auth';
+import jwt from 'jsonwebtoken';
+import { config } from '../config';
 
 export const tarotRouter = Router();
 
@@ -40,6 +43,15 @@ tarotRouter.get('/shuffle', (req: Request, res: Response) => {
 tarotRouter.post('/read', async (req: Request, res: Response) => {
   const { category, question, cards: selectedCards } = req.body;
 
+  let userId: string | null = null;
+  const auth = req.headers.authorization;
+  if (auth?.startsWith('Bearer ')) {
+    try {
+      const payload = jwt.verify(auth.slice(7), config.jwtSecret) as { user_id: string };
+      userId = payload.user_id;
+    } catch { /* 비회원 */ }
+  }
+
   if (!category || !CATEGORY_NAMES[category]) {
     res.status(400).json({ detail: `잘못된 카테고리: ${category}` });
     return;
@@ -70,7 +82,7 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
 
     // 기록 저장 (비회원도)
     try {
-      saveReading(null, category, question || '', cards, interpretation);
+      saveReading(userId, category, question || '', cards, interpretation);
     } catch {
       /* 기록 저장 실패는 무시 */
     }
@@ -105,6 +117,7 @@ tarotRouter.post('/chat', async (req: Request, res: Response) => {
     return;
   }
 
+  const allowedRoles = new Set(['user', 'assistant']);
   const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     {
@@ -115,7 +128,9 @@ tarotRouter.post('/chat', async (req: Request, res: Response) => {
 
   if (chat_history) {
     for (const m of chat_history) {
-      messages.push(m);
+      if (m && typeof m.role === 'string' && allowedRoles.has(m.role) && typeof m.content === 'string') {
+        messages.push({ role: m.role, content: m.content.substring(0, 1000) });
+      }
     }
   }
   messages.push({ role: 'user', content: question });

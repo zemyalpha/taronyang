@@ -43,7 +43,11 @@ readingsRouter.get('/:readingId', authMiddleware, (req: Request, res: Response) 
 /** 상담 기록 삭제 */
 readingsRouter.delete('/:readingId', authMiddleware, (req: Request, res: Response) => {
   const db = getDb();
-  db.prepare('DELETE FROM readings WHERE id = ? AND user_id = ?').run(req.params.readingId, (req as any).user.id);
+  const result = db.prepare('DELETE FROM readings WHERE id = ? AND user_id = ?').run(req.params.readingId, (req as any).user.id);
 
+  if (result.changes === 0) {
+    res.status(404).json({ detail: '기록을 찾을 수 없습니다' });
+    return;
+  }
   res.json({ ok: true });
 });

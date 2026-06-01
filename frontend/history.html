@@ -98,7 +98,7 @@
                             <span class="text-xs text-gray-500">${r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : ''}</span>
                         </div>
                         ${r.question ? `<p class="text-sm text-gray-400 mb-2">Q: ${escapeHtml(r.question)}</p>` : ''}
-                        <p class="text-sm text-gray-200 line-clamp-3">${escapeHtml((r.interpretation || '').substring(0, 150))}...</p>
+                        <p class="text-sm text-gray-200 line-clamp-3">${escapeHtml((r.interpretation || '').substring(0, 150))}${(r.interpretation || '').length > 150 ? '...' : ''}</p>
                     </div>
                 `).join('');
             } catch (e) {

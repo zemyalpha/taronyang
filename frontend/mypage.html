@@ -124,7 +124,7 @@
         const API = window.location.origin + '/api';
         const token = localStorage.getItem('token');
         if (!token) { location.href = '/login'; }
-        const headers = { 'Authorization': 'Bearer ' + token };
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
 
         function escapeHtml(str) {
             if (str == null) return '';
@@ -256,7 +256,7 @@
                     localStorage.setItem('user', JSON.stringify(stored));
                 } catch {}
 
-                if (zodiac !== undefined && zodiac !== null) {
+                if (zodiac !== '') {
                     const zodiacRes = await fetch(API + '/notifications/zodiac', {
                         method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ zodiac_sign: zodiac })

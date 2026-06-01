@@ -1,7 +1,11 @@
-const FALLBACK_BACKEND_URL = "http://192.168.0.9:8000";
-
 export async function onRequest(context) {
-  const backendUrl = (context.env && context.env.BACKEND_URL) || FALLBACK_BACKEND_URL;
+  const backendUrl = context.env && context.env.BACKEND_URL;
+  if (!backendUrl) {
+    return new Response(JSON.stringify({ error: "Backend URL not configured. Set BACKEND_URL environment variable." }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const url = new URL(context.request.url);
   const apiPath = context.params.path ? context.params.path.join("/") : "";
   const apiUrl = `${backendUrl}/api/${apiPath}${url.search}`;

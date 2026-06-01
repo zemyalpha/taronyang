@@ -49,19 +49,19 @@
             <h2 class="font-serif text-2xl text-center text-lavender mb-2">어떤 운이 궁금하신가요?</h2>
             <p class="text-center text-gray-400 mb-8">카테고리를 선택해주세요</p>
             <div class="grid grid-cols-2 gap-4" id="categories">
-                <button onclick="selectCategory('love')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button onclick="selectCategory('love', this)" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">💕</div>
                     <div class="font-bold text-gold">연애운</div>
                 </button>
-                <button onclick="selectCategory('money')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button onclick="selectCategory('money', this)" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">💰</div>
                     <div class="font-bold text-gold">재물운</div>
                 </button>
-                <button onclick="selectCategory('career')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button onclick="selectCategory('career', this)" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">💼</div>
                     <div class="font-bold text-gold">직장운</div>
                 </button>
-                <button onclick="selectCategory('general')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button onclick="selectCategory('general', this)" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">🌟</div>
                     <div class="font-bold text-gold">종합운</div>
                 </button>
@@ -168,11 +168,10 @@
         function prevStep(step) { showStep(step); }
 
         // 카테고리 선택
-        function selectCategory(cat) {
+        function selectCategory(cat, btn) {
             category = cat;
-            // 선택 UI
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('border-gold', 'bg-lavender/10'));
-            event.currentTarget.classList.add('border-gold', 'bg-lavender/10');
+            btn.classList.add('border-gold', 'bg-lavender/10');
             showStep('question');
         }
 
