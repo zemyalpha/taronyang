@@ -14,12 +14,28 @@ const minLevel: LogLevel = config.nodeEnv === 'production' ? 'info' : 'debug';
 
 function formatLog(level: LogLevel, msg: string, meta?: Record<string, unknown>): string {
   const timestamp = new Date().toISOString();
-  const entry = { timestamp, level, msg, ...(meta || {}) };
+  const entry = { ...(meta || {}), timestamp, level, msg };
   if (config.nodeEnv === 'production') {
-    return JSON.stringify(entry);
+    try {
+      return JSON.stringify(entry);
+    } catch (err) {
+      return JSON.stringify({
+        timestamp,
+        level: 'error',
+        msg: 'Failed to serialize log message: ' + msg,
+        error: String(err),
+      });
+    }
   }
-  const metaStr = meta ? ' ' + JSON.stringify(meta) : '';
-  return `[${timestamp}] ${level.toUpperCase()}: ${msg}${metaStr}`;
+  let metaStr = '';
+  if (meta) {
+    try {
+      metaStr = ' ' + JSON.stringify(meta);
+    } catch (err) {
+      metaStr = ' [Serialization Failed: ' + String(err) + ']';
+    }
+  }
+  return '[' + timestamp + '] ' + level.toUpperCase() + ': ' + msg + metaStr;
 }
 
 export const logger = {

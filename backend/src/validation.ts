@@ -17,7 +17,7 @@ export const loginSchema = z.object({
 /** 내 정보 수정 */
 export const updateMeSchema = z.object({
   nickname: z.string().max(30).optional(),
-  birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '생일은 YYYY-MM-DD 형식이어야 합니다').optional(),
+  birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '생일은 YYYY-MM-DD 형식이어야 합니다').nullable().optional(),
 });
 
 /** 타로 해석 */
@@ -50,7 +50,7 @@ export const paymentVerifySchema = z.object({
 /** 알림 설정 변경 */
 export const notifySettingsSchema = z.object({
   daily_email: z.boolean().optional(),
-  notify_time: z.string().regex(/^\d{2}:\d{2}$/, '시간은 HH:MM 형식이어야 합니다').optional(),
+  notify_time: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, '시간은 HH:MM 형식이어야 합니다').optional(),
   notify_channel: z.enum(['email', 'push', 'none']).optional(),
 });
 

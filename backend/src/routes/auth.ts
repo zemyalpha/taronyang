@@ -184,7 +184,7 @@ function calcZodiac(birthDate: string): string | null {
     if ((month === 10 && day >= 23) || (month === 11 && day <= 22))
       return '전갈자리';
     if ((month === 11 && day >= 23) || (month === 12 && day <= 24))
-      return '궁수자리';
+      return '사수자리';
     if ((month === 12 && day >= 25) || (month === 1 && day <= 19))
       return '염소자리';
     if ((month === 1 && day >= 20) || (month === 2 && day <= 18))
