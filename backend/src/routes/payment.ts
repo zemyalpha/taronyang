@@ -71,7 +71,7 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
       db.prepare("UPDATE users SET subscription_status = 'premium', subscription_expires_at = ? WHERE id = ?")
         .run(expires, (req as any).user.id);
       db.prepare('INSERT INTO processed_payments (imp_uid, user_id, amount) VALUES (?, ?, ?)')
-        .run(imp_uid, (req as any).user.id, payData.response.amount);
+        .run(imp_uid, (req as any).user.id, payData.response?.amount);
     })();
 
     res.json({ ok: true, message: '프리미엄이 활성화되었습니다! ✨' });
