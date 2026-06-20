@@ -40,27 +40,23 @@ function formatLog(level: LogLevel, msg: string, meta?: Record<string, unknown>)
 
 export const logger = {
   debug(msg: string, meta?: Record<string, unknown>): void {
-    if (LEVEL_PRIORITY[level('debug')] >= LEVEL_PRIORITY[minLevel]) {
+    if (LEVEL_PRIORITY['debug'] >= LEVEL_PRIORITY[minLevel]) {
       console.debug(formatLog('debug', msg, meta));
     }
   },
   info(msg: string, meta?: Record<string, unknown>): void {
-    if (LEVEL_PRIORITY[level('info')] >= LEVEL_PRIORITY[minLevel]) {
+    if (LEVEL_PRIORITY['info'] >= LEVEL_PRIORITY[minLevel]) {
       console.log(formatLog('info', msg, meta));
     }
   },
   warn(msg: string, meta?: Record<string, unknown>): void {
-    if (LEVEL_PRIORITY[level('warn')] >= LEVEL_PRIORITY[minLevel]) {
+    if (LEVEL_PRIORITY['warn'] >= LEVEL_PRIORITY[minLevel]) {
       console.warn(formatLog('warn', msg, meta));
     }
   },
   error(msg: string, meta?: Record<string, unknown>): void {
-    if (LEVEL_PRIORITY[level('error')] >= LEVEL_PRIORITY[minLevel]) {
+    if (LEVEL_PRIORITY['error'] >= LEVEL_PRIORITY[minLevel]) {
       console.error(formatLog('error', msg, meta));
     }
   },
 };
-
-function level(l: LogLevel): LogLevel {
-  return l;
-}

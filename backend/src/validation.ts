@@ -17,7 +17,9 @@ export const loginSchema = z.object({
 /** 내 정보 수정 */
 export const updateMeSchema = z.object({
   nickname: z.string().max(30).optional(),
-  birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '생일은 YYYY-MM-DD 형식이어야 합니다').nullable().optional(),
+  birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '생일은 YYYY-MM-DD 형식이어야 합니다')
+    .refine((v) => !isNaN(Date.parse(v)), '올바른 날짜가 아닙니다')
+    .nullable().optional(),
 });
 
 /** 타로 해석 */
@@ -27,7 +29,8 @@ export const tarotReadSchema = z.object({
   cards: z.array(z.object({
     id: z.number().int().min(0),
     is_upright: z.boolean(),
-  })).length(3, '카드를 3장 선택해주세요'),
+  })).length(3, '카드를 3장 선택해주세요')
+    .refine((cards) => new Set(cards.map((c) => c.id)).size === 3, '같은 카드를 중복으로 선택할 수 없습니다'),
 });
 
 /** 추가 대화 */

@@ -72,7 +72,8 @@ export function initDb(): void {
       imp_uid TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       amount INTEGER NOT NULL,
-      processed_at TEXT NOT NULL DEFAULT (datetime('now'))
+      processed_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id)
     );
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
