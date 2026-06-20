@@ -3,6 +3,7 @@ import Database from 'better-sqlite3';
 import { config } from './config';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { logger } from './logger';
 
 let db: Database.Database;
 
@@ -105,7 +106,7 @@ export function createUser(email: string, password: string, nickname?: string): 
     ).run(userId, 'email', email, hashed, nick);
     return getUserById(userId);
   } catch (err) {
-    console.error('사용자 생성 실패:', err);
+    logger.error('사용자 생성 실패', { error: String(err) });
     return null;
   }
 }

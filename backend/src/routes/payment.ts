@@ -3,6 +3,8 @@ import { Router, Request, Response } from 'express';
 import { config } from '../config';
 import { getDb, getUserById } from '../database';
 import { authMiddleware } from './auth';
+import { paymentVerifySchema } from '../validation';
+import { logger } from '../logger';
 
 export const paymentRouter = Router();
 
@@ -28,11 +30,12 @@ paymentRouter.get('/price', (_req: Request, res: Response) => {
 
 /** 결제 검증 + 프리미엄 활성화 */
 paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response) => {
-  const { imp_uid } = req.body;
-  if (!imp_uid) {
-    res.status(400).json({ detail: 'imp_uid가 필요합니다' });
+  const parsed = paymentVerifySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
     return;
   }
+  const { imp_uid } = parsed.data;
 
   try {
     // 포트원 결제 검증
@@ -50,7 +53,7 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
       return;
     }
     if (payData.response.amount !== config.premiumPrice) {
-      res.status(400).json({ detail: `결제 금액 불일치: ${payData.response.amount} != ${config.premiumPrice}` });
+      res.status(400).json({ detail: '결제 금액이 일치하지 않습니다' });
       return;
     }
 
@@ -62,7 +65,8 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
 
     res.json({ ok: true, message: '프리미엄이 활성화되었습니다! ✨' });
   } catch (err: any) {
-    res.status(400).json({ detail: String(err) });
+    logger.error('결제 검증 실패', { error: String(err), imp_uid });
+    res.status(400).json({ detail: '결제 검증에 실패했습니다. 잠시 후 다시 시도해주세요.' });
   }
 });
 

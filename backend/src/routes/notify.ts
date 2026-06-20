@@ -3,6 +3,7 @@ import { Router, Request, Response } from 'express';
 import { getDb } from '../database';
 import { authMiddleware } from './auth';
 import { generateDailyHoroscope } from '../dailyNotify';
+import { notifySettingsSchema, zodiacSchema } from '../validation';
 
 export const notifyRouter = Router();
 
@@ -31,8 +32,14 @@ notifyRouter.get('/settings', authMiddleware, (req: Request, res: Response) => {
 
 /** 알림 설정 변경 (json_set + 트랜잭션) */
 notifyRouter.put('/settings', authMiddleware, (req: Request, res: Response) => {
+  const parsed = notifySettingsSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
+    return;
+  }
+
   const user = (req as any).user;
-  const { daily_email, notify_time, notify_channel } = req.body;
+  const { daily_email, notify_time, notify_channel } = parsed.data;
   const db = getDb();
 
   const update = db.transaction(() => {
@@ -56,16 +63,13 @@ notifyRouter.put('/settings', authMiddleware, (req: Request, res: Response) => {
 
 /** 별자리 변경 */
 notifyRouter.put('/zodiac', authMiddleware, (req: Request, res: Response) => {
-  const validSigns = [
-    '양자리', '황소자리', '쌍둥이자리', '게자리', '사자자리', '처녀자리',
-    '천칭자리', '전갈자리', '사수자리', '염소자리', '물병자리', '물고기자리',
-  ];
-  const sign = req.body.zodiac_sign;
-  if (!sign || !validSigns.includes(sign)) {
-    res.status(400).json({ detail: `유효하지 않은 별자리: ${sign}` });
+  const parsed = zodiacSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: '유효하지 않은 별자리입니다' });
     return;
   }
 
+  const sign = parsed.data.zodiac_sign;
   const db = getDb();
   db.prepare('UPDATE users SET zodiac_sign = ? WHERE id = ?').run(sign, (req as any).user.id);
   res.json({ ok: true });

@@ -3,6 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
 import { createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, getDb, User } from '../database';
+import { signupSchema, loginSchema, updateMeSchema } from '../validation';
 
 export const authRouter = Router();
 
@@ -63,15 +64,12 @@ function makeUserResponse(user: User) {
 
 /** 회원가입 */
 authRouter.post('/signup', (req: Request, res: Response) => {
-  const { email, password, nickname } = req.body;
-  if (!email || !password) {
-    res.status(400).json({ detail: '이메일과 비밀번호를 입력해주세요' });
+  const parsed = signupSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
     return;
   }
-  if (password.length < 6) {
-    res.status(400).json({ detail: '비밀번호는 6자 이상이어야 합니다' });
-    return;
-  }
+  const { email, password, nickname } = parsed.data;
 
   const existing = getUserByEmail(email);
   if (existing) {
@@ -90,7 +88,12 @@ authRouter.post('/signup', (req: Request, res: Response) => {
 
 /** 로그인 */
 authRouter.post('/login', (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const parsed = loginSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
+    return;
+  }
+  const { email, password } = parsed.data;
   const user = verifyUser(email, password);
   if (!user) {
     res.status(401).json({ detail: '이메일 또는 비밀번호가 일치하지 않습니다' });
@@ -107,8 +110,14 @@ authRouter.get('/me', authMiddleware, (req: Request, res: Response) => {
 
 /** 내 정보 수정 */
 authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
+  const parsed = updateMeSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
+    return;
+  }
+
   const user = (req as any).user as User;
-  const { nickname, birth_date } = req.body;
+  const { nickname, birth_date } = parsed.data;
 
   const db = getDb();
   const updates: string[] = [];
