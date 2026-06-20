@@ -56,11 +56,12 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
       res.status(400).json({ detail: `결제 조회 실패: ${payData.message}` });
       return;
     }
-    if (payData.response?.status !== 'paid') {
+    const payment = payData.response;
+    if (!payment || payment.status !== 'paid') {
       res.status(400).json({ detail: '결제가 완료되지 않았습니다' });
       return;
     }
-    if (payData.response?.amount !== config.premiumPrice) {
+    if (payment.amount !== config.premiumPrice) {
       res.status(400).json({ detail: '결제 금액이 일치하지 않습니다' });
       return;
     }
@@ -71,7 +72,7 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
       db.prepare("UPDATE users SET subscription_status = 'premium', subscription_expires_at = ? WHERE id = ?")
         .run(expires, (req as any).user.id);
       db.prepare('INSERT INTO processed_payments (imp_uid, user_id, amount) VALUES (?, ?, ?)')
-        .run(imp_uid, (req as any).user.id, payData.response?.amount);
+        .run(imp_uid, (req as any).user.id, payment.amount);
     })();
 
     res.json({ ok: true, message: '프리미엄이 활성화되었습니다! ✨' });
