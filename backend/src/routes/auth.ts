@@ -123,18 +123,16 @@ authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
   const updates: string[] = [];
   const params: any[] = [];
 
-  if (nickname) {
+  if (nickname !== undefined) {
     updates.push('nickname = ?');
     params.push(nickname);
   }
-  if (birth_date) {
+  if (birth_date !== undefined) {
     updates.push('birth_date = ?');
     params.push(birth_date);
-    const zodiac = calcZodiac(birth_date);
-    if (zodiac) {
-      updates.push('zodiac_sign = ?');
-      params.push(zodiac);
-    }
+    const zodiac = birth_date ? calcZodiac(birth_date) : null;
+    updates.push('zodiac_sign = ?');
+    params.push(zodiac);
   }
   if (updates.length > 0) {
     params.push(user.id);

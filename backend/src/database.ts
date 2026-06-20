@@ -68,6 +68,13 @@ export function initDb(): void {
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
 
+    CREATE TABLE IF NOT EXISTS processed_payments (
+      imp_uid TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      processed_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_readings_user ON readings(user_id);
     CREATE INDEX IF NOT EXISTS idx_daily_date ON daily_horoscopes(date, zodiac_sign);

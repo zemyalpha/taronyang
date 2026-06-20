@@ -37,6 +37,14 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
   }
   const { imp_uid } = parsed.data;
 
+  // 리플레이 공격 방지 — 이미 처리된 결제인지 확인
+  const db = getDb();
+  const alreadyProcessed = db.prepare('SELECT 1 FROM processed_payments WHERE imp_uid = ?').get(imp_uid);
+  if (alreadyProcessed) {
+    res.status(400).json({ detail: '이미 처리된 결제 건입니다.' });
+    return;
+  }
+
   try {
     // 포트원 결제 검증
     const token = await getPortOneToken();
@@ -48,20 +56,23 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
       res.status(400).json({ detail: `결제 조회 실패: ${payData.message}` });
       return;
     }
-    if (payData.response.status !== 'paid') {
+    if (payData.response?.status !== 'paid') {
       res.status(400).json({ detail: '결제가 완료되지 않았습니다' });
       return;
     }
-    if (payData.response.amount !== config.premiumPrice) {
+    if (payData.response?.amount !== config.premiumPrice) {
       res.status(400).json({ detail: '결제 금액이 일치하지 않습니다' });
       return;
     }
 
-    // 프리미엄 활성화
-    const db = getDb();
+    // 프리미엄 활성화 + 결제 기록 (트랜잭션)
     const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-    db.prepare("UPDATE users SET subscription_status = 'premium', subscription_expires_at = ? WHERE id = ?")
-      .run(expires, (req as any).user.id);
+    db.transaction(() => {
+      db.prepare("UPDATE users SET subscription_status = 'premium', subscription_expires_at = ? WHERE id = ?")
+        .run(expires, (req as any).user.id);
+      db.prepare('INSERT INTO processed_payments (imp_uid, user_id, amount) VALUES (?, ?, ?)')
+        .run(imp_uid, (req as any).user.id, payData.response.amount);
+    })();
 
     res.json({ ok: true, message: '프리미엄이 활성화되었습니다! ✨' });
   } catch (err: any) {
