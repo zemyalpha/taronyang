@@ -72,13 +72,14 @@ info "wrangler 인증 확인"
 step "3/7 — Named Tunnel 생성"
 
 # 기존 터널 확인
-TUNNEL_ID=$(cloudflared tunnel list 2>/dev/null | grep "$TUNNEL_NAME" | awk '{print $1}' || true)
+TUNNEL_ID=$(cloudflared tunnel list 2>/dev/null | awk -v name="$TUNNEL_NAME" '$2 == name {print $1}' || true)
 
 if [ -n "$TUNNEL_ID" ]; then
     info "터널이 이미 존재합니다: $TUNNEL_NAME ($TUNNEL_ID)"
 else
     echo "📝 새 터널 생성 중..."
-    TUNNEL_ID=$(cloudflared tunnel create "$TUNNEL_NAME" 2>&1 | grep -oE '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}' || true)
+    CREATE_OUT=$(cloudflared tunnel create "$TUNNEL_NAME" 2>&1) || error "터널 생성 실패: $CREATE_OUT"
+    TUNNEL_ID=$(echo "$CREATE_OUT" | grep -oE '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}' || true)
     [ -n "$TUNNEL_ID" ] || error "터널 생성 실패"
     info "터널 생성됨: $TUNNEL_NAME (ID: $TUNNEL_ID)"
 fi
@@ -104,12 +105,10 @@ ingress:
 EOF
 info "Config 파일 생성: $CF_DIR/config.yml"
 
-# Quick Tunnel 중지
-if launchctl list 2>/dev/null | grep -q "com.taronyang.tunnel"; then
-    echo "🔄 Quick Tunnel 중지 중..."
-    launchctl unload ~/Library/LaunchAgents/com.taronyang.tunnel.plist 2>/dev/null || true
-    info "Quick Tunnel 중지됨"
-fi
+# 기존 Tunnel 서비스 언로드 (등록되었지만 비활성 상태도 커버하기 위해 무조건 실행)
+echo "🔄 기존 Tunnel 서비스 언로드 중..."
+launchctl unload ~/Library/LaunchAgents/com.taronyang.tunnel.plist 2>/dev/null || true
+info "기존 Tunnel 서비스 언로드 완료"
 
 # Named Tunnel용 launchd plist 생성 및 등록
 NAMED_PLIST="$PROJECT_DIR/com.taronyang.tunnel-named.plist"
@@ -146,7 +145,7 @@ EOF
 info "Named Tunnel plist 생성: $NAMED_PLIST"
 
 cp "$NAMED_PLIST" ~/Library/LaunchAgents/com.taronyang.tunnel.plist
-launchctl load ~/Library/LaunchAgents/com.taronyang.tunnel.plist 2>/dev/null || true
+launchctl load ~/Library/LaunchAgents/com.taronyang.tunnel.plist
 sleep 3
 info "Named Tunnel 시작됨"
 
@@ -160,7 +159,7 @@ wrangler pages project create "$PAGES_PROJECT" --production-branch main 2>/dev/n
 
 # BACKEND_URL 환경변수 설정
 echo "🔧 BACKEND_URL 환경변수 설정: https://$API_DOMAIN"
-wrangler pages secret put BACKEND_URL --project-name "$PAGES_PROJECT" <<< "https://$API_DOMAIN" 2>/dev/null && info "BACKEND_URL 설정 완료" || warn "환경변수 설정 실패 — 대시보드에서 수동 설정: https://$API_DOMAIN"
+wrangler pages secret put BACKEND_URL --project-name "$PAGES_PROJECT" <<< "https://$API_DOMAIN" && info "BACKEND_URL 설정 완료" || warn "환경변수 설정 실패 — 대시보드에서 수동 설정: https://$API_DOMAIN"
 
 # 프론트엔드 배포
 echo "📦 프론트엔드 배포 중..."
