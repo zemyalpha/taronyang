@@ -202,20 +202,20 @@ BACKEND_DIR="$RUNTIME_DIR/backend"
 NEEDS_INSTALL=0
 NEEDS_BUILD=0
 
-if [ "$OLD_HEAD" != "$NEW_HEAD" ]; then
+if [ -n "$OLD_HEAD" ] && [ "$OLD_HEAD" != "$NEW_HEAD" ]; then
   # 백엔드 관련 파일이 변경되었는지 확인
   BACKEND_CHANGES=$(git -C "$RUNTIME_DIR" diff --name-only "$OLD_HEAD" "$NEW_HEAD" -- backend/ 2>/dev/null || echo "")
   if [ -n "$BACKEND_CHANGES" ]; then
     NEEDS_BUILD=1
     info "백엔드 파일 변경 감지:"
     echo "$BACKEND_CHANGES" | sed 's/^/    /'
-    # package.json 또는 package-lock.json이 변경되면 npm install
+    # package.json 또는 package-lock.json이 변경되면 의존성 재설치
     if echo "$BACKEND_CHANGES" | grep -qE 'backend/(package\.json|package-lock\.json)'; then
       NEEDS_INSTALL=1
     fi
   fi
 else
-  # 변경사항이 없어도 dist가 없으면 빌드
+  # 변경사항이 없거나 OLD_HEAD를 알 수 없는 경우 — dist가 없으면 빌드
   if [ ! -d "$BACKEND_DIR/dist" ]; then
     NEEDS_BUILD=1
     NEEDS_INSTALL=1
