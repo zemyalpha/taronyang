@@ -110,9 +110,10 @@ echo "🔄 기존 Tunnel 서비스 언로드 중..."
 launchctl unload ~/Library/LaunchAgents/com.taronyang.tunnel.plist 2>/dev/null || true
 info "기존 Tunnel 서비스 언로드 완료"
 
-# Named Tunnel용 launchd plist 생성 및 등록
-NAMED_PLIST="$PROJECT_DIR/com.taronyang.tunnel-named.plist"
-cat > "$NAMED_PLIST" << EOF
+# Named Tunnel용 launchd plist 생성 및 등록 (~/Library/LaunchAgents에 직접 작성)
+CLOUDFLARED_PATH=$(command -v cloudflared) || error "cloudflared 경로를 찾을 수 없습니다"
+PLIST_PATH="$HOME/Library/LaunchAgents/com.taronyang.tunnel.plist"
+cat > "$PLIST_PATH" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -121,7 +122,7 @@ cat > "$NAMED_PLIST" << EOF
     <string>com.taronyang.tunnel</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/opt/homebrew/bin/cloudflared</string>
+        <string>$CLOUDFLARED_PATH</string>
         <string>tunnel</string>
         <string>run</string>
         <string>$TUNNEL_NAME</string>
@@ -142,10 +143,9 @@ cat > "$NAMED_PLIST" << EOF
 </dict>
 </plist>
 EOF
-info "Named Tunnel plist 생성: $NAMED_PLIST"
+info "Named Tunnel plist 생성: $PLIST_PATH"
 
-cp "$NAMED_PLIST" ~/Library/LaunchAgents/com.taronyang.tunnel.plist
-launchctl load ~/Library/LaunchAgents/com.taronyang.tunnel.plist
+launchctl load "$PLIST_PATH"
 sleep 3
 info "Named Tunnel 시작됨"
 
