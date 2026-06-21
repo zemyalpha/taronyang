@@ -94,7 +94,8 @@ cloudflared tunnel route dns "$TUNNEL_NAME" "$API_DOMAIN" 2>/dev/null && info "D
 step "5/7 — Tunnel Config 및 launchd 전환"
 
 mkdir -p "$CF_DIR"
-cat > "$CF_DIR/config.yml" << EOF
+CONFIG_PATH="$CF_DIR/taronyang-config.yml"
+cat > "$CONFIG_PATH" << EOF
 tunnel: $TUNNEL_ID
 credentials-file: $CF_DIR/$TUNNEL_ID.json
 
@@ -103,7 +104,7 @@ ingress:
     service: $LOCAL_URL
   - service: http_status:404
 EOF
-info "Config 파일 생성: $CF_DIR/config.yml"
+info "Config 파일 생성: $CONFIG_PATH"
 
 # Named Tunnel용 launchd plist 경로 (unload + create 일관성을 위해 상단에서 정의)
 PLIST_PATH="$HOME/Library/LaunchAgents/com.taronyang.tunnel.plist"
@@ -128,6 +129,8 @@ cat > "$PLIST_PATH" << EOF
     <array>
         <string>$CLOUDFLARED_PATH</string>
         <string>tunnel</string>
+        <string>--config</string>
+        <string>$CONFIG_PATH</string>
         <string>run</string>
         <string>$TUNNEL_NAME</string>
     </array>
@@ -173,7 +176,7 @@ fi
 
 # BACKEND_URL 환경변수 설정
 echo "🔧 BACKEND_URL 환경변수 설정: https://$API_DOMAIN"
-wrangler pages secret put BACKEND_URL --project-name "$PAGES_PROJECT" <<< "https://$API_DOMAIN" && info "BACKEND_URL 설정 완료" || error "BACKEND_URL 환경변수 설정 실패"
+printf '%s' "https://$API_DOMAIN" | wrangler pages secret put BACKEND_URL --project-name "$PAGES_PROJECT" && info "BACKEND_URL 설정 완료" || error "BACKEND_URL 환경변수 설정 실패"
 
 # 프론트엔드 배포
 echo "📦 프론트엔드 배포 중..."
