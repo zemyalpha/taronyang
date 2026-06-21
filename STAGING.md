@@ -62,6 +62,48 @@ echo "$NEW_URL"
 # 2. 이 STAGING.md 파일의 URL도 업데이트
 ```
 
+## launchd 서비스 설정 가이드
+
+`com.taronyang.monitor.plist` 파일에는 `/Users/YOUR_USERNAME/` 플레이스홀더가 포함되어 있습니다.
+각 개발자/서버 환경에 맞게 경로를 치환한 후 launchd에 등록해야 합니다.
+
+### 1. 경로 치환
+
+```bash
+# 현재 사용자의 홈 디렉토리로 치환
+sed "s|/Users/YOUR_USERNAME|$HOME|g" com.taronyang.monitor.plist \
+  > ~/Library/LaunchAgents/com.taronyang.monitor.plist
+```
+
+### 2. 로그 디렉토리 생성
+
+```bash
+mkdir -p ~/Library/Logs
+```
+
+### 3. launchd 서비스 등록
+
+```bash
+# 헬스 모니터 등록
+launchctl load ~/Library/LaunchAgents/com.taronyang.monitor.plist
+
+# 등록 확인 (PID가 숫자로 표시되면 정상)
+launchctl list | grep taronyang
+```
+
+### 4. 동작 확인
+
+```bash
+# 즉시 실행하여 로그 확인
+bash scripts/health-check.sh
+
+# 로그 파일 확인
+tail -20 ~/Library/Logs/taronyang-monitor.log
+```
+
+> **참고:** `launchd` plist는 절대 경로만 지원하므로 `$HOME` 변수를 직접 사용할 수 없습니다.
+> 체크인된 plist는 `YOUR_USERNAME` 플레이스홀더를 사용하며, 설치 시 위 명령으로 치환합니다.
+
 ## 서비스 관리 명령어
 
 ```bash
