@@ -19,7 +19,7 @@ mkdir -p "$LOG_DIR"
 
 # --- 주간 로그 로테이션 (크기 기반) ---
 if [ -f "$LOG_FILE" ]; then
-  FILE_SIZE=$(stat -f%z "$LOG_FILE" 2>/dev/null || echo 0)
+  FILE_SIZE=$(stat -f%z "$LOG_FILE" 2>/dev/null || stat -c%s "$LOG_FILE" 2>/dev/null || echo 0)
   if [ "$FILE_SIZE" -gt "$MAX_LOG_SIZE" ]; then
     tail -n "$MAX_LOG_LINES" "$LOG_FILE" > "${LOG_FILE}.tmp" && mv "${LOG_FILE}.tmp" "$LOG_FILE"
   fi
@@ -30,7 +30,7 @@ FAIL_COUNT=0
 STATUS_LINE=""
 
 # --- 1. 백엔드 헬스 체크 ---
-HTTP_CODE=$(curl -sf -o /dev/null -w '%{http_code}' --connect-timeout 5 --max-time 10 "$HEALTH_URL" 2>/dev/null || echo "000")
+HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 5 --max-time 10 "$HEALTH_URL" 2>/dev/null || echo "000")
 if [ "$HTTP_CODE" = "200" ]; then
   STATUS_LINE="backend=OK(200)"
 else
@@ -39,7 +39,7 @@ else
 fi
 
 # --- 2. cloudflared 프로세스 체크 ---
-if pgrep -f 'cloudflared' > /dev/null 2>&1; then
+if pgrep -x 'cloudflared' > /dev/null 2>&1; then
   STATUS_LINE="$STATUS_LINE tunnel=OK"
 else
   STATUS_LINE="$STATUS_LINE tunnel=DOWN"
@@ -50,7 +50,7 @@ fi
 if [ -f "$STAGING_URL_FILE" ]; then
   PUBLIC_URL=$(cat "$STAGING_URL_FILE" | tr -d '[:space:]')
   if [ -n "$PUBLIC_URL" ]; then
-    PUB_CODE=$(curl -sf -o /dev/null -w '%{http_code}' --connect-timeout 5 --max-time 15 "$PUBLIC_URL/api/health" 2>/dev/null || echo "000")
+    PUB_CODE=$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 5 --max-time 15 "$PUBLIC_URL/api/health" 2>/dev/null || echo "000")
     if [ "$PUB_CODE" = "200" ]; then
       STATUS_LINE="$STATUS_LINE public=OK(200)"
     else
