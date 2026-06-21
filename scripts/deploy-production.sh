@@ -12,6 +12,12 @@
 #   5. 백엔드가 localhost:8000에서 실행 중이어야 함
 set -euo pipefail
 
+# macOS 전용 — launchctl 의존
+if [ "$(uname)" != "Darwin" ]; then
+    echo "❌ 이 스크립트는 macOS(launchctl) 전용입니다." >&2
+    exit 1
+fi
+
 TUNNEL_NAME="taronyang"
 API_DOMAIN="${1:-api.taronyang.app}"
 PAGES_PROJECT="${2:-taronyang}"
