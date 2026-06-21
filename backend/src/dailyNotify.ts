@@ -55,7 +55,15 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
     return horoscope;
   } catch (err) {
     logger.error('일운 생성 실패', { zodiac: zodiacSign, error: String(err) });
-    return `🐹 오늘 ${zodiacSign}의 운세를 가져오지 못했어요. 잠시 후 다시 확인해주세요.`;
+    const fallback = `🐹 오늘 ${zodiacSign}의 운세를 가져오지 못했어요. 잠시 후 다시 확인해주세요.`;
+    try {
+      db.prepare(
+        'INSERT OR IGNORE INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
+      ).run(crypto.randomUUID(), zodiacSign, date, fallback, fallback.substring(0, 100), '{}');
+    } catch (dbErr) {
+      logger.error('일운 실패 캐시 저장 실패', { error: String(dbErr) });
+    }
+    return fallback;
   }
 }
 
