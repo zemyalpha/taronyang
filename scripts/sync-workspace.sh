@@ -10,7 +10,7 @@
 # 수행 작업:
 #   1. 런타임 워크스페이스 경로 확인 (인자 / 환경변수 / plist 자동 추출)
 #   2. 커밋되지 않은 변경사항 감지 (안전하게 stash 또는 명시적 중단)
-#   3. git checkout main && git pull origin main
+#   3. git fetch origin main && git reset --hard origin/main (결정론적 동기화)
 #   4. 백엔드 코드 변경 시 npm install + npm run build
 #   5. launchd 서비스 재시작 (backend)
 #   6. 헬스체크로 서비스 정상 확인
@@ -51,7 +51,30 @@ for arg in "$@"; do
     --dry-run)      DRY_RUN=1 ;;
     --skip-restart) SKIP_RESTART=1 ;;
     -h|--help)
-      head -30 "$0" | tail -28
+      cat <<'HELP'
+타로냥 런타임 워크스페이스 동기화 (post-merge sync)
+
+사용법:
+  ./scripts/sync-workspace.sh [RUNTIME_DIR]
+  ./scripts/sync-workspace.sh /path/to/runtime
+  TARONYANG_RUNTIME_DIR=/path/to/runtime ./scripts/sync-workspace.sh
+  ./scripts/sync-workspace.sh --force        # 변경사항을 stash 후 동기화
+  ./scripts/sync-workspace.sh --dry-run      # 실제 변경 없이 시뮬레이션
+  ./scripts/sync-workspace.sh --skip-restart # 서비스 재시작 건너뜀
+
+옵션:
+  RUNTIME_DIR            런타임 워크스페이스 경로 (위치 인자)
+  --force                커밋되지 않은 변경사항을 자동으로 stash
+  --dry-run              실제 변경 없이 시뮬레이션
+  --skip-restart         launchd 서비스 재시작 건너뜀
+  -h, --help             이 도움말 출력
+
+환경변수:
+  TARONYANG_RUNTIME_DIR  런타임 워크스페이스 경로
+
+종료 코드:
+  0 = 성공   1 = 실패   2 = 변경사항 있음 (--force 필요)
+HELP
       exit 0
       ;;
     -*)
@@ -160,8 +183,9 @@ else
   info "이미 main 브랜치"
 fi
 
-info "origin/main에서 pull..."
-git -C "$RUNTIME_DIR" pull origin main || die "git pull 실패" 1
+info "origin/main에서 fetch + reset (결정론적 동기화)..."
+git -C "$RUNTIME_DIR" fetch origin main || die "git fetch 실패" 1
+git -C "$RUNTIME_DIR" reset --hard origin/main || die "git reset --hard 실패" 1
 
 NEW_HEAD=$(git -C "$RUNTIME_DIR" rev-parse HEAD 2>/dev/null || echo "")
 CURRENT_BRANCH=$(git -C "$RUNTIME_DIR" branch --show-current)
@@ -200,8 +224,13 @@ else
 fi
 
 if [ "$NEEDS_INSTALL" -eq 1 ]; then
-  info "npm install (backend)..."
-  (cd "$BACKEND_DIR" && npm install) || die "npm install 실패" 1
+  info "의존성 설치 (backend)..."
+  # npm ci for reproducible builds; fall back to npm install if no lockfile
+  if [ -f "$BACKEND_DIR/package-lock.json" ]; then
+    (cd "$BACKEND_DIR" && npm ci) || die "npm ci 실패" 1
+  else
+    (cd "$BACKEND_DIR" && npm install) || die "npm install 실패" 1
+  fi
   success "의존성 설치 완료"
 fi
 
@@ -258,12 +287,22 @@ if [ "$SKIP_RESTART" -eq 1 ]; then
   exit 0
 fi
 
-# 백엔드 재시작 후 헬스체크까지 대기
+# 백엔드 재시작 후 헬스체크 — 재시도 루프로 기동 대기
 HEALTH_SCRIPT="$RUNTIME_DIR/scripts/health-check.sh"
 if [ -x "$HEALTH_SCRIPT" ]; then
-  info "헬스체크 대기 중 (백엔드 기동 시간)..."
-  sleep 3
-  if "$HEALTH_SCRIPT"; then
+  info "헬스체크 대기 중 (백엔드 기동, 최대 30초 재시도)..."
+  HEALTH_OK=0
+  for attempt in 1 2 3 4 5 6; do
+    sleep 5
+    if "$HEALTH_SCRIPT" >/dev/null 2>&1; then
+      HEALTH_OK=1
+      success "헬스체크 통과 (시도 ${attempt}/6, ${attempt}*5초 대기)"
+      break
+    fi
+    warn "헬스체크 재시도 ${attempt}/6 — 백엔드 기동 대기 중..."
+  done
+
+  if [ "$HEALTH_OK" -eq 1 ]; then
     echo ""
     success "🎉 동기화 완료 — 모든 서비스 정상"
     echo ""
@@ -271,7 +310,7 @@ if [ -x "$HEALTH_SCRIPT" ]; then
     info "런타임 커밋: ${NEW_HEAD:0:8}"
     exit 0
   else
-    error "헬스체크 실패 — 서비스 상태를 수동으로 확인하세요:"
+    error "헬스체크 실패 (6회 재시도 후에도 응답 없음) — 서비스 상태를 수동으로 확인하세요:"
     echo "    launchctl list | grep taronyang"
     echo "    tail -50 /tmp/taronyang-backend.err"
     echo "    tail -50 /tmp/taronyang-monitor.err"
