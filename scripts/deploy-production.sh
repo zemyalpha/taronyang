@@ -105,14 +105,16 @@ ingress:
 EOF
 info "Config 파일 생성: $CF_DIR/config.yml"
 
+# Named Tunnel용 launchd plist 경로 (unload + create 일관성을 위해 상단에서 정의)
+PLIST_PATH="$HOME/Library/LaunchAgents/com.taronyang.tunnel.plist"
+
 # 기존 Tunnel 서비스 언로드 (등록되었지만 비활성 상태도 커버하기 위해 무조건 실행)
 echo "🔄 기존 Tunnel 서비스 언로드 중..."
-launchctl unload ~/Library/LaunchAgents/com.taronyang.tunnel.plist 2>/dev/null || true
+launchctl unload "$PLIST_PATH" 2>/dev/null || true
 info "기존 Tunnel 서비스 언로드 완료"
 
 # Named Tunnel용 launchd plist 생성 및 등록 (~/Library/LaunchAgents에 직접 작성)
 CLOUDFLARED_PATH=$(command -v cloudflared) || error "cloudflared 경로를 찾을 수 없습니다"
-PLIST_PATH="$HOME/Library/LaunchAgents/com.taronyang.tunnel.plist"
 cat > "$PLIST_PATH" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -154,8 +156,16 @@ step "6/7 — Cloudflare Pages 프론트엔드 배포"
 
 cd "$PROJECT_DIR/frontend"
 
-# Pages 프로젝트 생성 (이미 존재하면 스킵)
-wrangler pages project create "$PAGES_PROJECT" --production-branch main 2>/dev/null && info "Pages 프로젝트 생성: $PAGES_PROJECT" || info "Pages 프로젝트가 이미 존재함: $PAGES_PROJECT"
+# Pages 프로젝트 생성 (이미 존재하면 스킵, 그 외 실패는 즉시 중단)
+if CREATE_PROJECT_OUT=$(wrangler pages project create "$PAGES_PROJECT" --production-branch main 2>&1); then
+    info "Pages 프로젝트 생성: $PAGES_PROJECT"
+else
+    if echo "$CREATE_PROJECT_OUT" | grep -qiE "already exists"; then
+        info "Pages 프로젝트가 이미 존재함: $PAGES_PROJECT"
+    else
+        error "Pages 프로젝트 생성 실패: $CREATE_PROJECT_OUT"
+    fi
+fi
 
 # BACKEND_URL 환경변수 설정
 echo "🔧 BACKEND_URL 환경변수 설정: https://$API_DOMAIN"
@@ -176,7 +186,7 @@ sleep 15
 
 echo ""
 echo "헬스체크: https://$API_DOMAIN/api/health"
-if curl -sf "https://$API_DOMAIN/api/health" 2>/dev/null; then
+if curl -sf --connect-timeout 5 --max-time 10 "https://$API_DOMAIN/api/health" 2>/dev/null; then
     info "API 헬스체크 OK!"
 else
     warn "API가 아직 응답하지 않습니다. DNS 전파에 시간이 걸릴 수 있습니다."
