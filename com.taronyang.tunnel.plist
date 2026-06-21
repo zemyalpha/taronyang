@@ -6,7 +6,8 @@
     <string>com.taronyang.tunnel</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/opt/homebrew/bin/cloudflared</string>
+        <string>/usr/bin/env</string>
+        <string>cloudflared</string>
         <string>tunnel</string>
         <string>--url</string>
         <string>http://localhost:8000</string>
