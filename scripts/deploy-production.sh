@@ -114,6 +114,8 @@ launchctl unload "$PLIST_PATH" 2>/dev/null || true
 info "기존 Tunnel 서비스 언로드 완료"
 
 # Named Tunnel용 launchd plist 생성 및 등록 (~/Library/LaunchAgents에 직접 작성)
+mkdir -p "$(dirname "$PLIST_PATH")"
+mkdir -p "$HOME/Library/Logs"
 CLOUDFLARED_PATH=$(command -v cloudflared) || error "cloudflared 경로를 찾을 수 없습니다"
 cat > "$PLIST_PATH" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -141,6 +143,8 @@ cat > "$PLIST_PATH" << EOF
     <dict>
         <key>PATH</key>
         <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>$HOME</string>
     </dict>
 </dict>
 </plist>
