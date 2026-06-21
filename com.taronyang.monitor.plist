@@ -14,9 +14,9 @@
     <key>RunAtLoad</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/tmp/taronyang-monitor.out</string>
+    <string>/Users/YOUR_USERNAME/Library/Logs/taronyang-monitor.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/taronyang-monitor.err</string>
+    <string>/Users/YOUR_USERNAME/Library/Logs/taronyang-monitor.err</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>

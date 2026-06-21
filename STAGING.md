@@ -19,7 +19,7 @@ https://cat-proposition-paris-articles.trycloudflare.com
 
 ### 방법 1: cloudflared 로그 확인 (권장)
 ```bash
-grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/taronyang-tunnel.err | tail -1
+grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/taronyang-tunnel.err | tail -1
 ```
 
 > Quick Tunnel의 퍼블릭 URL은 cloudflared가 stderr로 출력하며
@@ -56,7 +56,7 @@ grep '❌' ~/Library/Logs/taronyang-monitor.log
 
 ```bash
 # 1. 새 URL 확인
-NEW_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/taronyang-tunnel.err | tail -1)
+NEW_URL=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/taronyang-tunnel.err | tail -1)
 echo "$NEW_URL"
 
 # 2. 이 STAGING.md 파일의 URL도 업데이트

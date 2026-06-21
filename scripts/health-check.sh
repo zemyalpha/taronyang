@@ -45,7 +45,7 @@ else
 fi
 
 # ─── 2. cloudflared 터널 프로세스 확인 ───
-if TUNNEL_PID=$(launchctl list | awk '/com.taronyang.tunnel/ {print $1; exit}') && [[ "$TUNNEL_PID" =~ ^[0-9]+$ ]]; then
+if TUNNEL_PID=$(launchctl list | awk '$3 == "com.taronyang.tunnel" {print $1; exit}') && [[ "$TUNNEL_PID" =~ ^[0-9]+$ ]]; then
   log_ok "cloudflared 터널 실행 중 (launchd PID: $TUNNEL_PID)"
 else
   log_fail "com.taronyang.tunnel 서비스 미실행 — 터널 다운 (launchctl kickstart gui/\$(id -u)/com.taronyang.tunnel 확인)"
