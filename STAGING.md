@@ -22,15 +22,9 @@ https://cat-proposition-paris-articles.trycloudflare.com
 grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/taronyang-tunnel.err | tail -1
 ```
 
-### 방법 2: launchctl 상태 확인
-```bash
-launchctl print gui/$(id -u)/com.taronyang.tunnel 2>/dev/null | grep -A5 arguments
-```
-
-### 방법 3: 터널 프로세스에서 직접 확인
-```bash
-ps aux | grep 'cloudflared tunnel --url' | grep -v grep
-```
+> Quick Tunnel의 퍼블릭 URL은 cloudflared가 stderr로 출력하며
+> `launchctl print` / `ps aux`에는 로컬 주소(`http://localhost:8000`)만
+> 표시되므로, URL 확인은 반드시 로그를 통해서만 가능합니다.
 
 ## 아키텍처
 
@@ -65,10 +59,7 @@ grep '❌' ~/Library/Logs/taronyang-monitor.log
 NEW_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/taronyang-tunnel.err | tail -1)
 echo "$NEW_URL"
 
-# 2. 헬스 모니터의 공개 URL 체크용 파일 업데이트
-echo -n "$NEW_URL" > ~/.taronyang-staging-url
-
-# 3. 이 STAGING.md 파일의 URL도 업데이트
+# 2. 이 STAGING.md 파일의 URL도 업데이트
 ```
 
 ## 서비스 관리 명령어

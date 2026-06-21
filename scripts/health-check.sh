@@ -25,7 +25,7 @@
 set -uo pipefail
 
 LOCAL_URL="${LOCAL_URL:-http://localhost:8000}"
-TUNNEL_LOG="${TUNNEL_LOG:-/tmp/taronyang-tunnel.log}"
+TUNNEL_LOG="${TUNNEL_LOG:-/tmp/taronyang-tunnel.err}"
 PUBLIC_URL="${PUBLIC_URL:-}"
 HEALTH_TIMEOUT="${HEALTH_TIMEOUT:-10}"
 
@@ -45,10 +45,10 @@ else
 fi
 
 # ─── 2. cloudflared 터널 프로세스 확인 ───
-if TUNNEL_PID=$(pgrep -x cloudflared 2>/dev/null | head -1) && [ -n "$TUNNEL_PID" ]; then
-  log_ok "cloudflared 터널 실행 중 (PID: $TUNNEL_PID)"
+if TUNNEL_PID=$(launchctl list | awk '/com.taronyang.tunnel/ {print $1; exit}') && [ -n "$TUNNEL_PID" ]; then
+  log_ok "cloudflared 터널 실행 중 (launchd PID: $TUNNEL_PID)"
 else
-  log_fail "cloudflared 프로세스 없음 — 터널 다운 (launchctl kickstart gui/\$(id -u)/com.taronyang.tunnel 확인)"
+  log_fail "com.taronyang.tunnel 서비스 미실행 — 터널 다운 (launchctl kickstart gui/\$(id -u)/com.taronyang.tunnel 확인)"
 fi
 
 # ─── 3. 퍼블릭 URL 접근성 ───
