@@ -105,7 +105,7 @@ EOF
 info "Config 파일 생성: $CF_DIR/config.yml"
 
 # Quick Tunnel 중지
-if launchctl list &>/dev/null | grep -q "com.taronyang.tunnel"; then
+if launchctl list 2>/dev/null | grep -q "com.taronyang.tunnel"; then
     echo "🔄 Quick Tunnel 중지 중..."
     launchctl unload ~/Library/LaunchAgents/com.taronyang.tunnel.plist 2>/dev/null || true
     info "Quick Tunnel 중지됨"
