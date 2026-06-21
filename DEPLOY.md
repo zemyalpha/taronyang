@@ -48,6 +48,22 @@ cloudflared tunnel run --url http://localhost:8000 taronyang
 
 Cloudflare Pages 환경변수에 `BACKEND_URL=https://api.taronyang.com` 설정.
 
+#### 방법 A-0: Cloudflare Quick Tunnel (스테이징/임시 공개 URL)
+Cloudflare 계정이나 인증 없이 즉시 공개 HTTPS URL 생성:
+
+```bash
+# Quick Tunnel 시작 (계정 불필요, URL은 *.trycloudflare.com)
+cloudflared tunnel --url http://localhost:8000
+```
+
+**주의사항:**
+- URL은 무작위이며 재시작마다 변경됨 (`*.trycloudflare.com`)
+- 영구 도메인이나 커스텀 도메인 불가 — 이름 있는 터널(방법 A) 필요
+- 스테이징/프리뷰 용도. 프로덕션은 방법 A 사용
+
+**launchd 자동 실행:** `com.taronyang.tunnel.plist` 파일이 프로젝트 루트에 있음.
+`com.taronyang.backend.plist`와 동일한 패턴으로, 재부팅 시 자동 시작.
+
 #### 방법 B: Tailscale Funnel
 ```bash
 # Tailscale 설치 후
