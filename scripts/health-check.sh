@@ -45,7 +45,7 @@ else
 fi
 
 # ─── 2. cloudflared 터널 프로세스 확인 ───
-if TUNNEL_PID=$(pgrep -f cloudflared 2>/dev/null | head -1) && [ -n "$TUNNEL_PID" ]; then
+if TUNNEL_PID=$(pgrep -x cloudflared 2>/dev/null | head -1) && [ -n "$TUNNEL_PID" ]; then
   log_ok "cloudflared 터널 실행 중 (PID: $TUNNEL_PID)"
 else
   log_fail "cloudflared 프로세스 없음 — 터널 다운 (launchctl kickstart gui/\$(id -u)/com.taronyang.tunnel 확인)"
