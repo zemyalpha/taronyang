@@ -3,6 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
 import { createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, getDb, User } from '../database';
+import { signupSchema, loginSchema, updateMeSchema } from '../validation';
 
 export const authRouter = Router();
 
@@ -63,15 +64,12 @@ function makeUserResponse(user: User) {
 
 /** 회원가입 */
 authRouter.post('/signup', (req: Request, res: Response) => {
-  const { email, password, nickname } = req.body;
-  if (!email || !password) {
-    res.status(400).json({ detail: '이메일과 비밀번호를 입력해주세요' });
+  const parsed = signupSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
     return;
   }
-  if (password.length < 6) {
-    res.status(400).json({ detail: '비밀번호는 6자 이상이어야 합니다' });
-    return;
-  }
+  const { email, password, nickname } = parsed.data;
 
   const existing = getUserByEmail(email);
   if (existing) {
@@ -90,7 +88,12 @@ authRouter.post('/signup', (req: Request, res: Response) => {
 
 /** 로그인 */
 authRouter.post('/login', (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const parsed = loginSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
+    return;
+  }
+  const { email, password } = parsed.data;
   const user = verifyUser(email, password);
   if (!user) {
     res.status(401).json({ detail: '이메일 또는 비밀번호가 일치하지 않습니다' });
@@ -107,25 +110,29 @@ authRouter.get('/me', authMiddleware, (req: Request, res: Response) => {
 
 /** 내 정보 수정 */
 authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
+  const parsed = updateMeSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
+    return;
+  }
+
   const user = (req as any).user as User;
-  const { nickname, birth_date } = req.body;
+  const { nickname, birth_date } = parsed.data;
 
   const db = getDb();
   const updates: string[] = [];
   const params: any[] = [];
 
-  if (nickname) {
+  if (nickname !== undefined) {
     updates.push('nickname = ?');
     params.push(nickname);
   }
-  if (birth_date) {
+  if (birth_date !== undefined) {
     updates.push('birth_date = ?');
     params.push(birth_date);
-    const zodiac = calcZodiac(birth_date);
-    if (zodiac) {
-      updates.push('zodiac_sign = ?');
-      params.push(zodiac);
-    }
+    const zodiac = birth_date ? calcZodiac(birth_date) : null;
+    updates.push('zodiac_sign = ?');
+    params.push(zodiac);
   }
   if (updates.length > 0) {
     params.push(user.id);
@@ -175,7 +182,7 @@ function calcZodiac(birthDate: string): string | null {
     if ((month === 10 && day >= 23) || (month === 11 && day <= 22))
       return '전갈자리';
     if ((month === 11 && day >= 23) || (month === 12 && day <= 24))
-      return '궁수자리';
+      return '사수자리';
     if ((month === 12 && day >= 25) || (month === 1 && day <= 19))
       return '염소자리';
     if ((month === 1 && day >= 20) || (month === 2 && day <= 18))

@@ -3,6 +3,7 @@ import Database from 'better-sqlite3';
 import { config } from './config';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { logger } from './logger';
 
 let db: Database.Database;
 
@@ -67,6 +68,14 @@ export function initDb(): void {
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
 
+    CREATE TABLE IF NOT EXISTS processed_payments (
+      imp_uid TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      processed_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_readings_user ON readings(user_id);
     CREATE INDEX IF NOT EXISTS idx_daily_date ON daily_horoscopes(date, zodiac_sign);
@@ -105,7 +114,7 @@ export function createUser(email: string, password: string, nickname?: string): 
     ).run(userId, 'email', email, hashed, nick);
     return getUserById(userId);
   } catch (err) {
-    console.error('사용자 생성 실패:', err);
+    logger.error('사용자 생성 실패', { error: String(err) });
     return null;
   }
 }

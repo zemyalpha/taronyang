@@ -15,6 +15,8 @@ import { paymentRouter } from './routes/payment';
 import { adminRouter } from './routes/admin';
 import { notifyRouter } from './routes/notify';
 import { startDailyScheduler } from './dailyNotify';
+import { authMiddleware, adminMiddleware } from './routes/auth';
+import { logger } from './logger';
 
 const startTime = new Date();
 
@@ -115,8 +117,8 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'taronyang', version: '0.1.0' });
 });
 
-// 헬스체크 (상세 — 업타임 모니터링용)
-app.get('/api/health/detail', (_req, res) => {
+// 헬스체크 (상세 — 관리자 전용, 시스템 정보 노출 방지)
+app.get('/api/health/detail', authMiddleware, adminMiddleware, (_req, res) => {
   const uptime = process.uptime();
   const memUsage = process.memoryUsage();
   const db = getDb();
@@ -160,7 +162,7 @@ app.get('/api/health/detail', (_req, res) => {
 
 // 전역 에러 핸들러
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(`❌ 처리되지 않은 에러: ${err.message}`, err.stack);
+  logger.error('처리되지 않은 에러', { message: err.message, stack: err.stack });
   res.status(500).json({
     error: '서버 내부 오류가 발생했습니다.',
     ...(config.nodeEnv !== 'production' && { detail: err.message }),
@@ -169,13 +171,13 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 
 // 프로덕션에서 기본 JWT 시크릿 검증
 if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-production') {
-  console.error('⚠️ 프로덕션 환경에서 기본 JWT 시크릿 사용 중. JWT_SECRET 환경변수를 설정하세요.');
+  logger.error('프로덕션 환경에서 기본 JWT 시크릿 사용 중. JWT_SECRET 환경변수를 설정하세요.');
   process.exit(1);
 }
 
 // 서버 시작
 app.listen(config.port, config.host, () => {
-  console.log(`🔮 타로냥 API 서버: http://${config.host}:${config.port} (${config.nodeEnv})`);
+  logger.info('타로냥 API 서버 시작', { host: config.host, port: config.port, env: config.nodeEnv });
   startDailyScheduler();
 });
 

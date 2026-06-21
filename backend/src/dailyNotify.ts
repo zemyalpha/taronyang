@@ -9,6 +9,7 @@ import { config } from './config';
 import { getDb } from './database';
 import { callLlm } from './llm';
 import { getKstDate } from './routes/notify';
+import { logger } from './logger';
 
 const ZODIAC_SIGNS = [
   '양자리', '황소자리', '쌍둥이자리', '게자리', '사자자리', '처녀자리',
@@ -53,8 +54,16 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
     ).run(crypto.randomUUID(), zodiacSign, date, horoscope, horoscope.substring(0, 100), '{}');
     return horoscope;
   } catch (err) {
-    console.error(`일운 생성 실패 (${zodiacSign}):`, err);
-    return `🐹 오늘 ${zodiacSign}의 운세를 가져오지 못했어요. 잠시 후 다시 확인해주세요.`;
+    logger.error('일운 생성 실패', { zodiac: zodiacSign, error: String(err) });
+    const fallback = `🐹 오늘 ${zodiacSign}의 운세를 가져오지 못했어요. 잠시 후 다시 확인해주세요.`;
+    try {
+      db.prepare(
+        'INSERT OR IGNORE INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
+      ).run(crypto.randomUUID(), zodiacSign, date, fallback, fallback.substring(0, 100), '{}');
+    } catch (dbErr) {
+      logger.error('일운 실패 캐시 저장 실패', { error: String(dbErr) });
+    }
+    return fallback;
   }
 }
 
@@ -123,7 +132,7 @@ function getTransporter(): nodemailer.Transporter {
 /** SMTP 전송 */
 async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
   if (!config.smtpUser || !config.smtpPassword) {
-    console.warn('SMTP 설정 없음 — 이메일 발송 건너뜀');
+    logger.warn('SMTP 설정 없음 — 이메일 발송 건너뜀');
     return false;
   }
 
@@ -136,14 +145,14 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
     });
     return true;
   } catch (err) {
-    console.error(`이메일 발송 실패 (${to}):`, err);
+    logger.error('이메일 발송 실패', { to, error: String(err) });
     return false;
   }
 }
 
 /** 구독자 전체에게 일운 발송 */
 export async function sendDailyNotifications(): Promise<void> {
-  console.log('📧 일운 이메일 발송 시작');
+  logger.info('일운 이메일 발송 시작');
 
   const db = getDb();
 
@@ -153,7 +162,7 @@ export async function sendDailyNotifications(): Promise<void> {
     'SELECT COUNT(*) as cnt FROM daily_horoscopes WHERE date = ? AND email_sent = 1'
   ).get(today) as any;
   if (alreadySent.cnt >= ZODIAC_SIGNS.length) {
-    console.log(`오늘(${today}) 이미 발송 완료 — 건너뜀`);
+    logger.info('오늘 이미 발송 완료 — 건너뜀', { date: today });
     return;
   }
 
@@ -165,7 +174,7 @@ export async function sendDailyNotifications(): Promise<void> {
   ).all() as any[];
 
   if (!enabled.length) {
-    console.log('구독자 없음 — 발송 건너뜀');
+    logger.info('구독자 없음 — 발송 건너뜀');
     return;
   }
 
@@ -187,7 +196,7 @@ export async function sendDailyNotifications(): Promise<void> {
 
   sent = results.filter(r => r.status === 'fulfilled' && r.value).length;
 
-  console.log(`📧 일운 이메일 발송 완료: ${sent}/${enabled.length}`);
+  logger.info('일운 이메일 발송 완료', { sent, total: enabled.length });
 
   // 발송 완료 기록
   db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
@@ -210,10 +219,10 @@ export function startDailyScheduler(): void {
       try {
         await sendDailyNotifications();
       } catch (err) {
-        console.error('일운 발송 오류:', err);
+        logger.error('일운 발송 오류', { error: String(err) });
       }
     }
   }, CHECK_INTERVAL);
 
-  console.log('⏰ 일운 스케줄러 시작 — 매일 07:00 발송');
+  logger.info('일운 스케줄러 시작 — 매일 07:00 발송');
 }

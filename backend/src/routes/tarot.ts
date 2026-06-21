@@ -4,6 +4,8 @@ import { ALL_CARDS, getCard, CATEGORY_NAMES } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
 import { tarotReading, callLlm } from '../llm';
 import { saveReading } from './readings';
+import { tarotReadSchema, tarotChatSchema } from '../validation';
+import { logger } from '../logger';
 
 export const tarotRouter = Router();
 
@@ -38,21 +40,22 @@ tarotRouter.get('/shuffle', (req: Request, res: Response) => {
 
 /** 타로 해석 */
 tarotRouter.post('/read', async (req: Request, res: Response) => {
-  const { category, question, cards: selectedCards } = req.body;
-
-  if (!category || !CATEGORY_NAMES[category]) {
-    res.status(400).json({ detail: `잘못된 카테고리: ${category}` });
+  const parsed = tarotReadSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
     return;
   }
-  if (!selectedCards || selectedCards.length !== 3) {
-    res.status(400).json({ detail: '카드를 3장 선택해주세요' });
+  const { category, question, cards: selectedCards } = parsed.data;
+
+  if (!CATEGORY_NAMES[category]) {
+    res.status(400).json({ detail: `잘못된 카테고리: ${category}` });
     return;
   }
 
   // 카드 데이터 조회
   let cards: any[];
   try {
-    cards = selectedCards.map((s: { id: number; is_upright: boolean }) => {
+    cards = selectedCards.map((s) => {
       const card = getCard(s.id);
       if (!card) throw new Error(`카드 없음: ${s.id}`);
       return { ...card, is_upright: s.is_upright };
@@ -63,14 +66,14 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
   }
 
   // 프롬프트 생성
-  const prompt = buildReadingPrompt(CATEGORY_NAMES[category], question || '', cards);
+  const prompt = buildReadingPrompt(CATEGORY_NAMES[category], question, cards);
 
   try {
     const interpretation = await tarotReading(SYSTEM_PROMPT, prompt);
 
     // 기록 저장 (비회원도)
     try {
-      saveReading(null, category, question || '', cards, interpretation);
+      saveReading(null, category, question, cards, interpretation);
     } catch {
       /* 기록 저장 실패는 무시 */
     }
@@ -87,29 +90,25 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
       interpretation,
     });
   } catch (err) {
-    console.error('AI 해석 실패:', err);
+    logger.error('AI 해석 실패', { error: String(err) });
     res.status(500).json({ detail: 'AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.' });
   }
 });
 
 /** 추가 대화 */
 tarotRouter.post('/chat', async (req: Request, res: Response) => {
-  const { question, chat_history, category, cards_summary, previous_reading } = req.body;
-
-  if (!question || question.length > 500) {
-    res.status(400).json({ detail: '질문은 500자 이내로 입력해주세요' });
+  const parsed = tarotChatSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
     return;
   }
-  if (chat_history && chat_history.length >= 10) {
-    res.status(400).json({ detail: '대화 횟수를 초과했어요' });
-    return;
-  }
+  const { question, chat_history, category, cards_summary, previous_reading } = parsed.data;
 
   const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     {
       role: 'user',
-      content: `이전 상담: 카테고리=${category}, 카드=${cards_summary}, 해석=${previous_reading}`,
+      content: `이전 상담: 카테고리=${category || ''}, 카드=${cards_summary || ''}, 해석=${previous_reading || ''}`,
     },
   ];
 
@@ -124,7 +123,7 @@ tarotRouter.post('/chat', async (req: Request, res: Response) => {
     const reply = await callLlm(messages, 1000, 0.8);
     res.json({ reply });
   } catch (err) {
-    console.error('AI 응답 실패:', err);
+    logger.error('AI 응답 실패', { error: String(err) });
     res.status(500).json({ detail: 'AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.' });
   }
 });
