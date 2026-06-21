@@ -16,7 +16,7 @@
     <key>StandardOutPath</key>
     <string>/tmp/taronyang-monitor.out</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/taronyang-monitor.err</key>
+    <string>/tmp/taronyang-monitor.err</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
