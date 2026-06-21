@@ -72,7 +72,7 @@ info "wrangler 인증 확인"
 step "3/7 — Named Tunnel 생성"
 
 # 기존 터널 확인
-TUNNEL_ID=$(cloudflared tunnel list 2>/dev/null | awk -v name="$TUNNEL_NAME" '$2 == name {print $1}' || true)
+TUNNEL_ID=$(cloudflared tunnel list 2>/dev/null | awk -v name="$TUNNEL_NAME" '$2 == name {print $1; exit}' || true)
 
 if [ -n "$TUNNEL_ID" ]; then
     info "터널이 이미 존재합니다: $TUNNEL_NAME ($TUNNEL_ID)"
@@ -134,9 +134,9 @@ cat > "$PLIST_PATH" << EOF
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/tmp/taronyang-tunnel.log</string>
+    <string>$HOME/Library/Logs/taronyang-tunnel.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/taronyang-tunnel.err</string>
+    <string>$HOME/Library/Logs/taronyang-tunnel.err</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
@@ -169,7 +169,7 @@ fi
 
 # BACKEND_URL 환경변수 설정
 echo "🔧 BACKEND_URL 환경변수 설정: https://$API_DOMAIN"
-wrangler pages secret put BACKEND_URL --project-name "$PAGES_PROJECT" <<< "https://$API_DOMAIN" && info "BACKEND_URL 설정 완료" || warn "환경변수 설정 실패 — 대시보드에서 수동 설정: https://$API_DOMAIN"
+wrangler pages secret put BACKEND_URL --project-name "$PAGES_PROJECT" <<< "https://$API_DOMAIN" && info "BACKEND_URL 설정 완료" || error "BACKEND_URL 환경변수 설정 실패"
 
 # 프론트엔드 배포
 echo "📦 프론트엔드 배포 중..."
