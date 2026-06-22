@@ -45,13 +45,13 @@ if (config.nodeEnv === 'production') {
   });
 }
 
-// CORS — 프로덕션에서는 프론트엔드 도메인만 허용, 개발에서는 Origin 반사 (credentials: true + '*' 충돌 방지)
-// Quick Tunnel URL 회전 대응: *.trycloudflare.com Origin 동적 허용 (ZEMA-2620)
+// CORS — 프로덕션에서는 명시적으로 허용된 Origin만 검증 (credentials: true + wildcard 금지)
+// Quick Tunnel URL 회전 대응: config.frontendUrl + extraCorsOrigins로 명시적 허용 (ZEMA-2620)
 const corsOrigins = config.nodeEnv === 'production'
   ? [config.frontendUrl, ...config.extraCorsOrigins].filter(Boolean)
   : true;
 
-// Quick Tunnel URL 회전에도 CORS가 차단되지 않도록 동적 Origin 검증
+// Quick Tunnel URL 회전에도 CORS가 차단되지 않도록 명시적 Origin 검증
 function corsOriginCheck(origin: string | undefined, callback: (err: Error | null, ok?: boolean) => void) {
   // 개발 모드: 모든 Origin 허용
   if (config.nodeEnv !== 'production') {
@@ -64,19 +64,11 @@ function corsOriginCheck(origin: string | undefined, callback: (err: Error | nul
   if (Array.isArray(corsOrigins) && corsOrigins.includes(origin)) {
     return callback(null, true);
   }
-  // GitHub Pages Origin 허용
-  if (/^https:\/\/[a-z0-9-]+\.github\.io$/i.test(origin)) {
-    return callback(null, true);
-  }
-  // trycloudflare.com Origin 허용 (터널 자체에서 서빙되는 경우)
-  if (/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/i.test(origin)) {
-    return callback(null, true);
-  }
   return callback(null, false);
 }
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? corsOriginCheck : true,
+  origin: config.nodeEnv === 'production' ? corsOriginCheck : true,
   credentials: true,
 }));
 

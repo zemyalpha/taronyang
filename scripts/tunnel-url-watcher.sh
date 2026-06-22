@@ -14,8 +14,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BEACON_FILE="$PROJECT_DIR/api-beacon.json"
-TUNNEL_ERR_LOG="/tmp/taronyang-tunnel.err"
-TUNNEL_OUT_LOG="/tmp/taronyang-tunnel.log"
+TUNNEL_ERR_LOG="$HOME/Library/Logs/taronyang-tunnel.err"
+TUNNEL_OUT_LOG="$HOME/Library/Logs/taronyang-tunnel.log"
 
 # 현재 터널 URL 추출 (stderr 우선, stdout 폴백)
 extract_tunnel_url() {
@@ -37,10 +37,10 @@ read_beacon_url() {
     echo ""
     return
   fi
-  python3 -c "
-import json, sys
+  BEACON_FILE="$BEACON_FILE" python3 -c "
+import os, json
 try:
-    with open('$BEACON_FILE') as f:
+    with open(os.environ['BEACON_FILE']) as f:
         data = json.load(f)
     print(data.get('apiUrl', ''))
 except:
@@ -67,16 +67,16 @@ echo "  이전: ${BEACON_URL:-<없음>}"
 echo "  현재: $CURRENT_URL"
 
 # 비컨 파일 업데이트
-python3 -c "
-import json
+CURRENT_URL="$CURRENT_URL" BEACON_FILE="$BEACON_FILE" python3 -c "
+import os, json
 from datetime import datetime, timezone
 data = {
-    'apiUrl': '$CURRENT_URL',
+    'apiUrl': os.environ['CURRENT_URL'],
     'source': 'tunnel-quick',
     'updatedAt': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
     'note': 'Quick Tunnel URL — 자동 업데이트됨 (tunnel-url-watcher.sh)'
 }
-with open('$BEACON_FILE', 'w') as f:
+with open(os.environ['BEACON_FILE'], 'w') as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
     f.write('\n')
 "
@@ -92,6 +92,17 @@ if [ "$BRANCH" != "main" ]; then
   exit 0
 fi
 
+# 푸시되지 않은 로컬 커밋이 있는지 확인하고 있으면 푸시 시도
+if git status -sb 2>/dev/null | grep -q 'ahead'; then
+  echo "  ⚠️ 푸시되지 않은 로컬 커밋이 존재합니다. 푸시를 재시도합니다."
+  if git push origin main 2>/dev/null; then
+    echo "  ✓ 푸시 성공"
+  else
+    echo "  ❌ 푸시 실패 — 다음 실행에서 재시도"
+    exit 0
+  fi
+fi
+
 # 변경사항 커밋
 git add api-beacon.json
 git commit -m "chore: update tunnel URL beacon (auto)
@@ -101,7 +112,8 @@ Co-Authored-By: Paperclip <noreply@paperclip.ing>" 2>/dev/null || {
   exit 0
 }
 
-# 푸시
+# 로컬 변경사항 임시 보관 (커밋된 상태이므로 stash 불필요)
+# 원격 저장소와 결정론적 동기화 후 푸시
 if git push origin main 2>/dev/null; then
   echo "  ✓ GitHub로 푸시 완료 — Pages 자동 재배포 예정"
 else

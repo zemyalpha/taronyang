@@ -55,9 +55,9 @@ cat > "$PLIST_PATH" << EOF
     <key>RunAtLoad</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/tmp/taronyang-tunnel-watcher.log</string>
+    <string>$HOME/Library/Logs/taronyang-tunnel-watcher.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/taronyang-tunnel-watcher.err</string>
+    <string>$HOME/Library/Logs/taronyang-tunnel-watcher.err</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
@@ -71,8 +71,16 @@ EOF
 
 echo "  ✓ plist 생성: $PLIST_PATH"
 
-# 기존 서비스 언로드 (있는 경우)
+# 기존 서비스 언로드 (오류 무시)
 launchctl unload "$PLIST_PATH" 2>/dev/null || true
+
+# 서비스가 완전히 종료될 때까지 대기 (최대 5초)
+for i in {1..10}; do
+  if ! launchctl list 2>/dev/null | grep -q "com.taronyang.tunnel-watcher"; then
+    break
+  fi
+  sleep 0.5
+done
 
 # 서비스 등록
 launchctl load "$PLIST_PATH"
@@ -80,13 +88,13 @@ echo "  ✓ launchd 서비스 등록 완료"
 
 # 상태 확인
 sleep 2
-PID=$(launchctl list 2>/dev/null | awk '$3 == "com.taronyang.tunnel-watcher" {print $1}')
+PID=$(launchctl list 2>/dev/null | awk '$3 == "com.taronyang.tunnel-watcher" {print $1; exit}')
 if [ -n "$PID" ] && [ "$PID" != "-" ]; then
   echo "  ✓ 서비스 실행 중 (PID: $PID)"
 else
-  echo "  ⚠️ 서비스가 아직 시작되지 않음 — 로그 확인: /tmp/taronyang-tunnel-watcher.err"
+  echo "  ⚠️ 서비스가 아직 시작되지 않음 — 로그 확인: $HOME/Library/Logs/taronyang-tunnel-watcher.err"
 fi
 
 echo ""
 echo "완료! 감시자는 60초마다 터널 URL 변경을 확인합니다."
-echo "로그: tail -f /tmp/taronyang-tunnel-watcher.log"
+echo "로그: tail -f $HOME/Library/Logs/taronyang-tunnel-watcher.log"
