@@ -1,0 +1,22 @@
+User-agent: Yeti
+Allow: /
+Disallow: /admin
+Disallow: /mypage
+Disallow: /history
+Disallow: /login
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /mypage
+Disallow: /history
+Disallow: /login
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /mypage
+Disallow: /history
+Disallow: /login
+
+Sitemap: https://taronyang.com/sitemap.xml
