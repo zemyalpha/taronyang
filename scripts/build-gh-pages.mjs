@@ -69,7 +69,7 @@ function generateConfigJs(tunnelUrl) {
     "      // Request object: copy its properties into a plain RequestInit (spec-compliant)",
     "      var ri = { method: input.method, headers: input.headers, mode: input.mode,",
     "        credentials: input.credentials, cache: input.cache, redirect: input.redirect };",
-    "      if (input.method !== 'GET' && input.method !== 'HEAD') ri.body = input.body;",
+    "      if (input.method !== 'GET' && input.method !== 'HEAD') { ri.body = input.body; ri.duplex = 'half'; }",
     "      return origFetch(newUrl, Object.assign(ri, init || {}));",
     '    }',
     '    return origFetch(input, init);',
@@ -81,16 +81,16 @@ function generateConfigJs(tunnelUrl) {
 
 function injectConfigScript(html) {
   const scriptTag = `<script src="${BASE_PATH}/static/js/config.js"></script>`;
-  if (html.includes('config.js')) return html;
+  if (html.includes('static/js/config.js')) return html;
   return html.replace(/<head\b[^>]*>/i, (match) => `${match}\n    ${scriptTag}`);
 }
 
 function rewritePaths(html) {
   let result = html;
 
-  // href="/..." → href="/taronyang/..."  (but not if already prefixed or protocol-relative //)
+  // href/src/action="/..." → "/taronyang/..."  (but not if already prefixed or protocol-relative //)
   result = result.replace(
-    /((?:href|src)\s*=\s*["'])\/(?![/]|taronyang\/)/g,
+    /((?:href|src|action)\s*=\s*["'])\/(?![/]|taronyang\/)/g,
     `$1${BASE_PATH}/`,
   );
 
@@ -113,7 +113,7 @@ mkdirSync(BUILD, { recursive: true });
 
 // 2. Copy frontend files (excluding functions/ and wrangler.toml which are Cloudflare-specific)
 console.log('[build] Copying frontend files...');
-const skipEntries = new Set(['functions', 'wrangler.toml']);
+const skipEntries = new Set(['functions', 'wrangler.toml', 'node_modules', '.DS_Store']);
 for (const entry of readdirSync(FRONTEND)) {
   if (skipEntries.has(entry)) continue;
   cpSync(join(FRONTEND, entry), join(BUILD, entry), { recursive: true });
