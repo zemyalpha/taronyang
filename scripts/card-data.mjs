@@ -21,7 +21,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 1, slug: 'magician', name: '마법사', nameEn: 'The Magician', symbol: '🧙',
-    element: '수성', planet: '수성',
+    element: '공기', planet: '수성',
     keywordsUp: ['창조', '기술', '의지력', '집중', '성공'],
     keywordsDown: ['조작', '기만', '재능낭비', '자신감부족'],
     meaningUp: '당신에게 필요한 모든 것이 이미 갖춰져 있어요. 능력을 믿고 행동하세요.',
@@ -32,7 +32,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 2, slug: 'high-priestess', name: '여사제', nameEn: 'The High Priestess', symbol: '🌙',
-    element: '달', planet: '달',
+    element: '물', planet: '달',
     keywordsUp: ['직관', '지혜', '신비', '내면의목소리', '은비적지식'],
     keywordsDown: ['비밀', '거리낌', '내면무시', '감정억압'],
     meaningUp: '내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요.',
@@ -43,7 +43,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 3, slug: 'empress', name: '여황제', nameEn: 'The Empress', symbol: '👑',
-    element: '금성', planet: '금성',
+    element: '흙', planet: '금성',
     keywordsUp: ['풍요', '모성', '창조', '자연', '성장'],
     keywordsDown: ['과잉보호', '의존', '창조력부족', '나태'],
     meaningUp: '풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요.',
@@ -54,7 +54,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 4, slug: 'emperor', name: '황제', nameEn: 'The Emperor', symbol: '🏛️',
-    element: '양자리', planet: '화성',
+    element: '불', planet: '화성',
     keywordsUp: ['권위', '안정', '리더십', '구조', '아버지상'],
     keywordsDown: ['독재', '완고함', '통제력과도', '유연성부족'],
     meaningUp: '질서와 안정이 필요한 시기예요. 체계적으로 계획을 세워보세요.',
@@ -65,7 +65,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 5, slug: 'hierophant', name: '교황', nameEn: 'The Hierophant', symbol: '⛪',
-    element: '황소자리', planet: '목성',
+    element: '흙', planet: '목성',
     keywordsUp: ['전통', '가르침', '신앙', '의식', '멘토'],
     keywordsDown: ['구습', '권위주의', '반항', '비전통적'],
     meaningUp: '좋은 스승이나 멘토를 만날 수 있는 시기예요. 배움에 열려있으세요.',
@@ -76,7 +76,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 6, slug: 'lovers', name: '연인', nameEn: 'The Lovers', symbol: '💕',
-    element: '쌍둥이자리', planet: '수성',
+    element: '공기', planet: '수성',
     keywordsUp: ['사랑', '선택', '조화', '매력', '결합'],
     keywordsDown: ['갈등', '선택의어려움', '불화', '가치관충돌'],
     meaningUp: '중요한 선택의 순간이에요. 마음이 이끄는 대로 선택하세요.',
@@ -87,7 +87,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 7, slug: 'chariot', name: '전차', nameEn: 'The Chariot', symbol: '⚡',
-    element: '게자리', planet: '달',
+    element: '물', planet: '달',
     keywordsUp: ['승리', '결단', '전진', '의지', '성취'],
     keywordsDown: ['패배감', '방향상실', '조급함', '통제력상실'],
     meaningUp: '강한 의지로 목표를 향해 전진할 때예요. 승리는 가까워요.',
@@ -98,7 +98,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 8, slug: 'strength', name: '힘', nameEn: 'Strength', symbol: '🦁',
-    element: '사자자리', planet: '태양',
+    element: '불', planet: '태양',
     keywordsUp: ['용기', '인내', '내면의힘', '자제력', '연민'],
     keywordsDown: ['나약함', '자신감결핍', '분노', '두려움'],
     meaningUp: '부드러운 힘이 필요한 시기예요. 인내와 용기로 극복할 수 있어요.',
@@ -109,7 +109,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 9, slug: 'hermit', name: '은둔자', nameEn: 'The Hermit', symbol: '🏔️',
-    element: '처녀자리', planet: '수성',
+    element: '흙', planet: '수성',
     keywordsUp: ['성찰', '고독', '지혜', '내면탐구', '안내자'],
     keywordsDown: ['고립', '회피', '외로움', '과도한은둔'],
     meaningUp: '혼자만의 시간이 필요해요. 내면을 깊이 들여다보며 답을 찾으세요.',
@@ -120,7 +120,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 10, slug: 'wheel-of-fortune', name: '운명의 수레바퀴', nameEn: 'Wheel of Fortune', symbol: '🎡',
-    element: '목성', planet: '목성',
+    element: '불', planet: '목성',
     keywordsUp: ['변화', '전환', '운', '기회', '순환'],
     keywordsDown: ['역경', '불운', '저항', '변화에대한두려움'],
     meaningUp: '운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요.',
@@ -131,7 +131,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 11, slug: 'justice', name: '정의', nameEn: 'Justice', symbol: '⚖️',
-    element: '천칭자리', planet: '금성',
+    element: '공기', planet: '금성',
     keywordsUp: ['공정', '진실', '균형', '책임', '인과응보'],
     keywordsDown: ['불공정', '편견', '책임회피', '불균형'],
     meaningUp: '정의로운 결과가 따를 거예요. 정직하게 행동하면 좋은 결실이 있어요.',
@@ -148,12 +148,12 @@ export const MAJOR_ARCANA = [
     meaningUp: '다르게 바라볼 시간이에요. 기다림 속에서 새로운 깨달음을 얻을 거예요.',
     meaningDown: '너무 오래 머뭇거리고 있어요. 결단을 내릴 때가 왔어요.',
     loveAdvice: '관계를 다른 각도에서 바라봐야 해요. 기다림이 필요한 시기예요.',
-    careerAdvice: '잠시 멈추서 관점을 바꿔보세요. 기다림 속에서 새로운 통찰이 올 거예요.',
+    careerAdvice: '잠시 멈춰서 관점을 바꿔보세요. 기다림 속에서 새로운 통찰이 올 거예요.',
     moneyAdvice: '지금은 기다림의 시간이에요. 섣부른 결정보다 인내가 필요해요.',
   },
   {
     id: 13, slug: 'death', name: '죽음', nameEn: 'Death', symbol: '🦋',
-    element: '전갈자리', planet: '명왕성',
+    element: '물', planet: '명왕성',
     keywordsUp: ['끝과시작', '변환', '해방', '탈바꿈', '재탄생'],
     keywordsDown: ['저항', '변화거부', '집착', '두려움'],
     meaningUp: '하나의 장이 끝나고 새로운 장이 시작돼요. 과거를 내려놓고 변화를 받아들이세요.',
@@ -164,7 +164,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 14, slug: 'temperance', name: '절제', nameEn: 'Temperance', symbol: '🏺',
-    element: '사수자리', planet: '목성',
+    element: '불', planet: '목성',
     keywordsUp: ['균형', '조화', '인내', '중용', '치유'],
     keywordsDown: ['과잉', '불균형', '급진', '극단'],
     meaningUp: '모든 것의 균형이 필요한 시기예요. 극단을 피하고 중용을 지키세요.',
@@ -175,7 +175,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 15, slug: 'devil', name: '악마', nameEn: 'The Devil', symbol: '😈',
-    element: '염소자리', planet: '토성',
+    element: '흙', planet: '토성',
     keywordsUp: ['집착', '유혹', '속박', '그림자', '물질주의'],
     keywordsDown: ['해방', '깨어남', '속박에서벗어남', '자유'],
     meaningUp: '무언가에 지나치게 집착하고 있을 수 있어요. 스스로를 옭아매는 것에서 벗어나세요.',
@@ -186,7 +186,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 16, slug: 'tower', name: '탑', nameEn: 'The Tower', symbol: '🗼',
-    element: '화성', planet: '화성',
+    element: '불', planet: '화성',
     keywordsUp: ['급변', '파괴', '진실노출', '해방', '각성'],
     keywordsDown: ['재난회피', '변화지연', '거부', '공포'],
     meaningUp: '갑작스러운 변화가 찾아올 수 있어요. 하지만 무너진 자리에 더 강한 것이 세워질 거예요.',
@@ -197,7 +197,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 17, slug: 'star', name: '별', nameEn: 'The Star', symbol: '⭐',
-    element: '물병자리', planet: '천왕성',
+    element: '공기', planet: '천왕성',
     keywordsUp: ['희망', '영감', '치유', '신앙', '밝은미래'],
     keywordsDown: ['절망', '신뢰상실', '방향감각상실', '희망고문'],
     meaningUp: '희망의 빛이 비치고 있어요. 어려움 속에서도 빛은 항상 있어요.',
@@ -208,7 +208,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 18, slug: 'moon', name: '달', nameEn: 'The Moon', symbol: '🌕',
-    element: '물고기자리', planet: '해왕성',
+    element: '물', planet: '해왕성',
     keywordsUp: ['환상', '직관', '무의식', '불안', '신비'],
     keywordsDown: ['혼란해소', '진실노출', '두려움극복', '명확해짐'],
     meaningUp: '상황이 불명확하고 혼란스러울 수 있어요. 시간이 지나면 진실이 드러날 거예요.',
@@ -219,7 +219,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 19, slug: 'sun', name: '태양', nameEn: 'The Sun', symbol: '☀️',
-    element: '태양', planet: '태양',
+    element: '불', planet: '태양',
     keywordsUp: ['성공', '기쁨', '활력', '긍정', '명확함'],
     keywordsDown: ['일시적침체', '자만', '과도한낙관', '에너지저하'],
     meaningUp: '밝은 에너지가 가득해요! 지금 하는 일이 좋은 결과를 맺을 거예요.',
@@ -241,7 +241,7 @@ export const MAJOR_ARCANA = [
   },
   {
     id: 21, slug: 'world', name: '세계', nameEn: 'The World', symbol: '🌍',
-    element: '토성', planet: '토성',
+    element: '흙', planet: '토성',
     keywordsUp: ['완성', '성취', '통합', '여행', '순환완료'],
     keywordsDown: ['미완성', '지연', '마무리부족', '결핍감'],
     meaningUp: '하나의 큰 순환이 완성되고 있어요. 지금까지의 노력이 아름답게 완성될 거예요.',
