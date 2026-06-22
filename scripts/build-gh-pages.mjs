@@ -62,11 +62,15 @@ function generateConfigJs(tunnelUrl) {
     '  window.fetch = function (input, init) {',
     "    var url = typeof input === 'string' ? input : (input && input.url) || '';",
     "    var path = url.replace(window.location.origin, '');",
-    "    if (path.indexOf('/api/') === 0 || path === '/api') {",
+    "    if (/^\\/api([\\/?]|$)/.test(path)) {",
     "      var rest = path.replace(/^\\/api/, '');",
     '      var newUrl = API_BASE + rest;',
     "      if (typeof input === 'string') return origFetch(newUrl, init);",
-    '      return origFetch(new Request(newUrl, input), init);',
+    "      // Request object: copy its properties into a plain RequestInit (spec-compliant)",
+    "      var ri = { method: input.method, headers: input.headers, mode: input.mode,",
+    "        credentials: input.credentials, cache: input.cache, redirect: input.redirect };",
+    "      if (input.method !== 'GET' && input.method !== 'HEAD') ri.body = input.body;",
+    "      return origFetch(newUrl, Object.assign(ri, init || {}));",
     '    }',
     '    return origFetch(input, init);',
     '  };',
@@ -78,22 +82,22 @@ function generateConfigJs(tunnelUrl) {
 function injectConfigScript(html) {
   const scriptTag = `<script src="${BASE_PATH}/static/js/config.js"></script>`;
   if (html.includes('config.js')) return html;
-  return html.replace(/<head>/, `<head>\n    ${scriptTag}`);
+  return html.replace(/<head\b[^>]*>/i, (match) => `${match}\n    ${scriptTag}`);
 }
 
 function rewritePaths(html) {
   let result = html;
 
-  // href="/..." → href="/taronyang/..."  (but not if already prefixed)
+  // href="/..." → href="/taronyang/..."  (but not if already prefixed or protocol-relative //)
   result = result.replace(
-    /((?:href|src)\s*=\s*["'])\/(?!taronyang\/)/g,
+    /((?:href|src)\s*=\s*["'])\/(?![/]|taronyang\/)/g,
     `$1${BASE_PATH}/`,
   );
 
   // location.href = '/...' → location.href = '/taronyang/...'
   // Also catches onclick="location.href='/...'"
   result = result.replace(
-    /((?:window\.)?location\.href\s*=\s*["'])\/(?!taronyang\/)/g,
+    /((?:window\.)?location\.href\s*=\s*["'])\/(?![/]|taronyang\/)/g,
     `$1${BASE_PATH}/`,
   );
 
