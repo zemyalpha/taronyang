@@ -4,6 +4,7 @@
   "description": "무료 AI 타로 서비스. 연애운, 재물운, 직장운, 종합운을 카드로 해석해 드립니다.",
   "lang": "ko-KR",
   "dir": "ltr",
+  "id": "/",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",

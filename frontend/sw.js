@@ -108,7 +108,13 @@ self.addEventListener("activate", (event) => {
 });
 
 // 민감한 API 경로는 캐싱에서 제외 (보안: 인증/관리자/결제 데이터 유출 방지)
-const SENSITIVE_API_PATHS = ["/api/auth", "/api/admin", "/api/payment"];
+const SENSITIVE_API_PATHS = [
+  "/api/auth",
+  "/api/admin",
+  "/api/payment",
+  "/api/readings",
+  "/api/notifications",
+];
 
 function isCacheableApiRequest(url) {
   if (!url.pathname.startsWith("/api/")) return false;
@@ -165,7 +171,8 @@ async function handlePage(event) {
     }
     return networkResponse;
   } catch (_err) {
-    const cached = await cache.match(request);
+    // 모든 캐시 저장소(PAGE_CACHE + STATIC_CACHE의 사전 캐싱된 페이지)를 조회
+    const cached = await caches.match(request);
     if (cached) return cached;
     // 오프라인 폴백
     const offline = await caches.match("/offline.html");

@@ -181,7 +181,9 @@ window.addEventListener('appinstalled', () => {
 
 // iOS는 beforeinstallprompt 미지원 → 별도 가이드 토스트 (Safari 홈추가만)
 function showIOSInstallHint() {
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isIOS =
+    /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isSafari =
     /safari/i.test(navigator.userAgent) &&
     !/crios/i.test(navigator.userAgent) &&
