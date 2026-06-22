@@ -20,7 +20,7 @@ import { cpSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, rea
 import { join, dirname, relative, extname } from 'path';
 import { fileURLToPath } from 'url';
 import { generateCardPages } from './generate-card-pages.mjs';
-import { MAJOR_ARCANA } from './card-data.mjs';
+import { ALL_CARDS } from './card-data.mjs';
 
 const __scriptDir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__scriptDir, '..');
@@ -168,7 +168,7 @@ function updateSitemapWithCards(buildDir) {
   sitemap = sitemap.replace(/\n  <!-- card-pages-start -->[\s\S]*?<!-- card-pages-end -->/g, '');
 
   const today = new Date().toISOString().split('T')[0];
-  const cardUrls = MAJOR_ARCANA.map((card) => {
+  const cardUrls = ALL_CARDS.map((card) => {
     const slug = `${card.id}-${card.slug}`;
     return [
       `  <url>`,
@@ -192,7 +192,7 @@ function updateSitemapWithCards(buildDir) {
   const injection = `\n  <!-- card-pages-start -->\n${cardsIndexUrl}\n${cardUrls}\n  <!-- card-pages-end -->`;
   sitemap = sitemap.replace('</urlset>', `${injection}\n</urlset>`);
   writeFileSync(sitemapPath, sitemap);
-  console.log(`  ✓ Added ${MAJOR_ARCANA.length} card URLs to sitemap.xml`);
+  console.log(`  ✓ Added ${ALL_CARDS.length} card URLs to sitemap.xml`);
 }
 
 // === Build ===
