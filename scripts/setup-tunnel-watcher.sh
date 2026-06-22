@@ -19,6 +19,8 @@ BACKEND_PLIST="$HOME/Library/LaunchAgents/com.taronyang.backend.plist"
 if [ -f "$BACKEND_PLIST" ]; then
   DETECTED=$(grep -A1 'WorkingDirectory' "$BACKEND_PLIST" 2>/dev/null | grep '<string>' | sed 's/.*<string>\(.*\)<\/string>.*/\1/' | head -1 || true)
   if [ -n "$DETECTED" ]; then
+    # WorkingDirectory는 backend/를 가리키므로 한 단계 위가 프로젝트 루트
+    DETECTED=$(dirname "$DETECTED")
     RUNTIME_DIR="$DETECTED"
     echo "  런타임 워크스페이스 감지: $RUNTIME_DIR"
   fi
