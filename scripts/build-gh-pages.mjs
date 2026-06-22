@@ -68,7 +68,8 @@ function generateConfigJs(tunnelUrl) {
     "      if (typeof input === 'string') return origFetch(newUrl, init);",
     "      // Request object: copy its properties into a plain RequestInit (spec-compliant)",
     "      var ri = { method: input.method, headers: input.headers, mode: input.mode,",
-    "        credentials: input.credentials, cache: input.cache, redirect: input.redirect };",
+    "        credentials: input.credentials, cache: input.cache, redirect: input.redirect,",
+    "        signal: input.signal };",
     "      if (input.method !== 'GET' && input.method !== 'HEAD') { ri.body = input.body; ri.duplex = 'half'; }",
     "      return origFetch(newUrl, Object.assign(ri, init || {}));",
     '    }',
@@ -94,10 +95,10 @@ function rewritePaths(html) {
     `$1${BASE_PATH}/`,
   );
 
-  // location.href = '/...' → location.href = '/taronyang/...'
+  // location.href = '/...', location = '/...', location.assign('/...'), location.replace('/...')
   // Also catches onclick="location.href='/...'"
   result = result.replace(
-    /((?:window\.)?location\.href\s*=\s*["'])\/(?![/]|taronyang\/)/g,
+    /((?:window\.)?location(?:\.href|\.assign|\.replace)?\s*(?:=\s*|\(\s*)["'])\/(?![/]|taronyang\/)/g,
     `$1${BASE_PATH}/`,
   );
 
@@ -122,11 +123,12 @@ for (const entry of readdirSync(FRONTEND)) {
 // 3. Create static/ directory structure (backend maps /static → frontend root)
 console.log('[build] Creating static/ directory mapping...');
 mkdirSync(join(BUILD, 'static'), { recursive: true });
-if (existsSync(join(BUILD, 'css'))) {
-  cpSync(join(BUILD, 'css'), join(BUILD, 'static', 'css'), { recursive: true });
-}
-if (existsSync(join(BUILD, 'js'))) {
-  cpSync(join(BUILD, 'js'), join(BUILD, 'static', 'js'), { recursive: true });
+for (const entry of readdirSync(BUILD)) {
+  if (entry === 'static' || entry.endsWith('.html') || entry.startsWith('.')) continue;
+  const fullPath = join(BUILD, entry);
+  if (statSync(fullPath).isDirectory()) {
+    cpSync(fullPath, join(BUILD, 'static', entry), { recursive: true });
+  }
 }
 
 // 4. Generate config.js with fetch interceptor
