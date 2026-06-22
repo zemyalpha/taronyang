@@ -19,6 +19,8 @@
 import { cpSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, readdirSync, statSync } from 'fs';
 import { join, dirname, relative, extname } from 'path';
 import { fileURLToPath } from 'url';
+import { generateCardPages } from './generate-card-pages.mjs';
+import { MAJOR_ARCANA } from './card-data.mjs';
 
 const __scriptDir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__scriptDir, '..');
@@ -105,9 +107,43 @@ function rewritePaths(html) {
   return result;
 }
 
-// === Build ===
+function updateSitemapWithCards(buildDir) {
+  const sitemapPath = join(buildDir, 'sitemap.xml');
+  if (!existsSync(sitemapPath)) return;
+  let sitemap = readFileSync(sitemapPath, 'utf-8');
 
-// 1. Clean and create build directory
+  // Remove any previously injected card entries
+  sitemap = sitemap.replace(/\n  <!-- card-pages-start -->[\s\S]*?<!-- card-pages-end -->/g, '');
+
+  const today = new Date().toISOString().split('T')[0];
+  const cardUrls = MAJOR_ARCANA.map((card) => {
+    const slug = `${card.id}-${card.slug}`;
+    return [
+      `  <url>`,
+      `    <loc>https://taronyang.com/cards/${slug}.html</loc>`,
+      `    <lastmod>${today}</lastmod>`,
+      `    <changefreq>monthly</changefreq>`,
+      `    <priority>0.7</priority>`,
+      `  </url>`,
+    ].join('\n');
+  }).join('\n');
+
+  const cardsIndexUrl = [
+    `  <url>`,
+    `    <loc>https://taronyang.com/cards/</loc>`,
+    `    <lastmod>${today}</lastmod>`,
+    `    <changefreq>weekly</changefreq>`,
+    `    <priority>0.8</priority>`,
+    `  </url>`,
+  ].join('\n');
+
+  const injection = `\n  <!-- card-pages-start -->\n${cardsIndexUrl}\n${cardUrls}\n  <!-- card-pages-end -->`;
+  sitemap = sitemap.replace('</urlset>', `${injection}\n</urlset>`);
+  writeFileSync(sitemapPath, sitemap);
+  console.log(`  ✓ Added ${MAJOR_ARCANA.length} card URLs to sitemap.xml`);
+}
+
+// === Build ===
 console.log('[build] Cleaning build directory...');
 rmSync(BUILD, { recursive: true, force: true });
 mkdirSync(BUILD, { recursive: true });
@@ -132,6 +168,10 @@ for (const entry of readdirSync(BUILD)) {
     cpSync(fullPath, join(BUILD, 'static', entry));
   }
 }
+
+// 3.5 Generate card interpretation pages (ZEMA-2610)
+console.log('[build] Generating card interpretation pages...');
+generateCardPages(BUILD);
 
 // 4. Generate config.js with fetch interceptor
 console.log(`[build] Generating config.js (TUNNEL_URL=${TUNNEL_URL || 'none'})...`);
@@ -163,6 +203,10 @@ for (const page of ROUTED_PAGES) {
 // 7. Add .nojekyll to prevent Jekyll processing
 console.log('[build] Adding .nojekyll...');
 writeFileSync(join(BUILD, '.nojekyll'), '');
+
+// 8. Update sitemap with card pages
+console.log('[build] Updating sitemap with card pages...');
+updateSitemapWithCards(BUILD);
 
 // 8. Summary
 const allFiles = findHtmlFiles(BUILD);
