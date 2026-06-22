@@ -70,9 +70,10 @@ echo "$NEW_URL"
 ### 1. 경로 치환
 
 ```bash
-# 현재 프로젝트 경로로 자동 치환
+# 현재 프로젝트 경로로 자동 치환 (Bash 매개변수 확장 사용 — 특수문자 안전)
 mkdir -p ~/Library/LaunchAgents
-sed "s|YOUR_PROJECT_PATH|$(pwd)|g" com.taronyang.monitor.plist \
+template=$(cat com.taronyang.monitor.plist)
+printf '%s\n' "${template//YOUR_PROJECT_PATH/$(pwd)}" \
   > ~/Library/LaunchAgents/com.taronyang.monitor.plist
 ```
 
