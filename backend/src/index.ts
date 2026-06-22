@@ -45,10 +45,10 @@ if (config.nodeEnv === 'production') {
   });
 }
 
-// CORS — 프로덕션에서는 프론트엔드 도메인만 허용
+// CORS — 프로덕션에서는 프론트엔드 도메인만 허용, 개발에서는 Origin 반사 (credentials: true + '*' 충돌 방지)
 const corsOrigins = config.nodeEnv === 'production'
-  ? [config.frontendUrl].filter(Boolean)
-  : '*';
+  ? [config.frontendUrl, ...config.extraCorsOrigins].filter(Boolean)
+  : true;
 app.use(cors({
   origin: corsOrigins,
   credentials: true,
