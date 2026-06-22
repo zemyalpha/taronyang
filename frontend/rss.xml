@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>타로냥 — 무료 AI 타로</title>
+    <link>https://taronyang.com</link>
+    <description>무료 AI 타로 서비스 타로냥. 연애운, 재물운, 직장운, 종합운을 카드로 해석하는 AI 타로. 매일 업데이트되는 오늘의 운세와 타로 상담.</description>
+    <language>ko</language>
+    <lastBuildDate>Mon, 22 Jun 2026 00:00:00 +0900</lastBuildDate>
+    <ttl>60</ttl>
+
+    <item>
+      <title>오늘의 운세 — 타로냥</title>
+      <link>https://taronyang.com/daily</link>
+      <description>매일 업데이트되는 AI 오늘의 운세. 오늘의 행운의 색, 추천 카드, 한 줄 조언을 확인하세요.</description>
+      <pubDate>Mon, 22 Jun 2026 00:00:00 +0900</pubDate>
+      <guid>https://taronyang.com/daily</guid>
+    </item>
+
+    <item>
+      <title>무료 AI 타로 상담 — 연애운</title>
+      <link>https://taronyang.com/tarot?cat=love</link>
+      <description>연애, 사랑, 인연, 관계에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 연애운을 해석합니다.</description>
+      <pubDate>Mon, 22 Jun 2026 00:00:00 +0900</pubDate>
+      <guid>https://taronyang.com/tarot?cat=love</guid>
+    </item>
+
+    <item>
+      <title>무료 AI 타로 상담 — 재물운</title>
+      <link>https://taronyang.com/tarot?cat=money</link>
+      <description>돈, 투자, 재산에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 재물운을 해석합니다.</description>
+      <pubDate>Mon, 22 Jun 2026 00:00:00 +0900</pubDate>
+      <guid>https://taronyang.com/tarot?cat=money</guid>
+    </item>
+
+    <item>
+      <title>무료 AI 타로 상담 — 직장운</title>
+      <link>https://taronyang.com/tarot?cat=career</link>
+      <description>커리어, 이직, 승진에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 직장운을 해석합니다.</description>
+      <pubDate>Mon, 22 Jun 2026 00:00:00 +0900</pubDate>
+      <guid>https://taronyang.com/tarot?cat=career</guid>
+    </item>
+
+    <item>
+      <title>무료 AI 타로 상담 — 종합운</title>
+      <link>https://taronyang.com/tarot?cat=general</link>
+      <description>전체적인 흐름에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 종합운을 해석합니다.</description>
+      <pubDate>Mon, 22 Jun 2026 00:00:00 +0900</pubDate>
+      <guid>https://taronyang.com/tarot?cat=general</guid>
+    </item>
+
+    <item>
+      <title>타로냥 요금제 안내</title>
+      <link>https://taronyang.com/pricing</link>
+      <description>타로냥 무료 및 프리미엄 요금제 안내. 매일 1회 무료 타로, 무제한 상담 프리미엄.</description>
+      <pubDate>Mon, 22 Jun 2026 00:00:00 +0900</pubDate>
+      <guid>https://taronyang.com/pricing</guid>
+    </item>
+  </channel>
+</rss>
