@@ -44,10 +44,10 @@ grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/taronyang-tunnel.err | ta
 
 ```bash
 # 최근 헬스 체크 결과 확인
-tail -20 /tmp/taronyang-monitor.log
+tail -20 taronyang-monitor.log
 
 # 장애 기록만 필터
-grep '❌' /tmp/taronyang-monitor.log
+grep '❌' taronyang-monitor.log
 ```
 
 ## 스테이징 URL 업데이트 절차
@@ -93,11 +93,11 @@ launchctl list | grep taronyang
 bash scripts/health-check.sh
 
 # 로그 파일 확인
-tail -20 /tmp/taronyang-monitor.log
+tail -20 taronyang-monitor.log
 ```
 
-> **참고:** 로그는 `/tmp/`에 저장되어 재부팅 시 자동으로 정리됩니다.
-> `ProgramArguments` 경로만 `YOUR_PROJECT_PATH` 플레이스홀더 치환이 필요합니다.
+> **참고:** 헬스 모니터 로그는 프로젝트 디렉터리 내부에 저장됩니다.
+> `YOUR_PROJECT_PATH` 플레이스홀더 치환 시 로그 경로도 함께 치환됩니다.
 
 ## 서비스 관리 명령어
 

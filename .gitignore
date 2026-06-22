@@ -20,6 +20,7 @@ node_modules/
 
 # Logs
 *.log
+*.err
 node_modules/
 backend/dist/
 backend/taronyang.db*
