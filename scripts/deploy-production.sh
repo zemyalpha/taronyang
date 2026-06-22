@@ -100,8 +100,11 @@ echo "🌐 $API_DOMAIN → 터널 연결 중..."
 if ROUTE_OUT=$(cloudflared tunnel route dns "$TUNNEL_NAME" "$API_DOMAIN" 2>&1); then
     info "DNS 라우팅 완료"
 else
-    warn "DNS 라우팅 설정 중 참고사항/실패: $ROUTE_OUT"
-    echo "   이미 설정되어 있다면 무시해도 좋습니다."
+    if echo "$ROUTE_OUT" | grep -qiE "already exists|already pointing|sharing the same name"; then
+        info "DNS 라우팅이 이미 설정되어 있습니다."
+    else
+        error "DNS 라우팅 설정 실패: $ROUTE_OUT"
+    fi
 fi
 
 # ─── Tunnel Config 파일 ───
@@ -169,7 +172,17 @@ launchctl unload "$PLIST_PATH" 2>/dev/null || true
 info "기존 Tunnel 서비스 언로드 완료"
 
 launchctl load "$PLIST_PATH"
-sleep 3
+success=0
+for _ in {1..10}; do
+    if pgrep -f "cloudflared.*run.*$TUNNEL_NAME" &>/dev/null; then
+        success=1
+        break
+    fi
+    sleep 1
+done
+if [ $success -eq 0 ]; then
+    error "Named Tunnel 프로세스가 시작되지 않았습니다. 로그를 확인하세요: tail -n 20 $HOME/Library/Logs/taronyang-tunnel.err"
+fi
 info "Named Tunnel 시작됨"
 
 # ─── Cloudflare Pages 배포 ───
