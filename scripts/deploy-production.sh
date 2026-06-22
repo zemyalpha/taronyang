@@ -115,11 +115,6 @@ info "Config 파일 생성: $CONFIG_PATH"
 # Named Tunnel용 launchd plist 경로 (unload + create 일관성을 위해 상단에서 정의)
 PLIST_PATH="$HOME/Library/LaunchAgents/com.taronyang.tunnel.plist"
 
-# 기존 Tunnel 서비스 언로드 (등록되었지만 비활성 상태도 커버하기 위해 무조건 실행)
-echo "🔄 기존 Tunnel 서비스 언로드 중..."
-launchctl unload "$PLIST_PATH" 2>/dev/null || true
-info "기존 Tunnel 서비스 언로드 완료"
-
 # Named Tunnel용 launchd plist 생성 및 등록 (~/Library/LaunchAgents에 직접 작성)
 mkdir -p "$(dirname "$PLIST_PATH")"
 mkdir -p "$HOME/Library/Logs"
@@ -159,6 +154,11 @@ cat > "$PLIST_PATH" << EOF
 </plist>
 EOF
 info "Named Tunnel plist 생성: $PLIST_PATH"
+
+# 기존 Tunnel 서비스 언로드 (plist 생성 후 실행 — stale 서비스 확실하게 제거)
+echo "🔄 기존 Tunnel 서비스 언로드 중..."
+launchctl unload "$PLIST_PATH" 2>/dev/null || true
+info "기존 Tunnel 서비스 언로드 완료"
 
 launchctl load "$PLIST_PATH"
 sleep 3
