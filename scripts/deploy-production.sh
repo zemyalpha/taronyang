@@ -78,7 +78,10 @@ info "wrangler 인증 확인"
 step "3/7 — Named Tunnel 생성"
 
 # 기존 터널 확인
-TUNNEL_ID=$(cloudflared tunnel list 2>/dev/null | awk -v name="$TUNNEL_NAME" '$2 == name {print $1; exit}' || true)
+if ! TUNNEL_LIST=$(cloudflared tunnel list 2>&1); then
+    error "Cloudflare 터널 목록을 가져오는 데 실패했습니다: $TUNNEL_LIST"
+fi
+TUNNEL_ID=$(echo "$TUNNEL_LIST" | awk -v name="$TUNNEL_NAME" '$2 == name {print $1; exit}')
 
 if [ -n "$TUNNEL_ID" ]; then
     info "터널이 이미 존재합니다: $TUNNEL_NAME ($TUNNEL_ID)"
@@ -94,7 +97,12 @@ fi
 step "4/7 — DNS 라우팅 설정"
 
 echo "🌐 $API_DOMAIN → 터널 연결 중..."
-cloudflared tunnel route dns "$TUNNEL_NAME" "$API_DOMAIN" 2>/dev/null && info "DNS 라우팅 완료" || warn "DNS 라우팅 실패 — 수동 확인 필요: cloudflared tunnel route dns $TUNNEL_NAME $API_DOMAIN"
+if ROUTE_OUT=$(cloudflared tunnel route dns "$TUNNEL_NAME" "$API_DOMAIN" 2>&1); then
+    info "DNS 라우팅 완료"
+else
+    warn "DNS 라우팅 설정 중 참고사항/실패: $ROUTE_OUT"
+    echo "   이미 설정되어 있다면 무시해도 좋습니다."
+fi
 
 # ─── Tunnel Config 파일 ───
 step "5/7 — Tunnel Config 및 launchd 전환"
