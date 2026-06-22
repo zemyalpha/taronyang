@@ -64,14 +64,14 @@ echo "$NEW_URL"
 
 ## launchd 서비스 설정 가이드
 
-`com.taronyang.monitor.plist` 파일에는 `/Users/YOUR_USERNAME/` 플레이스홀더가 포함되어 있습니다.
-각 개발자/서버 환경에 맞게 경로를 치환한 후 launchd에 등록해야 합니다.
+`com.taronyang.monitor.plist` 파일에는 `YOUR_PROJECT_PATH` 플레이스홀더가 포함되어 있습니다.
+프로젝트 루트 경로로 치환한 후 launchd에 등록해야 합니다.
 
 ### 1. 경로 치환
 
 ```bash
-# 현재 사용자의 홈 디렉토리로 치환
-sed "s|/Users/YOUR_USERNAME|$HOME|g" com.taronyang.monitor.plist \
+# 현재 프로젝트 경로로 자동 치환
+sed "s|YOUR_PROJECT_PATH|$(pwd)|g" com.taronyang.monitor.plist \
   > ~/Library/LaunchAgents/com.taronyang.monitor.plist
 ```
 
@@ -96,7 +96,7 @@ tail -20 /tmp/taronyang-monitor.log
 ```
 
 > **참고:** 로그는 `/tmp/`에 저장되어 재부팅 시 자동으로 정리됩니다.
-> `ProgramArguments` 경로만 `YOUR_USERNAME` 플레이스홀더 치환이 필요합니다.
+> `ProgramArguments` 경로만 `YOUR_PROJECT_PATH` 플레이스홀더 치환이 필요합니다.
 
 ## 서비스 관리 명령어
 
