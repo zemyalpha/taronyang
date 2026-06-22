@@ -85,14 +85,9 @@ function generateCardPage(card, allCards) {
   const keywordTags = (arr, type) =>
     arr.map((k) => `<span class="keyword-tag ${type}">${escapeHtml(k)}</span>`).join('\n                    ');
 
-  const relatedCards = allCards
-    .filter((c) => c.id !== card.id)
-    .sort(() => 0.5 - ((card.id * 17 + Date.now()) % 1))
-    .slice(0, 4)
-    .map((c) => {
-      const sameId = (card.id + c.id) % allCards.length;
-      return allCards[sameId];
-    });
+  const relatedCards = [5, 11, 7, 17].map(
+    (offset) => allCards[(card.id + offset) % allCards.length],
+  );
 
   return `<!DOCTYPE html>
 <html lang="ko">
