@@ -14,7 +14,7 @@ if ('serviceWorker' in navigator) {
     }
   });
 
-  window.addEventListener('load', () => {
+  const registerSW = () => {
     navigator.serviceWorker
       .register('/sw.js', { scope: '/' })
       .then((reg) => {
@@ -34,7 +34,13 @@ if ('serviceWorker' in navigator) {
         });
       })
       .catch((err) => console.warn('[PWA] SW 등록 실패:', err));
-  });
+  };
+
+  if (document.readyState === 'complete') {
+    registerSW();
+  } else {
+    window.addEventListener('load', registerSW);
+  }
 }
 
 // === PWA: 홈스크린 설치 프롬프트 (Android Chrome) ===
@@ -190,7 +196,7 @@ function showIOSInstallHint() {
   const banner = buildInstallBanner();
   // iOS는 prompt()가 없으므로 설치 버튼을 공유/가이드로 변경
   const installBtn = banner.querySelector('.ti-install');
-  installBtn.textContent = '방법 보기';
+  installBtn.textContent = '확인';
   banner.querySelector('.ti-text span').textContent =
     'Safari 공유 버튼 → 홈 화면에 추가';
   document.body.appendChild(banner);
@@ -206,6 +212,12 @@ function showIOSInstallHint() {
   banner.querySelector('.ti-close').addEventListener('click', dismiss);
 }
 
-window.addEventListener('load', () => {
+const initIOSInstallHint = () => {
   setTimeout(showIOSInstallHint, INSTALL_SHOW_DELAY_MS);
-});
+};
+
+if (document.readyState === 'complete') {
+  initIOSInstallHint();
+} else {
+  window.addEventListener('load', initIOSInstallHint);
+}

@@ -19,7 +19,6 @@ const PRECACHE_URLS = [
   "/static/js/app.js",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
-  "/offline.html",
 ];
 
 // 오프라인 폴백 페이지 (인라인으로 간단하게)
@@ -76,7 +75,7 @@ self.addEventListener("install", (event) => {
       await cache.put("/offline.html", fallbackResponse);
       // 핵심 자산 사전 캐싱 (실패해도 설치는 계속)
       await Promise.allSettled(
-        PRECACHE_URLS.filter((u) => u !== "/offline.html").map(async (url) => {
+        PRECACHE_URLS.map(async (url) => {
           try {
             const res = await fetch(url, { cache: "no-cache" });
             if (res && res.ok) await cache.put(url, res.clone());
@@ -126,18 +125,27 @@ function isStaticAsset(url) {
 }
 
 // 정적 자산: Cache First + 백그라운드 업데이트 (stale-while-revalidate)
-async function handleStaticAsset(request) {
+async function handleStaticAsset(event) {
+  const { request } = event;
   const cache = await caches.open(STATIC_CACHE);
   const cached = await cache.match(request);
-  const networkFetch = fetch(request)
-    .then((response) => {
-      if (response && response.ok) {
-        cache.put(request, response.clone());
-      }
-      return response;
-    })
-    .catch(() => cached);
-  return cached || networkFetch;
+  if (cached) {
+    event.waitUntil(
+      fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            cache.put(request, response.clone());
+          }
+        })
+        .catch(() => {})
+    );
+    return cached;
+  }
+  const networkResponse = await fetch(request).catch(() => null);
+  if (networkResponse && networkResponse.ok) {
+    cache.put(request, networkResponse.clone());
+  }
+  return networkResponse || Response.error();
 }
 
 // HTML 문서: Network First, 실패 시 캐시 → 오프라인 폴백
@@ -148,7 +156,7 @@ async function handlePage(event) {
     // navigation preload 응답이 있으면 재사용
     const preloadResponse =
       event.preloadResponse instanceof Promise
-        ? await event.preloadResponse
+        ? await event.preloadResponse.catch(() => null)
         : null;
     const networkResponse =
       preloadResponse || (await fetch(request));
@@ -202,7 +210,7 @@ self.addEventListener("fetch", (event) => {
   } else if (isCacheableApiRequest(url)) {
     event.respondWith(handleApi(request));
   } else if (isStaticAsset(url)) {
-    event.respondWith(handleStaticAsset(request));
+    event.respondWith(handleStaticAsset(event));
   }
   // 그 외 요청은 브라우저 기본 동작
 });

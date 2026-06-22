@@ -67,7 +67,7 @@ test.describe('PWA — Service Worker', () => {
     });
 
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await page.evaluate(() => navigator.serviceWorker.ready);
 
     // SW 등록 확인
     const swState = await page.evaluate(async () => {
@@ -88,7 +88,7 @@ test.describe('PWA — Service Worker', () => {
   test('오프라인 폴백 동작', async ({ page, context }) => {
     // 페이지 로드 후 SW가 캐시 구축할 때까지 대기
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await page.evaluate(() => navigator.serviceWorker.ready);
 
     // 오프라인 모드 전환
     await context.setOffline(true);
