@@ -101,7 +101,11 @@ if ROUTE_OUT=$(cloudflared tunnel route dns "$TUNNEL_NAME" "$API_DOMAIN" 2>&1); 
     info "DNS 라우팅 완료"
 else
     if echo "$ROUTE_OUT" | grep -qiE "already exists|already pointing|sharing the same name"; then
-        info "DNS 라우팅이 이미 설정되어 있습니다."
+        if echo "$ROUTE_OUT" | grep -qi "$TUNNEL_ID"; then
+            info "DNS 라우팅이 이미 이 터널($TUNNEL_ID)로 설정되어 있습니다."
+        else
+            warn "DNS 라우팅이 이미 존재하지만 현재 터널($TUNNEL_ID)을 가리키고 있지 않을 수 있습니다: $ROUTE_OUT"
+        fi
     else
         error "DNS 라우팅 설정 실패: $ROUTE_OUT"
     fi
@@ -169,12 +173,22 @@ info "Named Tunnel plist 생성: $PLIST_PATH"
 # 기존 Tunnel 서비스 언로드 (plist 생성 후 실행 — stale 서비스 확실하게 제거)
 echo "🔄 기존 Tunnel 서비스 언로드 중..."
 launchctl unload "$PLIST_PATH" 2>/dev/null || true
+# launchctl unload는 비동기 — 프로세스가 완전히 종료될 때까지 대기
+for _ in {1..5}; do
+    OLD_PID=$(launchctl list 2>/dev/null | awk '$3 == "com.taronyang.tunnel" {print $1}')
+    if [ -z "$OLD_PID" ] || [ "$OLD_PID" = "-" ]; then
+        break
+    fi
+    sleep 1
+done
 info "기존 Tunnel 서비스 언로드 완료"
 
 launchctl load "$PLIST_PATH"
 success=0
+# launchctl list로 서비스 PID 확인 (pgrep -f는 editor/tail 오탐 위험)
 for _ in {1..10}; do
-    if pgrep -f "cloudflared.*run.*$TUNNEL_NAME" &>/dev/null; then
+    PID=$(launchctl list 2>/dev/null | awk '$3 == "com.taronyang.tunnel" {print $1}')
+    if [ -n "$PID" ] && [ "$PID" != "-" ]; then
         success=1
         break
     fi
