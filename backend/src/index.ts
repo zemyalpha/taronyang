@@ -47,7 +47,7 @@ if (config.nodeEnv === 'production') {
 
 // CORS — 프로덕션에서는 프론트엔드 도메인만 허용
 const corsOrigins = config.nodeEnv === 'production'
-  ? [config.frontendUrl].filter(Boolean)
+  ? [config.frontendUrl, ...config.extraCorsOrigins].filter(Boolean)
   : '*';
 app.use(cors({
   origin: corsOrigins,

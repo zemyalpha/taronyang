@@ -56,4 +56,5 @@ export const config = {
 
   // CORS
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8000',
+  extraCorsOrigins: (process.env.EXTRA_CORS_ORIGINS || '').split(',').filter(Boolean),
 };
