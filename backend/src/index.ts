@@ -95,6 +95,25 @@ app.use('/api/notifications', notifyRouter);
 const frontendPath = path.join(__dirname, '../../frontend');
 app.use('/static', express.static(frontendPath));
 
+// PWA 자산 — Service Worker, Web App Manifest, 아이콘
+// SW는 항상 최신 버전을 제공하기 위해 no-cache
+app.get('/sw.js', (_req, res) => {
+  res.set('Content-Type', 'application/javascript; charset=utf-8');
+  res.set('Cache-Control', 'no-cache, must-revalidate');
+  res.set('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(frontendPath, 'sw.js'));
+});
+app.get('/manifest.json', (_req, res) => {
+  res.set('Content-Type', 'application/manifest+json; charset=utf-8');
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(frontendPath, 'manifest.json'));
+});
+// 아이콘 — 장기 캐싱 (immutable)
+app.use('/icons', express.static(path.join(frontendPath, 'icons'), {
+  maxAge: '1y',
+  immutable: true,
+}));
+
 const htmlPages = [
   { route: '/', file: 'index.html' },
   { route: '/tarot', file: 'tarot.html' },
