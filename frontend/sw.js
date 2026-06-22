@@ -99,20 +99,21 @@ self.addEventListener("activate", (event) => {
           .filter((k) => !k.startsWith(SW_VERSION))
           .map((k) => caches.delete(k))
       );
+      // 네비게이션 프리로드가 가능하면 활성화
+      if ("navigationPreload" in self.registration) {
+        await self.registration.navigationPreload.enable();
+      }
       await self.clients.claim();
     })()
   );
 });
 
-// 네비게이션 프리로드가 가능하면 활성화
-if ("navigationPreload" in self.registration) {
-  self.addEventListener("activate", (event) => {
-    event.waitUntil(self.registration.navigationPreload.enable());
-  });
-}
+// 민감한 API 경로는 캐싱에서 제외 (보안: 인증/관리자/결제 데이터 유출 방지)
+const SENSITIVE_API_PATHS = ["/api/auth", "/api/admin", "/api/payment"];
 
-function isApiRequest(url) {
-  return url.pathname.startsWith("/api/");
+function isCacheableApiRequest(url) {
+  if (!url.pathname.startsWith("/api/")) return false;
+  return !SENSITIVE_API_PATHS.some((path) => url.pathname.startsWith(path));
 }
 
 function isStaticAsset(url) {
@@ -198,7 +199,7 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(handlePage(event));
-  } else if (isApiRequest(url)) {
+  } else if (isCacheableApiRequest(url)) {
     event.respondWith(handleApi(request));
   } else if (isStaticAsset(url)) {
     event.respondWith(handleStaticAsset(request));

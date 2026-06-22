@@ -5,6 +5,15 @@ console.log('🔮 타로냥 로딩 완료');
 
 // === PWA: Service Worker 등록 ===
 if ('serviceWorker' in navigator) {
+  // 새로운 서비스 워커가 제어권을 잡으면 페이지를 새로고침하여 최신 에셋 반영
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/sw.js', { scope: '/' })
@@ -164,13 +173,17 @@ window.addEventListener('appinstalled', () => {
   }
 });
 
-// iOS는 beforeinstallprompt 미지원 → 별도 가이드 토스트 (Safari 홈추가)
+// iOS는 beforeinstallprompt 미지원 → 별도 가이드 토스트 (Safari 홈추가만)
 function showIOSInstallHint() {
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isSafari =
+    /safari/i.test(navigator.userAgent) &&
+    !/crios/i.test(navigator.userAgent) &&
+    !/fxios/i.test(navigator.userAgent);
   const isStandalone =
     window.navigator.standalone === true ||
     window.matchMedia('(display-mode: standalone)').matches;
-  if (!isIOS || isStandalone) return;
+  if (!isIOS || !isSafari || isStandalone) return;
   if (!shouldShowInstallBanner()) return;
 
   injectInstallStyles();
