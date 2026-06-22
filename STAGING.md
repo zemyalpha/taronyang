@@ -71,6 +71,7 @@ echo "$NEW_URL"
 
 ```bash
 # 현재 프로젝트 경로로 자동 치환
+mkdir -p ~/Library/LaunchAgents
 sed "s|YOUR_PROJECT_PATH|$(pwd)|g" com.taronyang.monitor.plist \
   > ~/Library/LaunchAgents/com.taronyang.monitor.plist
 ```
