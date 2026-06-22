@@ -12,3 +12,18 @@
 
 /robots.txt
   Content-Type: text/plain; charset=utf-8
+
+/sw.js
+  Content-Type: application/javascript; charset=utf-8
+  Cache-Control: no-cache, must-revalidate
+  Service-Worker-Allowed: /
+
+/manifest.json
+  Content-Type: application/manifest+json; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/static/*
+  Cache-Control: public, max-age=86400, must-revalidate
