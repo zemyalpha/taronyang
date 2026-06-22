@@ -44,10 +44,10 @@ grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/taronyang-tunnel.err | ta
 
 ```bash
 # 최근 헬스 체크 결과 확인
-tail -20 ~/Library/Logs/taronyang-monitor.log
+tail -20 /tmp/taronyang-monitor.log
 
 # 장애 기록만 필터
-grep '❌' ~/Library/Logs/taronyang-monitor.log
+grep '❌' /tmp/taronyang-monitor.log
 ```
 
 ## 스테이징 URL 업데이트 절차
@@ -75,13 +75,7 @@ sed "s|/Users/YOUR_USERNAME|$HOME|g" com.taronyang.monitor.plist \
   > ~/Library/LaunchAgents/com.taronyang.monitor.plist
 ```
 
-### 2. 로그 디렉토리 생성
-
-```bash
-mkdir -p ~/Library/Logs
-```
-
-### 3. launchd 서비스 등록
+### 2. launchd 서비스 등록
 
 ```bash
 # 헬스 모니터 등록
@@ -91,18 +85,18 @@ launchctl load ~/Library/LaunchAgents/com.taronyang.monitor.plist
 launchctl list | grep taronyang
 ```
 
-### 4. 동작 확인
+### 3. 동작 확인
 
 ```bash
 # 즉시 실행하여 로그 확인
 bash scripts/health-check.sh
 
 # 로그 파일 확인
-tail -20 ~/Library/Logs/taronyang-monitor.log
+tail -20 /tmp/taronyang-monitor.log
 ```
 
-> **참고:** `launchd` plist는 절대 경로만 지원하므로 `$HOME` 변수를 직접 사용할 수 없습니다.
-> 체크인된 plist는 `YOUR_USERNAME` 플레이스홀더를 사용하며, 설치 시 위 명령으로 치환합니다.
+> **참고:** 로그는 `/tmp/`에 저장되어 재부팅 시 자동으로 정리됩니다.
+> `ProgramArguments` 경로만 `YOUR_USERNAME` 플레이스홀더 치환이 필요합니다.
 
 ## 서비스 관리 명령어
 
