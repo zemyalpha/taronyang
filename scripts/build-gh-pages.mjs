@@ -128,6 +128,8 @@ for (const entry of readdirSync(BUILD)) {
   const fullPath = join(BUILD, entry);
   if (statSync(fullPath).isDirectory()) {
     cpSync(fullPath, join(BUILD, 'static', entry), { recursive: true });
+  } else {
+    cpSync(fullPath, join(BUILD, 'static', entry));
   }
 }
 

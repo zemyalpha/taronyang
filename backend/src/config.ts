@@ -55,6 +55,6 @@ export const config = {
   databasePath: process.env.DATABASE_PATH || './taronyang.db',
 
   // CORS
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8000',
-  extraCorsOrigins: (process.env.EXTRA_CORS_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean),
+  frontendUrl: (process.env.FRONTEND_URL || 'http://localhost:8000').replace(/\/$/, ''),
+  extraCorsOrigins: (process.env.EXTRA_CORS_ORIGINS || '').split(',').map(o => o.trim().replace(/\/$/, '')).filter(Boolean),
 };
