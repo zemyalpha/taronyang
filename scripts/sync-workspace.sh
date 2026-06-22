@@ -11,7 +11,7 @@
 #   1. 런타임 워크스페이스 경로 확인 (인자 / 환경변수 / plist 자동 추출)
 #   2. 커밋되지 않은 변경사항 감지 (안전하게 stash 또는 명시적 중단)
 #   3. git fetch origin main && git reset --hard origin/main (결정론적 동기화)
-#   4. 백엔드 코드 변경 시 npm install + npm run build
+#   4. 백엔드 코드 변경 시 npm install + better-sqlite3 rebuild + npm run build
 #   5. launchd 서비스 재시작 (backend)
 #   6. 헬스체크로 서비스 정상 확인
 #
@@ -199,6 +199,22 @@ fi
 echo ""
 echo "=== 3/5. 백엔드 빌드 ==="
 BACKEND_DIR="$RUNTIME_DIR/backend"
+
+# launchd가 사용하는 Node 버전으로 PATH 정렬
+# Homebrew Node(v26)와 nvm Node(v22) ABI 불일치로 better-sqlite3 크래시 방지 (ZEMA-2606)
+NODE_BIN=""
+BACKEND_PLIST="$HOME/Library/LaunchAgents/com.taronyang.backend.plist"
+if [ -f "$BACKEND_PLIST" ]; then
+  NODE_BIN=$(plutil -extract ProgramArguments.0 raw "$BACKEND_PLIST" 2>/dev/null || true)
+fi
+if [ -n "$NODE_BIN" ] && [ -x "$NODE_BIN" ]; then
+  NODE_DIR="$(dirname "$NODE_BIN")"
+  export PATH="$NODE_DIR:$PATH"
+  info "Node 경로 정렬 (plist): $NODE_BIN ($("$NODE_BIN" --version 2>/dev/null || echo 'unknown'))"
+else
+  warn "plist에서 Node 경로를 찾을 수 없음 — 현재 PATH의 node 사용: $(command -v node 2>/dev/null || echo 'not found')"
+fi
+
 NEEDS_INSTALL=0
 NEEDS_BUILD=0
 
@@ -232,6 +248,19 @@ if [ "$NEEDS_INSTALL" -eq 1 ]; then
     (cd "$BACKEND_DIR" && npm install) || die "npm install 실패" 1
   fi
   success "의존성 설치 완료"
+fi
+
+# better-sqlite3 native module rebuild — ABI 불일치 방지 (ZEMA-2606)
+# git reset --hard는 node_modules를 건드리지 않으므로, 이전 Node 버전으로
+# 컴파일된 native binary가 남아 있을 수 있음. launchd Node 버전에 맞게 rebuild.
+if [ "$NEEDS_BUILD" -eq 1 ]; then
+  if [ -d "$BACKEND_DIR/node_modules/better-sqlite3" ]; then
+    info "better-sqlite3 native module rebuild ($(node --version 2>/dev/null || echo '?'))..."
+    (cd "$BACKEND_DIR" && npm rebuild better-sqlite3) || die "better-sqlite3 rebuild 실패" 1
+    success "better-sqlite3 rebuild 완료"
+  else
+    warn "node_modules/better-sqlite3 없음 — rebuild 건너뜀 (install에서 처리됨)"
+  fi
 fi
 
 if [ "$NEEDS_BUILD" -eq 1 ]; then
