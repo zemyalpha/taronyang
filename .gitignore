@@ -23,6 +23,7 @@ node_modules/
 *.err
 node_modules/
 backend/dist/
+backend/coverage/
 backend/taronyang.db*
 test-results/
 playwright/.cache/

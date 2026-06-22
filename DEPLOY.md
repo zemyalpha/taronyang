@@ -1,6 +1,32 @@
 # Cloudflare Pages 배포 가이드
 
-## 프론트엔드 배포 (Cloudflare Pages)
+## 원커맨드 프로덕션 배포 (보드 승인 후)
+
+보드 승인 + Cloudflare 계정 인증 후, 다음 한 명령어로 전체 프로덕션 배포:
+
+```bash
+# 사전 요구사항
+brew install cloudflared
+npm install -g wrangler
+
+# 전체 배포 (Named Tunnel 생성 + DNS + launchd 전환 + Pages 배포 + 환경변수)
+./scripts/deploy-production.sh api.taronyang.app taronyang
+```
+
+스크립트가 수행하는 작업:
+1. 사전 검증 (cloudflared, wrangler, 백엔드 헬스체크)
+2. Cloudflare 인증 (cloudflared login, wrangler login)
+3. Named Tunnel 생성 (`taronyang`)
+4. DNS 라우팅 (`api.taronyang.app` → 터널)
+5. Quick Tunnel → Named Tunnel launchd 전환
+6. Cloudflare Pages 프론트엔드 배포 + `BACKEND_URL` 환경변수 설정
+7. 프로덕션 헬스체크 검증
+
+---
+
+## 수동 배포 (참고용)
+
+### 프론트엔드 배포 (Cloudflare Pages)
 
 ### 1. Cloudflare Pages 설정
 ```bash
