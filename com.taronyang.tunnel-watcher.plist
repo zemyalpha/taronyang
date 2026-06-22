@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-0.0.dtd">
+<!-- 템플릿 — 실제 설치 시 scripts/setup-tunnel-watcher.sh가 경로를 치환하여 생성 -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.taronyang.tunnel-watcher</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__PROJECT_DIR__/scripts/tunnel-url-watcher.sh</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>60</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>__HOME__/Library/Logs/taronyang-tunnel-watcher.log</string>
+    <key>StandardErrorPath</key>
+    <string>__HOME__/Library/Logs/taronyang-tunnel-watcher.err</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>__HOME__</string>
+    </dict>
+</dict>
+</plist>

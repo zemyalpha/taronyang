@@ -16,7 +16,7 @@
 import { mkdirSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { MAJOR_ARCANA, getNextCard, getPrevCard } from './card-data.mjs';
+import { MAJOR_ARCANA, MINOR_ARCANA, ALL_CARDS, getNextCard, getPrevCard } from './card-data.mjs';
 
 const __scriptDir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__scriptDir, '..');
@@ -49,7 +49,7 @@ function generateCardPage(card, allCards) {
   const next = getNextCard(card.id);
   const title = `${card.name} (${card.nameEn}) 타로카드 의미와 해석 | 타로냥`;
   const description = `${card.name}(${card.nameEn}) 카드의 정방향·역방향 의미, 연애운·재물운·직장운 해석. ${card.meaningUp}`;
-  const keywordsStr = [...card.keywordsUp, ...card.keywordsDown, card.name, card.nameEn, '타로카드', '메이저아르카나', '타로해석'].join(', ');
+  const keywordsStr = [...card.keywordsUp, ...card.keywordsDown, card.name, card.nameEn, '타로카드', card.id < 22 ? '메이저아르카나' : '마이너아르카나', '타로해석'].join(', ');
 
   const schemaData = {
     '@context': 'https://schema.org',
@@ -77,7 +77,7 @@ function generateCardPage(card, allCards) {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: '메이저 아르카나', item: `${SITE_URL}/cards/` },
+      { '@type': 'ListItem', position: 2, name: card.id < 22 ? '메이저 아르카나' : '마이너 아르카나', item: `${SITE_URL}/cards/` },
       { '@type': 'ListItem', position: 3, name: card.name, item: cardFullUrl(card) },
     ],
   };
@@ -143,7 +143,7 @@ function generateCardPage(card, allCards) {
             <nav class="breadcrumb" aria-label="breadcrumb">
                 <a href="/">홈</a>
                 <span aria-hidden="true">›</span>
-                <a href="/cards/">메이저 아르카나</a>
+                <a href="/cards/">${card.id < 22 ? '메이저 아르카나' : '마이너 아르카나'}</a>
                 <span aria-hidden="true">›</span>
                 <span class="breadcrumb-current">${escapeHtml(card.name)}</span>
             </nav>
@@ -267,14 +267,31 @@ function generateCardPage(card, allCards) {
 }
 
 function generateIndexPage(cards) {
-  const title = '메이저 아르카나 22장 타로카드 의미 총정리 | 타로냥';
-  const description = '타로 메이저 아르카나 22장(바보~세계)의 정방향·역방향 의미, 연애운·재물운·직장운 해석을 한 곳에서. 무료 AI 타로 타로냥.';
+  const title = '타로카드 78장 의미 총정리 (메이저+마이너 아르카나) | 타로냥';
+  const description = '타로 메이저 아르카나 22장 + 마이너 아르카나 56장의 정방향·역방향 의미, 연애운·재물운·직장운 해석을 한 곳에서. 무료 AI 타로 타로냥.';
+
+  const majorCards = cards.filter((c) => c.id < 22);
+  const minorCards = cards.filter((c) => c.id >= 22);
+  const suitGroups = {
+    컵: { title: '💕 컵 (Cups)', cards: minorCards.filter((c) => c.name.startsWith('컵')) },
+    펜타클: { title: '💰 펜타클 (Pentacles)', cards: minorCards.filter((c) => c.name.startsWith('펜타클')) },
+    소드: { title: '⚔️ 소드 (Swords)', cards: minorCards.filter((c) => c.name.startsWith('소드')) },
+    완드: { title: '🔥 완드 (Wands)', cards: minorCards.filter((c) => c.name.startsWith('완드')) },
+  };
+
+  const cardItemHtml = (card) => `
+                <a href="${cardUrl(card)}" class="card-index-item">
+                    <div class="card-index-number">No. ${card.id}</div>
+                    <div class="card-index-symbol" aria-hidden="true">${card.symbol}</div>
+                    <div class="card-index-name">${escapeHtml(card.name)}</div>
+                    <div class="card-index-name-en">${escapeHtml(card.nameEn)}</div>
+                </a>`;
 
   const schemaData = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: '메이저 아르카나 22장 타로카드 의미 총정리',
-    description: '타로 메이저 아르카나 22장의 카드별 의미와 해석 모음.',
+    name: '타로카드 78장 의미 총정리',
+    description: '타로 메이저 아르카나 22장 + 마이너 아르카나 56장의 카드별 의미와 해석 모음.',
     url: `${SITE_URL}/cards/`,
     inLanguage: 'ko-KR',
     isPartOf: { '@type': 'WebSite', name: '타로냥', url: SITE_URL },
@@ -287,8 +304,8 @@ function generateIndexPage(cards) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}">
-    <meta name="keywords" content="메이저 아르카나, 타로카드 의미, 타로 해석, 22 대아르카나, 바보, 마법사, 여사제, 세계, 타로냥">
-    <meta property="og:title" content="메이저 아르카나 22장 타로카드 의미 총정리 | 타로냥">
+    <meta name="keywords" content="타로카드 의미, 메이저 아르카나, 마이너 아르카나, 타로 해석, 78장 타로, 컵, 펜타클, 소드, 완드, 타로냥">
+    <meta property="og:title" content="타로카드 78장 의미 총정리 | 타로냥">
     <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="${SITE_URL}/cards/">
@@ -298,7 +315,7 @@ function generateIndexPage(cards) {
     <meta property="og:image:height" content="630">
     <meta property="og:locale" content="ko_KR">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="메이저 아르카나 22장 타로카드 의미 총정리 | 타로냥">
+    <meta name="twitter:title" content="타로카드 78장 의미 총정리 | 타로냥">
     <meta name="twitter:description" content="${escapeHtml(description)}">
     <meta name="twitter:image" content="${SITE_URL}/og-image.png">
     <meta name="robots" content="index, follow">
@@ -329,22 +346,24 @@ function generateIndexPage(cards) {
 
         <section class="hero">
             <div class="hero-icon" aria-hidden="true">🃏</div>
-            <h1 class="hero-title">메이저 아르카나</h1>
-            <p class="hero-subtitle">22장의 타로카드 의미와 해석</p>
+            <h1 class="hero-title">타로카드 의미 총정리</h1>
+            <p class="hero-subtitle">메이저 아르카나 22장 + 마이너 아르카나 56장</p>
         </section>
 
         <section class="section">
-            <p class="section-title">카드를 선택해서 상세 해석 보기</p>
+            <p class="section-title">🃏 메이저 아르카나 (22장)</p>
             <div class="card-index-grid">
-                ${cards.map((card) => `
-                <a href="${cardUrl(card)}" class="card-index-item">
-                    <div class="card-index-number">No. ${card.id}</div>
-                    <div class="card-index-symbol" aria-hidden="true">${card.symbol}</div>
-                    <div class="card-index-name">${escapeHtml(card.name)}</div>
-                    <div class="card-index-name-en">${escapeHtml(card.nameEn)}</div>
-                </a>`).join('')}
+                ${majorCards.map(cardItemHtml).join('')}
             </div>
         </section>
+
+        ${Object.values(suitGroups).map((group) => `
+        <section class="section">
+            <p class="section-title">${group.title} (${group.cards.length}장)</p>
+            <div class="card-index-grid">
+                ${group.cards.map(cardItemHtml).join('')}
+            </div>
+        </section>`).join('')}
 
         <section class="card-cta">
             <a href="/tarot" class="cta-button">지금 타로 보기 →</a>
@@ -382,18 +401,18 @@ export function generateCardPages(outputDir) {
   mkdirSync(cardsDir, { recursive: true });
 
   console.log('[card-pages] Generating card pages...');
-  for (const card of MAJOR_ARCANA) {
-    const html = generateCardPage(card, MAJOR_ARCANA);
+  for (const card of ALL_CARDS) {
+    const html = generateCardPage(card, ALL_CARDS);
     const filePath = join(cardsDir, `${slugify(card)}.html`);
     writeFileSync(filePath, html);
     console.log(`  ✓ cards/${card.id}-${card.slug}.html`);
   }
 
-  const indexHtml = generateIndexPage(MAJOR_ARCANA);
+  const indexHtml = generateIndexPage(ALL_CARDS);
   writeFileSync(join(cardsDir, 'index.html'), indexHtml);
   console.log('  ✓ cards/index.html');
 
-  console.log(`[card-pages] ✅ Generated ${MAJOR_ARCANA.length} card pages + index`);
+  console.log(`[card-pages] ✅ Generated ${ALL_CARDS.length} card pages + index`);
 }
 
 // Allow direct execution: node scripts/generate-card-pages.mjs [outputDir]
