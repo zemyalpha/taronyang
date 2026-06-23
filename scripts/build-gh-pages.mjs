@@ -34,7 +34,7 @@ const CANONICAL_DOMAIN = 'https://taronyang.com';
 const GH_PAGES_URL = 'https://zemyalpha.github.io/taronyang';
 
 // File extensions that may contain taronyang.com URLs and need domain rewriting
-const DOMAIN_REWRITE_EXTENSIONS = new Set(['.html', '.xml', '.txt']);
+const DOMAIN_REWRITE_EXTENSIONS = new Set(['.html', '.xml', '.txt', '.js', '.json']);
 
 // Pages that need directory-based routing (clean URL → dir/index.html)
 const ROUTED_PAGES = ['tarot', 'daily', 'history', 'mypage', 'login', 'pricing'];
