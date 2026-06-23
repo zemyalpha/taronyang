@@ -76,9 +76,24 @@ export function initDb(): void {
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
 
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      props TEXT NOT NULL DEFAULT '{}',
+      path TEXT,
+      referrer TEXT,
+      session_id TEXT,
+      ip TEXT,
+      user_agent TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_readings_user ON readings(user_id);
     CREATE INDEX IF NOT EXISTS idx_daily_date ON daily_horoscopes(date, zodiac_sign);
+    CREATE INDEX IF NOT EXISTS idx_analytics_name ON analytics_events(name);
+    CREATE INDEX IF NOT EXISTS idx_analytics_created ON analytics_events(created_at);
+    CREATE INDEX IF NOT EXISTS idx_analytics_session ON analytics_events(session_id);
   `);
 }
 

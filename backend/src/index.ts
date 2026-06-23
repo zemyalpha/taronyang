@@ -14,6 +14,7 @@ import { readingsRouter } from './routes/readings';
 import { paymentRouter } from './routes/payment';
 import { adminRouter } from './routes/admin';
 import { notifyRouter } from './routes/notify';
+import { analyticsRouter } from './routes/analytics';
 import { startDailyScheduler } from './dailyNotify';
 import { authMiddleware, adminMiddleware } from './routes/auth';
 import { logger } from './logger';
@@ -108,6 +109,7 @@ app.use('/api/readings', readingsRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/notifications', notifyRouter);
+app.use('/api/analytics', analyticsRouter);
 
 // 정적 파일 (프론트엔드)
 const frontendPath = path.join(__dirname, '../../frontend');
