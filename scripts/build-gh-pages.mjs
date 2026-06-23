@@ -29,6 +29,13 @@ const BUILD = join(ROOT, 'gh-pages-build');
 const BASE_PATH = '/taronyang';
 const TUNNEL_URL = process.env.TUNNEL_URL || '';
 
+// Canonical domain used in source files → actual GitHub Pages URL
+const CANONICAL_DOMAIN = 'https://taronyang.com';
+const GH_PAGES_URL = 'https://zemyalpha.github.io/taronyang';
+
+// File extensions that may contain taronyang.com URLs and need domain rewriting
+const DOMAIN_REWRITE_EXTENSIONS = new Set(['.html', '.xml', '.txt']);
+
 // Pages that need directory-based routing (clean URL → dir/index.html)
 const ROUTED_PAGES = ['tarot', 'daily', 'history', 'mypage', 'login', 'pricing'];
 
@@ -137,8 +144,15 @@ function injectConfigScript(html) {
   return html.replace(/<head\b[^>]*>/i, (match) => `${match}\n    ${scriptTag}`);
 }
 
+function rewriteDomain(content) {
+  return content.split(CANONICAL_DOMAIN).join(GH_PAGES_URL);
+}
+
 function rewritePaths(html) {
   let result = html;
+
+  // Replace canonical domain → GitHub Pages URL (OG, canonical, JSON-LD, sitemap, etc.)
+  result = rewriteDomain(result);
 
   // href/src/action="/..." → "/taronyang/..."  (but not if already prefixed or protocol-relative //)
   result = result.replace(
@@ -169,7 +183,7 @@ function updateSitemapWithCards(buildDir) {
     const slug = `${card.id}-${card.slug}`;
     return [
       `  <url>`,
-      `    <loc>https://taronyang.com/cards/${slug}.html</loc>`,
+      `    <loc>${GH_PAGES_URL}/cards/${slug}.html</loc>`,
       `    <lastmod>${today}</lastmod>`,
       `    <changefreq>monthly</changefreq>`,
       `    <priority>0.7</priority>`,
@@ -179,7 +193,7 @@ function updateSitemapWithCards(buildDir) {
 
   const cardsIndexUrl = [
     `  <url>`,
-    `    <loc>https://taronyang.com/cards/</loc>`,
+    `    <loc>${GH_PAGES_URL}/cards/</loc>`,
     `    <lastmod>${today}</lastmod>`,
     `    <changefreq>weekly</changefreq>`,
     `    <priority>0.8</priority>`,
@@ -252,6 +266,26 @@ for (const file of htmlFiles) {
   writeFileSync(file, html);
   console.log(`  ✓ ${relative(BUILD, file)}`);
 }
+
+// 5.5 Rewrite canonical domain in non-HTML files (sitemap.xml, robots.txt, rss.xml)
+console.log('[build] Rewriting canonical domain in XML/text files...');
+function rewriteDomainInNonHtmlFiles(dir) {
+  for (const entry of readdirSync(dir)) {
+    const fullPath = join(dir, entry);
+    const stat = statSync(fullPath);
+    if (stat.isDirectory()) {
+      rewriteDomainInNonHtmlFiles(fullPath);
+    } else if (DOMAIN_REWRITE_EXTENSIONS.has(extname(entry)) && extname(entry) !== '.html') {
+      const content = readFileSync(fullPath, 'utf-8');
+      const rewritten = rewriteDomain(content);
+      if (rewritten !== content) {
+        writeFileSync(fullPath, rewritten);
+        console.log(`  ✓ ${relative(BUILD, fullPath)}`);
+      }
+    }
+  }
+}
+rewriteDomainInNonHtmlFiles(BUILD);
 
 // 6. Create directory-based routing for clean URLs
 console.log('[build] Creating directory-based routes...');
