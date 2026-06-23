@@ -1,0 +1,26 @@
+{
+  "date": "2026-06-23",
+  "weekday": "화요일",
+  "cards": [
+    {
+      "name": "탑",
+      "symbol": "🗼",
+      "slug": "16-tower"
+    },
+    {
+      "name": "황제",
+      "symbol": "🏛️",
+      "slug": "4-emperor"
+    },
+    {
+      "name": "별",
+      "symbol": "⭐",
+      "slug": "17-star"
+    }
+  ],
+  "summary": "오늘은 「급변」의 에너지가 흐르는 날이에요. 갑작스러운 변화가 찾아올 수 있어요. 하지만 무너진 자리에 더 강한 것이 세워질 거예요. 다만 「권위」권위와 관련된 부분은 조심하…",
+  "luckyColor": "라벤더 퍼플",
+  "luckyColorHex": "#a78bfa",
+  "luckyNumber": 5,
+  "url": "/blog/daily/2026-06-23.html"
+}

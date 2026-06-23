@@ -1210,3 +1210,192 @@ body {
         transform: translateY(0);
     }
 }
+
+/* === Daily Fortune Pages (ZEMA-2666) === */
+
+.daily-fortune-preview {
+    display: block;
+    background: rgba(26, 26, 62, 0.8);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: border-color 0.3s, transform 0.2s;
+}
+
+.daily-fortune-preview:hover {
+    border-color: var(--accent-purple);
+    transform: translateY(-2px);
+}
+
+.daily-fortune-preview-label {
+    font-size: 14px;
+    color: var(--accent-gold);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.daily-fortune-preview-cards {
+    font-size: 28px;
+    margin-bottom: 8px;
+    letter-spacing: 4px;
+}
+
+.daily-fortune-preview-summary {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.daily-fortune-preview-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.daily-fortune-preview-link {
+    color: var(--accent-purple);
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* Daily fortune page — card reading blocks */
+.daily-card-reading {
+    background: rgba(10, 10, 46, 0.6);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent-purple);
+}
+
+.daily-card-reading.negative {
+    border-left-color: var(--negative);
+}
+
+.daily-card-reading.positive {
+    border-left-color: var(--positive);
+}
+
+.daily-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.daily-card-position {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.daily-card-orientation {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 10px;
+    border-radius: 12px;
+}
+
+.daily-card-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    margin-bottom: 10px;
+}
+
+.daily-card-link:hover .daily-card-name {
+    text-decoration: underline;
+}
+
+.daily-card-symbol {
+    font-size: 32px;
+}
+
+.daily-card-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.daily-card-name-en {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.daily-card-meaning {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.daily-card-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Daily fortune index page */
+.daily-index-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.daily-index-item {
+    display: block;
+    background: rgba(26, 26, 62, 0.6);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: border-color 0.3s, transform 0.2s;
+}
+
+.daily-index-item:hover {
+    border-color: var(--accent-purple);
+    transform: translateX(4px);
+}
+
+.daily-index-date {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 6px;
+}
+
+.daily-index-cards {
+    font-size: 24px;
+    margin-bottom: 6px;
+    letter-spacing: 4px;
+}
+
+.daily-index-summary {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Card nav disabled state */
+.card-nav-btn.disabled {
+    visibility: hidden;
+}
+
+@media (max-width: 600px) {
+    .daily-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .daily-fortune-preview-cards {
+        font-size: 24px;
+    }
+}
