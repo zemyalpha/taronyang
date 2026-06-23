@@ -58,6 +58,7 @@
     }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
@@ -74,6 +75,7 @@
     </noscript>
 </head>
 <body>
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <div class="stars" id="stars"></div>
 
     <div class="container">
@@ -192,6 +194,11 @@
             </section>
         </article>
 
+        
+        <!-- 공유 -->
+        <section class="share-section" data-share data-share-url="https://taronyang.com/blog/taro-fortune-guide.html" data-share-title="타로운세 보는법 완벽 가이드 — 초보자도 쉽게 타로점 보는 법 | 타로냥" data-share-desc="타로운세가 궁금하다면? 타로운세 보는법, 카드를 뽑는 순서, 질문 고르는 법을 초보자도 이해하기 쉽게 정리했어요. 무료 AI 타로로 지금 바로 타로점을 확인하세요."></section>
+
+
         <footer class="footer">
             <p><a href="/blog/">블로그 목록</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
@@ -214,5 +221,6 @@
             }
         })();
     </script>
+    <script src="/static/js/share.js"></script>
 </body>
 </html>

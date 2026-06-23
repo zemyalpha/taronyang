@@ -35,6 +35,7 @@
     }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -67,6 +68,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
 </head>
 <body class="bg-navy text-gray-100 font-sans min-h-screen">
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
 
     <!-- 네비게이션 -->
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
@@ -81,7 +83,7 @@
         </div>
     </nav>
 
-    <main class="pt-20 pb-10 px-4 max-w-3xl mx-auto">
+    <main class="pt-20 pb-10 px-4 max-w-3xl mx-auto" id="main-content">
 
         <!-- Step 1: 카테고리 선택 -->
         <div id="step-category" class="step">
@@ -418,5 +420,6 @@
     <script src="/static/js/config.js"></script>
     <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
+    <script src="/static/js/share.js"></script>
 </body>
 </html>

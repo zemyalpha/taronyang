@@ -70,7 +70,9 @@
     }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="/static/css/style.css" as="style">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -86,10 +88,11 @@
     </noscript>
 </head>
 <body>
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <!-- 별 배경 -->
     <div class="stars" id="stars"></div>
 
-    <div class="container">
+    <div class="container" id="main-content">
         <!-- 헤더 -->
         <header class="header">
             <a href="/" class="header-logo">🔮 타로냥</a>
@@ -246,6 +249,9 @@
             </div>
         </section>
 
+        <!-- 공유 -->
+        <section class="share-section" data-share data-share-url="https://taronyang.com/" data-share-title="타로냥 - 무료 AI 타로" data-share-desc="24시간 무료 AI 타로! 연애운, 재물운, 직장운을 카드 3장으로 해석."></section>
+
         <!-- 푸터 -->
         <footer class="footer">
             <p>타로냥 © 2026</p>
@@ -259,6 +265,7 @@
     <script src="/static/js/config.js"></script>
     <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
+    <script src="/static/js/share.js"></script>
     <script>
         // 별 생성
         (function() {
