@@ -172,6 +172,20 @@
             </div>
         </section>
 
+        <!-- 오늘의 타로운세 미리보기 (ZEMA-2666) -->
+        <section class="section" id="daily-fortune-section" style="display:none;">
+            <a href="#" class="daily-fortune-preview" id="daily-fortune-link">
+                <div class="daily-fortune-preview-label">🌅 오늘의 타로운세</div>
+                <div class="daily-fortune-preview-cards" id="daily-fortune-cards"></div>
+                <div class="daily-fortune-preview-summary" id="daily-fortune-summary"></div>
+                <div class="daily-fortune-preview-meta">
+                    <span id="daily-fortune-color"></span>
+                    <span id="daily-fortune-number"></span>
+                    <span class="daily-fortune-preview-link">자세히 보기 →</span>
+                </div>
+            </a>
+        </section>
+
         <!-- 통계 -->
         <div class="stats">
             오늘 <strong id="today-count">-</strong>명이 타로를 봤어요 🔮
@@ -276,6 +290,29 @@
 
         // 통계 (임시 하드코딩, 추후 API 연동)
         document.getElementById('today-count').textContent = '1,247';
+
+        // 오늘의 타로운세 미리보기 (ZEMA-2666)
+        (async function() {
+            try {
+                var resp = await fetch('blog/daily/today-meta.json', { cache: 'no-cache' });
+                if (!resp.ok) return;
+                var data = await resp.json();
+                var linkEl = document.getElementById('daily-fortune-link');
+                var cardsEl = document.getElementById('daily-fortune-cards');
+                var summaryEl = document.getElementById('daily-fortune-summary');
+                var colorEl = document.getElementById('daily-fortune-color');
+                var numberEl = document.getElementById('daily-fortune-number');
+                var sectionEl = document.getElementById('daily-fortune-section');
+                if (!linkEl || !data) return;
+                linkEl.href = data.url;
+                cardsEl.textContent = data.cards.map(function(c) { return c.symbol; }).join(' ');
+                cardsEl.setAttribute('aria-label', data.cards.map(function(c) { return c.name; }).join(', '));
+                summaryEl.textContent = data.summary;
+                colorEl.innerHTML = '🎨 행운의 색: <span style="color:' + data.luckyColorHex + ';font-weight:700;">' + data.luckyColor + '</span>';
+                numberEl.textContent = '🔢 행운의 숫자: ' + data.luckyNumber;
+                sectionEl.style.display = '';
+            } catch (e) { /* today-meta.json 없을 시 섹션 숨김 유지 */ }
+        })();
     </script>
 </body>
 </html>

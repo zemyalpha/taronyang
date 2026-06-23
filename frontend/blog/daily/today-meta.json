@@ -1,0 +1,26 @@
+{
+  "date": "2026-06-24",
+  "weekday": "수요일",
+  "cards": [
+    {
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
+    },
+    {
+      "name": "교황",
+      "symbol": "⛪",
+      "slug": "5-hierophant"
+    },
+    {
+      "name": "연인",
+      "symbol": "💕",
+      "slug": "6-lovers"
+    }
+  ],
+  "summary": "오늘은 「용기」의 에너지가 흐르는 날이에요. 부드러운 힘이 필요한 시기예요. 인내와 용기로 극복할 수 있어요. 다만 「구습」과 관련된 부분은 조심하고, 연인이 주는 「사랑」의…",
+  "luckyColor": "민트",
+  "luckyColorHex": "#34d399",
+  "luckyNumber": 8,
+  "url": "/blog/daily/2026-06-24.html"
+}

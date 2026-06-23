@@ -206,6 +206,50 @@ function updateSitemapWithCards(buildDir) {
   console.log(`  ✓ Added ${ALL_CARDS.length} card URLs to sitemap.xml`);
 }
 
+function updateSitemapWithDailyFortunes(buildDir) {
+  const sitemapPath = join(buildDir, 'sitemap.xml');
+  if (!existsSync(sitemapPath)) return;
+
+  const dailyDir = join(buildDir, 'blog', 'daily');
+  if (!existsSync(dailyDir)) return;
+
+  const fortunes = readdirSync(dailyDir)
+    .filter((f) => /^\d{4}-\d{2}-\d{2}\.html$/.test(f))
+    .map((f) => f.replace('.html', ''))
+    .sort()
+    .reverse();
+
+  if (fortunes.length === 0) return;
+
+  let sitemap = readFileSync(sitemapPath, 'utf-8');
+  sitemap = sitemap.replace(/\n  <!-- daily-fortune-start -->[\s\S]*?<!-- daily-fortune-end -->/g, '');
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const indexUrl = [
+    `  <url>`,
+    `    <loc>${GH_PAGES_URL}/blog/daily/</loc>`,
+    `    <lastmod>${today}</lastmod>`,
+    `    <changefreq>daily</changefreq>`,
+    `    <priority>0.9</priority>`,
+    `  </url>`,
+  ].join('\n');
+
+  const fortuneUrls = fortunes.map((dateStr) => [
+    `  <url>`,
+    `    <loc>${GH_PAGES_URL}/blog/daily/${dateStr}.html</loc>`,
+    `    <lastmod>${dateStr}</lastmod>`,
+    `    <changefreq>monthly</changefreq>`,
+    `    <priority>0.8</priority>`,
+    `  </url>`,
+  ].join('\n')).join('\n');
+
+  const injection = `\n  <!-- daily-fortune-start -->\n${indexUrl}\n${fortuneUrls}\n  <!-- daily-fortune-end -->`;
+  sitemap = sitemap.replace('</urlset>', `${injection}\n</urlset>`);
+  writeFileSync(sitemapPath, sitemap);
+  console.log(`  ✓ Added ${fortunes.length} daily fortune URLs to sitemap.xml`);
+}
+
 // === Build ===
 console.log('[build] Cleaning build directory...');
 rmSync(BUILD, { recursive: true, force: true });
@@ -306,6 +350,10 @@ writeFileSync(join(BUILD, '.nojekyll'), '');
 // 8. Update sitemap with card pages
 console.log('[build] Updating sitemap with card pages...');
 updateSitemapWithCards(BUILD);
+
+// 8.5 Update sitemap with daily fortune pages (ZEMA-2666)
+console.log('[build] Updating sitemap with daily fortune pages...');
+updateSitemapWithDailyFortunes(BUILD);
 
 // 8. Summary
 const allFiles = findHtmlFiles(BUILD);

@@ -8,6 +8,7 @@ on:
       - 'scripts/build-gh-pages.mjs'
       - 'scripts/generate-card-pages.mjs'
       - 'scripts/card-data.mjs'
+      - 'scripts/generate-daily-fortune.mjs'
       - 'api-beacon.json'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:

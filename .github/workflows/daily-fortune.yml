@@ -1,0 +1,68 @@
+name: Daily Fortune Auto-Publish
+
+on:
+  schedule:
+    # KST 07:00 = UTC 22:00 (previous day)
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Target date (YYYY-MM-DD). Defaults to today KST.'
+        required: false
+        type: string
+      days:
+        description: 'Number of days to generate (backfill). Default: 1'
+        required: false
+        type: string
+        default: '1'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-fortune
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate daily fortune
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.date }}" ]; then ARGS="${{ inputs.date }}"; fi
+          if [ -n "${{ inputs.days }}" ]; then ARGS="$ARGS --days ${{ inputs.days }}"; fi
+          if [ -z "$ARGS" ]; then ARGS="--days 1"; fi
+          echo "Running: node scripts/generate-daily-fortune.mjs $ARGS"
+          node scripts/generate-daily-fortune.mjs $ARGS
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/blog/daily/
+          if git diff --cached --quiet; then
+            echo "No changes to commit — fortune already up to date."
+          else
+            COMMIT_DATE=$(date -u +%Y-%m-%d)
+            git commit -m "feat(daily-fortune): auto-publish daily fortune for ${COMMIT_DATE}
+
+          Co-Authored-By: Paperclip <noreply@paperclip.ing>"
+            git push
+            echo "✅ Pushed daily fortune. Deploy-pages workflow will trigger automatically."
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Daily fortune generation failed. Check the workflow logs."
+          echo "::notice::The daily fortune job failed. Manual intervention may be needed."
