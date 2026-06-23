@@ -99,12 +99,12 @@ function luckyNumber(dateStr) {
 
 // ── Fortune text generation ───────────────────────────────────────
 
-function withParticle(word, particle) {
+function getParticle(word, particle) {
   const code = word.charCodeAt(word.length - 1) - 0xac00;
   const hasBatchim = code >= 0 && code % 28 !== 0;
-  if (particle === '과') return hasBatchim ? `${word}과` : `${word}와`;
-  if (particle === '이') return hasBatchim ? `${word}이` : `${word}가`;
-  return word + particle;
+  if (particle === '과') return hasBatchim ? '과' : '와';
+  if (particle === '이') return hasBatchim ? '이' : '가';
+  return particle;
 }
 
 function overallSummary(cards) {
@@ -112,7 +112,7 @@ function overallSummary(cards) {
   const energyWord = energy.keywordsUp[0];
   const adviceWord = advice.keywordsUp[0];
   const cautionWord = caution.reversed ? caution.keywordsDown[0] : caution.keywordsUp[0];
-  return `오늘은 「${energyWord}」의 에너지가 흐르는 날이에요. ${energy.meaningUp} 다만 「${cautionWord}」${withParticle(cautionWord, '과')} 관련된 부분은 조심하고, ${withParticle(advice.name, '이')} 주는 「${adviceWord}」의 메시지를 하루의 나침반으로 삼아보세요.`;
+  return `오늘은 「${energyWord}」의 에너지가 흐르는 날이에요. ${energy.meaningUp} 다만 「${cautionWord}」${getParticle(cautionWord, '과')} 관련된 부분은 조심하고, ${advice.name}${getParticle(advice.name, '이')} 주는 「${adviceWord}」의 메시지를 하루의 나침반으로 삼아보세요.`;
 }
 
 function loveReading(cards) {
@@ -156,18 +156,18 @@ function formatDateKorean(dateStr) {
 
 function getWeekday(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
+  const date = new Date(Date.UTC(y, m - 1, d));
   const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
-  return days[date.getDay()];
+  return days[date.getUTCDay()];
 }
 
 function subtractDays(dateStr, n) {
   const [y, m, d] = dateStr.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  date.setDate(date.getDate() - n);
-  const yy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
+  const date = new Date(Date.UTC(y, m - 1, d));
+  date.setUTCDate(date.getUTCDate() - n);
+  const yy = date.getUTCFullYear();
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(date.getUTCDate()).padStart(2, '0');
   return `${yy}-${mm}-${dd}`;
 }
 
