@@ -875,3 +875,222 @@ body {
     .advice-grid { grid-template-columns: repeat(3, 1fr); }
     .card-index-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* === 블로그 콘텐츠 (ZEMA-2637) === */
+
+/* 블로그 헤더/메타 */
+.blog-hero {
+    text-align: center;
+    padding: 32px 20px;
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    margin-bottom: 24px;
+}
+
+.blog-hero-emoji {
+    font-size: 56px;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.blog-hero-title {
+    font-family: var(--font-title);
+    font-size: 24px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.blog-hero-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.blog-hero-meta a {
+    color: var(--accent-purple);
+    text-decoration: none;
+}
+
+/* 본문 prose — 블로그 글 가독성 */
+.blog-article {
+    padding: 4px 0 8px;
+}
+
+.blog-article > section {
+    margin: 24px 0;
+}
+
+.blog-article h2 {
+    font-family: var(--font-title);
+    font-size: 20px;
+    color: var(--text-primary);
+    margin: 28px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.blog-article h3 {
+    font-family: var(--font-title);
+    font-size: 17px;
+    color: var(--accent-purple);
+    margin: 20px 0 8px;
+}
+
+.blog-article p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+}
+
+.blog-article ul,
+.blog-article ol {
+    margin: 0 0 16px 4px;
+    padding-left: 20px;
+}
+
+.blog-article li {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.blog-article a {
+    color: var(--accent-purple);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s;
+}
+
+.blog-article a:hover {
+    color: var(--accent-gold);
+}
+
+.blog-article strong {
+    color: var(--accent-gold);
+    font-weight: 700;
+}
+
+/* 인용구 / 콜아웃 */
+.blog-article blockquote,
+.blog-callout {
+    background: var(--bg-card);
+    border-left: 4px solid var(--accent-purple);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 16px 0;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+
+.blog-callout-title {
+    font-family: var(--font-title);
+    font-size: 15px;
+    color: var(--accent-gold);
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+/* 이미지 플레이스홀더 */
+.blog-figure {
+    margin: 20px 0;
+    background: var(--bg-card);
+    border: 1px dashed rgba(167, 139, 250, 0.35);
+    border-radius: 12px;
+    padding: 28px 16px;
+    text-align: center;
+}
+
+.blog-figure-emoji {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.blog-figure-caption {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+/* 관련 글 / 카드 링크 묶음 */
+.blog-related {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.blog-related-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 10px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-primary);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.blog-related-card:hover {
+    border-color: var(--accent-purple);
+    transform: translateY(-2px);
+}
+
+.blog-related-symbol {
+    font-size: 32px;
+    margin-bottom: 6px;
+}
+
+.blog-related-name {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* 블로그 인덱스 그리드 */
+.blog-index-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
+.blog-index-card {
+    display: block;
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-primary);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    transition: all 0.3s;
+}
+
+.blog-index-card:hover {
+    border-color: var(--accent-purple);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.18);
+}
+
+.blog-index-emoji {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.blog-index-title {
+    font-family: var(--font-title);
+    font-size: 17px;
+    margin-bottom: 6px;
+}
+
+.blog-index-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+@media (max-width: 375px) {
+    .blog-related { grid-template-columns: 1fr; }
+}
