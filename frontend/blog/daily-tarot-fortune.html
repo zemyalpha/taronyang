@@ -58,6 +58,7 @@
     }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
@@ -74,6 +75,7 @@
     </noscript>
 </head>
 <body>
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <div class="stars" id="stars"></div>
 
     <div class="container">
@@ -186,6 +188,11 @@
             </section>
         </article>
 
+        
+        <!-- 공유 -->
+        <section class="share-section" data-share data-share-url="https://taronyang.com/blog/daily-tarot-fortune.html" data-share-title="오늘의 타로운세 — 일운 타로로 하루를 여는 활용법 | 타로냥" data-share-desc="오늘의 타로운세, 어떻게 활용하면 좋을까? 일운 타로로 하루의 흐름을 읽고 작은 결심을 세우는 방법을 정리했어요. 매일 무료로 오늘의 운세와 타로를 확인해 보세요."></section>
+
+
         <footer class="footer">
             <p><a href="/blog/">블로그 목록</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
@@ -208,5 +215,6 @@
             }
         })();
     </script>
+    <script src="/static/js/share.js"></script>
 </body>
 </html>

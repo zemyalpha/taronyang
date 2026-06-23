@@ -29,6 +29,16 @@ const BUILD = join(ROOT, 'gh-pages-build');
 const BASE_PATH = '/taronyang';
 const TUNNEL_URL = process.env.TUNNEL_URL || '';
 
+function minifyCss(css) {
+  return css
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([{}:;,>])\s*/g, '$1')
+    .replace(/;}/g, '}')
+    .replace(/:\s+/g, ':')
+    .trim();
+}
+
 // Canonical domain used in source files → actual GitHub Pages URL
 const CANONICAL_DOMAIN = 'https://taronyang.com';
 const GH_PAGES_URL = 'https://zemyalpha.github.io/taronyang';
@@ -274,6 +284,18 @@ for (const entry of readdirSync(BUILD)) {
   } else {
     cpSync(fullPath, join(BUILD, 'static', entry));
   }
+}
+
+// 3.1 Minify CSS for production (ZEMA-2683)
+console.log('[build] Minifying CSS...');
+const cssPath = join(BUILD, 'static', 'css', 'style.css');
+if (existsSync(cssPath)) {
+  const rawCss = readFileSync(cssPath, 'utf-8');
+  const originalSize = Buffer.byteLength(rawCss);
+  const minified = minifyCss(rawCss);
+  writeFileSync(cssPath, minified);
+  const minifiedSize = Buffer.byteLength(minified);
+  console.log(`  ✓ style.css: ${originalSize}B → ${minifiedSize}B (${Math.round((1 - minifiedSize / originalSize) * 100)}% smaller)`);
 }
 
 // 3.5 Generate card interpretation pages (ZEMA-2610)

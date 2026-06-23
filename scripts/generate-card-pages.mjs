@@ -64,6 +64,8 @@ function generateCardPage(card, allCards) {
       name: '타로냥',
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/og-image.png` },
     },
+    datePublished: '2026-06-20',
+    dateModified: '2026-06-24',
     inLanguage: 'ko-KR',
     about: {
       '@type': 'Thing',
@@ -119,7 +121,9 @@ function generateCardPage(card, allCards) {
     ${JSON.stringify(breadcrumb, null, 2)}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="/static/css/style.css" as="style">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -131,9 +135,10 @@ function generateCardPage(card, allCards) {
     </noscript>
 </head>
 <body>
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <div class="stars" id="stars"></div>
 
-    <div class="container">
+    <div class="container" id="main-content">
         <header class="header">
             <a href="/" class="header-logo">🔮 타로냥</a>
             <a href="/cards/" class="header-login">카드 목록</a>
@@ -238,6 +243,8 @@ function generateCardPage(card, allCards) {
                     </a>`).join('')}
                 </div>
             </section>
+
+            <section class="share-section" data-share data-share-url="${cardFullUrl(card)}" data-share-title="${escapeHtml(card.name)} (${escapeHtml(card.nameEn)}) 타로카드 | 타로냥" data-share-desc="${escapeHtml(card.meaningUp)}"></section>
         </article>
 
         <footer class="footer">
@@ -262,6 +269,7 @@ function generateCardPage(card, allCards) {
             }
         })();
     </script>
+    <script src="/static/js/share.js"></script>
 </body>
 </html>`;
 }
@@ -324,7 +332,9 @@ function generateIndexPage(cards) {
     ${JSON.stringify(schemaData, null, 2)}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="/static/css/style.css" as="style">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -336,9 +346,10 @@ function generateIndexPage(cards) {
     </noscript>
 </head>
 <body>
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <div class="stars" id="stars"></div>
 
-    <div class="container">
+    <div class="container" id="main-content">
         <header class="header">
             <a href="/" class="header-logo">🔮 타로냥</a>
             <a href="/tarot" class="header-login">타로 보기</a>
@@ -369,6 +380,8 @@ function generateIndexPage(cards) {
             <a href="/tarot" class="cta-button">지금 타로 보기 →</a>
         </section>
 
+        <section class="share-section" data-share data-share-url="${SITE_URL}/cards/" data-share-title="타로카드 78장 의미 총정리 | 타로냥" data-share-desc="메이저 아르카나 22장 + 마이너 아르카나 56장의 카드별 의미와 해석 모음."></section>
+
         <footer class="footer">
             <p>타로냥 © 2026</p>
             <p><a href="/">홈으로</a> · <a href="/tarot">타로 보기</a></p>
@@ -392,6 +405,7 @@ function generateIndexPage(cards) {
             }
         })();
     </script>
+    <script src="/static/js/share.js"></script>
 </body>
 </html>`;
 }
