@@ -28,6 +28,7 @@ import { MAJOR_ARCANA } from './card-data.mjs';
 const __scriptDir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__scriptDir, '..');
 const DAILY_DIR = join(ROOT, 'frontend', 'blog', 'daily');
+const SITEMAP_PATH = join(ROOT, 'frontend', 'sitemap.xml');
 const SITE_URL = 'https://taronyang.com';
 
 // ── Deterministic PRNG ────────────────────────────────────────────
@@ -596,6 +597,45 @@ function generateTodayMeta(dateStr, cards) {
   };
 }
 
+// ── Sitemap auto-update (ZEMA-2676) ────────────────────────────────
+
+function updateSitemapWithDailyFortunes(fortuneDates) {
+  if (!existsSync(SITEMAP_PATH)) {
+    console.log('  ⚠ sitemap.xml not found — skipping sitemap update');
+    return;
+  }
+
+  let sitemap = readFileSync(SITEMAP_PATH, 'utf-8');
+
+  // Remove any previously injected daily fortune block (idempotent)
+  sitemap = sitemap.replace(/\n  <!-- daily-fortune-start -->[\s\S]*?<!-- daily-fortune-end -->/g, '');
+
+  const today = todayKST();
+
+  const indexUrl = [
+    `  <url>`,
+    `    <loc>${SITE_URL}/blog/daily/</loc>`,
+    `    <lastmod>${today}</lastmod>`,
+    `    <changefreq>daily</changefreq>`,
+    `    <priority>0.9</priority>`,
+    `  </url>`,
+  ].join('\n');
+
+  const fortuneUrls = fortuneDates.map((dateStr) => [
+    `  <url>`,
+    `    <loc>${SITE_URL}/blog/daily/${dateStr}.html</loc>`,
+    `    <lastmod>${dateStr}</lastmod>`,
+    `    <changefreq>monthly</changefreq>`,
+    `    <priority>0.8</priority>`,
+  `  </url>`,
+  ].join('\n')).join('\n');
+
+  const injection = `\n  <!-- daily-fortune-start -->\n${indexUrl}\n${fortuneUrls}\n  <!-- daily-fortune-end -->`;
+  sitemap = sitemap.replace('</urlset>', `${injection}\n</urlset>`);
+  writeFileSync(SITEMAP_PATH, sitemap);
+  console.log(`  ✓ sitemap.xml updated with ${fortuneDates.length} daily fortune URLs`);
+}
+
 // ── Main ───────────────────────────────────────────────────────────
 
 function main() {
@@ -633,6 +673,9 @@ function main() {
   const indexHtml = generateDailyIndex(allFortunes);
   writeFileSync(join(DAILY_DIR, 'index.html'), indexHtml);
   console.log(`  ✓ index.html (${allFortunes.length} fortunes listed)`);
+
+  // Auto-update sitemap.xml with all daily fortune URLs (ZEMA-2676)
+  updateSitemapWithDailyFortunes(allFortunes);
 
   // Generate today-meta.json for homepage preview
   const todayCards = pickCardsForDate(targetDate);
