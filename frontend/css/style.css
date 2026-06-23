@@ -1094,3 +1094,119 @@ body {
 @media (max-width: 375px) {
     .blog-related { grid-template-columns: 1fr; }
 }
+
+/* === FAQ 페이지 (ZEMA-2656) === */
+
+.faq-section {
+    margin: 28px 0;
+}
+
+.faq-section-title {
+    font-family: var(--font-title);
+    font-size: 16px;
+    text-align: left;
+    margin-bottom: 14px;
+    color: var(--accent-purple);
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.faq-item {
+    background: var(--bg-card);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.faq-item[open] {
+    border-color: rgba(167, 139, 250, 0.4);
+}
+
+.faq-question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--text-primary);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+.faq-question::-webkit-details-marker {
+    display: none;
+}
+
+.faq-question::after {
+    content: '+';
+    flex-shrink: 0;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--accent-purple);
+    transition: transform 0.2s;
+    line-height: 1;
+}
+
+.faq-item[open] .faq-question::after {
+    content: '−';
+}
+
+.faq-answer {
+    padding: 0 18px 18px;
+    animation: faqSlideIn 0.2s ease;
+}
+
+.faq-answer p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.faq-answer p:last-child {
+    margin-bottom: 0;
+}
+
+.faq-answer ul {
+    margin: 8px 0 12px 4px;
+    padding-left: 20px;
+}
+
+.faq-answer li {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.faq-answer a {
+    color: var(--accent-purple);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.faq-answer a:hover {
+    color: var(--accent-gold);
+}
+
+.faq-answer strong {
+    color: var(--accent-gold);
+    font-weight: 700;
+}
+
+@keyframes faqSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
