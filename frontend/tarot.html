@@ -222,6 +222,9 @@
         // 카테고리 선택
         function selectCategory(cat) {
             category = cat;
+            if (window.TaronyangAnalytics) {
+                TaronyangAnalytics.track('tarot_category_selected', { category: cat });
+            }
             // 선택 UI
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('border-gold', 'bg-lavender/10'));
             event.currentTarget.classList.add('border-gold', 'bg-lavender/10');
@@ -338,6 +341,14 @@
 
                 // 해석 텍스트
                 document.getElementById('result-text').textContent = data.interpretation;
+
+                if (window.TaronyangAnalytics) {
+                    TaronyangAnalytics.track('tarot_reading_complete', {
+                        category: category,
+                        cards: selectedCards.map(s => s.card.name).join(', '),
+                        has_question: !!question,
+                    });
+                }
             } catch (e) {
                 document.getElementById('result-text').textContent = '해석을 불러오지 못했어요 😿 다시 시도해주세요.';
             }
@@ -404,6 +415,8 @@
         }
     </script>
 
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

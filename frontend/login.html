@@ -148,6 +148,9 @@
                 if (!res.ok) throw new Error(data.detail || '로그인 실패');
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+                if (window.TaronyangAnalytics) {
+                    TaronyangAnalytics.track('login_complete', { method: 'email' });
+                }
                 window.location.href = '/';
             } catch (e) {
                 errEl.textContent = e.message;
@@ -173,6 +176,9 @@
                 if (!res.ok) throw new Error(data.detail || '회원가입 실패');
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+                if (window.TaronyangAnalytics) {
+                    TaronyangAnalytics.track('signup_complete', { method: 'email' });
+                }
                 window.location.href = '/';
             } catch (e) {
                 errEl.textContent = e.message;
@@ -217,6 +223,8 @@
         }
     </script>
 
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

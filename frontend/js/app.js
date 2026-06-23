@@ -149,6 +149,7 @@ function showInstallBanner() {
 
   installBtn.addEventListener('click', async () => {
     if (!deferredInstallPrompt) return;
+    if (window.TaronyangAnalytics) TaronyangAnalytics.track('pwa_install_prompted');
     deferredInstallPrompt.prompt();
     try {
       const choice = await deferredInstallPrompt.userChoice;
@@ -172,6 +173,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 // 설치 완료 시 배너 제거 + 플래그 정리
 window.addEventListener('appinstalled', () => {
+  if (window.TaronyangAnalytics) TaronyangAnalytics.track('pwa_installed');
   deferredInstallPrompt = null;
   const banner = document.getElementById('taronyang-install-banner');
   if (banner) banner.remove();
