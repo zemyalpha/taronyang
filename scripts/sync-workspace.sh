@@ -216,27 +216,32 @@ else
 fi
 
 NEEDS_INSTALL=0
-NEEDS_BUILD=0
 
+# 항상 백엔드 빌드 실행 (ZEMA-2644)
+# 브랜치 전환 시 OLD_HEAD vs NEW_HEAD git diff로는 백엔드 변경을 놓칠 수 있음.
+# dist/는 .gitignore 대상이라 git reset --hard가 dist/를 갱신하지 않으므로,
+# 두 커밋의 src/ 코드가 동일하면 diff가 비어 빌드가 생략되지만 dist/는
+# 이전 빌드 상태로 남아 stale 해지는 버그가 있었다.
+# tsc 증분 컴파일은 변경사항이 없으면 1-2초 내 완료되므로 항상 빌드하는 것이 안전.
+NEEDS_BUILD=1
+info "백엔드 빌드를 항상 실행 (dist/ 신선도 보장, ZEMA-2644)"
+
+# 의존성 재설치 필요 여부 확인 (package.json/package-lock.json 변경 시)
 if [ -n "$OLD_HEAD" ] && [ "$OLD_HEAD" != "$NEW_HEAD" ]; then
-  # 백엔드 관련 파일이 변경되었는지 확인
   BACKEND_CHANGES=$(git -C "$RUNTIME_DIR" diff --name-only "$OLD_HEAD" "$NEW_HEAD" -- backend/ 2>/dev/null || echo "")
   if [ -n "$BACKEND_CHANGES" ]; then
-    NEEDS_BUILD=1
-    info "백엔드 파일 변경 감지:"
+    info "백엔드 변경 파일:"
     echo "$BACKEND_CHANGES" | sed 's/^/    /'
-    # package.json 또는 package-lock.json이 변경되면 의존성 재설치
     if echo "$BACKEND_CHANGES" | grep -qE 'backend/(package\.json|package-lock\.json)'; then
       NEEDS_INSTALL=1
     fi
   fi
-else
-  # 변경사항이 없거나 OLD_HEAD를 알 수 없는 경우 — dist가 없으면 빌드
-  if [ ! -d "$BACKEND_DIR/dist" ]; then
-    NEEDS_BUILD=1
-    NEEDS_INSTALL=1
-    warn "backend/dist 없음 — 초기 빌드 필요"
-  fi
+fi
+
+# dist/가 없으면 초기 설치 필요
+if [ ! -d "$BACKEND_DIR/dist" ]; then
+  NEEDS_INSTALL=1
+  warn "backend/dist 없음 — 초기 빌드 필요"
 fi
 
 if [ "$NEEDS_INSTALL" -eq 1 ]; then
@@ -263,12 +268,11 @@ if [ "$NEEDS_BUILD" -eq 1 ]; then
   fi
 fi
 
+# NEEDS_BUILD는 항상 1이지만 변수를 유지하여 향후 조건부 빌드 복귀 가능
 if [ "$NEEDS_BUILD" -eq 1 ]; then
   info "npm run build (backend)..."
   (cd "$BACKEND_DIR" && npm run build) || die "백엔드 빌드 실패" 1
   success "백엔드 빌드 완료"
-else
-  success "백엔드 빌드 불필요 (코드 변경 없음)"
 fi
 
 # ─── 5. launchd 서비스 재시작 ───
