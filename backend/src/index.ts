@@ -52,6 +52,13 @@ const corsOrigins = config.nodeEnv === 'production'
   ? [config.frontendUrl, ...config.extraCorsOrigins].filter(Boolean)
   : true;
 
+// 동적 Origin 패턴 — GitHub Pages 호스팅 + Cloudflare Quick Tunnel 회전 대응 (ZEMA-2715)
+// 이 패턴들은 명시적 allowlist와 별개로 자동 허용되어야 한다 (.env.example 참고)
+const corsOriginPatterns = [
+  /^https:\/\/[a-z0-9-]+\.github\.io$/i, // GitHub Pages (예: https://zemyalpha.github.io)
+  /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/i, // Cloudflare Quick Tunnel (회전 대응)
+];
+
 // Quick Tunnel URL 회전에도 CORS가 차단되지 않도록 명시적 Origin 검증
 function corsOriginCheck(origin: string | undefined, callback: (err: Error | null, ok?: boolean) => void) {
   // 개발 모드: 모든 Origin 허용
@@ -61,8 +68,12 @@ function corsOriginCheck(origin: string | undefined, callback: (err: Error | nul
   if (!origin) {
     return callback(null, true); // Same-origin 요청 (Origin 헤더 없음)
   }
-  // 명시적으로 허용된 Origin
+  // 명시적으로 허용된 Origin (FRONTEND_URL + EXTRA_CORS_ORIGINS)
   if (Array.isArray(corsOrigins) && corsOrigins.includes(origin)) {
+    return callback(null, true);
+  }
+  // 패턴 기반 동적 허용 — GitHub Pages / Quick Tunnel URL 회전 대응
+  if (corsOriginPatterns.some((pattern) => pattern.test(origin))) {
     return callback(null, true);
   }
   return callback(null, false);
