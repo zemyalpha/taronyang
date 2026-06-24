@@ -616,6 +616,10 @@ function updateSitemapWithDailyFortunes(fortuneDates) {
   // Remove any previously injected daily fortune block (idempotent)
   sitemap = sitemap.replace(/\n  <!-- daily-fortune-start -->[\s\S]*?<!-- daily-fortune-end -->/g, '');
 
+  // Collapse any blank lines left before </urlset> so repeated runs do not
+  // accumulate trailing whitespace (ZEMA-2678 idempotency fix).
+  sitemap = sitemap.replace(/\n+<\/urlset>/, '\n</urlset>');
+
   const today = todayKST();
 
   const indexUrl = [
