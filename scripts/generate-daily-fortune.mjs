@@ -614,13 +614,12 @@ function updateSitemapWithDailyFortunes(fortuneDates) {
   let sitemap = readFileSync(SITEMAP_PATH, 'utf-8');
 
   // Remove any previously injected daily fortune block (idempotent).
-  // `\r?\n` handles both LF and CRLF line endings for cross-platform safety.
-  sitemap = sitemap.replace(/\r?\n  <!-- daily-fortune-start -->[\s\S]*?<!-- daily-fortune-end -->/g, '');
-
-  // Collapse any blank lines (and stray indentation) left before </urlset> so
-  // repeated runs do not accumulate trailing whitespace (ZEMA-2678 idempotency
-  // fix). The `[ \t]*` tolerates horizontal whitespace before the closing tag.
-  sitemap = sitemap.replace(/(?:\r?\n)+[ \t]*<\/urlset>/, '\n</urlset>');
+  // `\r?\n` matches both LF and CRLF line endings for cross-platform safety.
+  // Matching the optional trailing newline `(\r?\n)?` after the end marker
+  // removes the blank line left before </urlset> in a single pass, so no
+  // separate cleanup step is needed and the file's original line-ending
+  // style is preserved (ZEMA-2678 idempotency fix).
+  sitemap = sitemap.replace(/\r?\n  <!-- daily-fortune-start -->[\s\S]*?<!-- daily-fortune-end -->(\r?\n)?/g, '');
 
   const today = todayKST();
 
