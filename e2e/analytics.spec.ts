@@ -105,8 +105,9 @@ test.describe('사용자 추적 분석 도구 (ZEMA-2638 / ZEMA-2639)', () => {
         }
       });
       await requestPromise;
-      // 비동기 에러 핸들러 실행 대기
-      await page.waitForTimeout(500);
+      // 비동기 에러 핸들러 실행 대기 — 고정 대기 대신 이벤트 루프를 한 번 비워
+      // 마이크로태크(fetch 거부 → .catch)가 처리되도록 한다 (Playwright 안티패턴 회피).
+      await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
       // 어떠한 uncaught 런타임 에러도 발생하지 않아야 함 (필터링 없이)
       expect(errors).toHaveLength(0);
