@@ -58,14 +58,31 @@ jobs:
           else
             COMMIT_DATE=$(date -u +%Y-%m-%d)
             BRANCH="daily/auto-${COMMIT_DATE}"
+            # Clean up any stale branch/PR from a partial earlier run today
+            # (e.g. the workflow ran, created a branch, but failed to merge).
+            if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+              echo "ℹ️ Existing branch $BRANCH found — cleaning up before re-creating."
+              EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty' 2>/dev/null || true)
+              if [ -n "$EXISTING_PR" ]; then
+                gh pr close "$EXISTING_PR" --delete-branch || true
+              else
+                git push origin --delete "$BRANCH" || true
+              fi
+            fi
             # Commit on a throwaway branch instead of pushing to protected main
             git checkout -b "$BRANCH"
             git commit -m "feat(daily-fortune): auto-publish daily fortune for ${COMMIT_DATE}
 
           Co-Authored-By: Paperclip <noreply@paperclip.ing>"
             git push --set-upstream origin "$BRANCH"
-            # Create PR and queue auto-merge (GitHub merges server-side once
-            # required checks pass, satisfying main branch protection).
+            # Create PR and merge immediately.
+            #
+            # --auto fails on bot-created PRs: GitHub Actions does not run CI
+            # on PRs opened by GITHUB_TOKEN, so the PR is already "clean" and
+            # GitHub rejects enablePullRequestAutoMerge with
+            # "Pull request is in clean status". The fortune generator is
+            # deterministic (no external deps), so an immediate squash-merge
+            # is safe.
             PR_URL=$(gh pr create \
               --base main \
               --head "$BRANCH" \
@@ -76,12 +93,12 @@ jobs:
 
           Co-Authored-By: Paperclip <noreply@paperclip.ing>")
             echo "✅ Created PR: ${PR_URL}"
-            gh pr merge "$BRANCH" --squash --auto --delete-branch || {
-              echo "::error::Auto-merge failed. Enable 'Allow auto-merge' in repo Settings → General → Pull Requests."
+            gh pr merge "$BRANCH" --squash --delete-branch || {
+              echo "::error::Merge failed for PR ${PR_URL}. Check main branch protection / required checks."
               echo "::error::PR ${PR_URL} is open — merge manually if needed."
               exit 1
             }
-            echo "✅ PR queued for auto-merge. Deploy-pages workflow will trigger after merge."
+            echo "✅ PR merged immediately. Deploy-pages workflow will trigger after merge."
           fi
 
       - name: Notify on failure
