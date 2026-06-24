@@ -310,6 +310,7 @@ function generateDailyPage(dateStr, cards) {
     ${JSON.stringify(breadcrumbSchema, null, 2)}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
@@ -322,9 +323,10 @@ function generateDailyPage(dateStr, cards) {
     </noscript>
 </head>
 <body>
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <div class="stars" id="stars"></div>
 
-    <div class="container">
+    <div class="container" id="main-content">
         <header class="header">
             <a href="/" class="header-logo">🔮 타로냥</a>
             <a href="/blog/daily/" class="header-login">일운 목록</a>
@@ -445,6 +447,7 @@ function generateDailyPage(dateStr, cards) {
             }
         })();
     </script>
+    <script src="/static/js/share.js"></script>
 </body>
 </html>`;
 }
@@ -514,6 +517,7 @@ function generateDailyIndex(fortuneDates) {
     ${JSON.stringify(schemaData, null, 2)}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
@@ -526,9 +530,10 @@ function generateDailyIndex(fortuneDates) {
     </noscript>
 </head>
 <body>
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <div class="stars" id="stars"></div>
 
-    <div class="container">
+    <div class="container" id="main-content">
         <header class="header">
             <a href="/" class="header-logo">🔮 타로냥</a>
             <a href="/blog/" class="header-login">블로그</a>
@@ -573,6 +578,7 @@ ${recent.map(itemHtml).join('\n')}
             }
         })();
     </script>
+    <script src="/static/js/share.js"></script>
 </body>
 </html>`;
 }
