@@ -96,16 +96,17 @@ test.describe('사용자 추적 분석 도구 (ZEMA-2638 / ZEMA-2639)', () => {
 
       await page.goto('/');
 
-      // MAX_QUEUE(10)만큼 호출하여 즉시 flush 유도, 네트워크 실패 라이프사이클이
-      // 완전히 종료될 때까지 대기 (waitForResponse + catch로 abort 거부를 안전 처리).
-      const responsePromise = page.waitForResponse('**/api/analytics/event').catch(() => {});
+      // MAX_QUEUE(10)만큼 호출하여 즉시 flush 유도. route.abort()로 인해
+      // 응답이 돌아오지 않으므로 waitForResponse 대신 waitForRequest로
+      // 요청이 실제로 발생했는지만 확인한다.
+      const requestPromise = page.waitForRequest('**/api/analytics/event');
       await page.evaluate(() => {
         const analytics = (window as any).TaronyangAnalytics;
         for (let i = 0; i < 10; i++) {
           analytics.track('e2e_test_event', { source: 'playwright' });
         }
       });
-      await responsePromise;
+      await requestPromise;
 
       // 어떠한 uncaught 런타임 에러도 발생하지 않아야 함 (필터링 없이)
       expect(errors).toHaveLength(0);
