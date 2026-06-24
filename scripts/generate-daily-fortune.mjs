@@ -618,7 +618,7 @@ function updateSitemapWithDailyFortunes(fortuneDates) {
 
   // Collapse any blank lines left before </urlset> so repeated runs do not
   // accumulate trailing whitespace (ZEMA-2678 idempotency fix).
-  sitemap = sitemap.replace(/\n+<\/urlset>/, '\n</urlset>');
+  sitemap = sitemap.replace(/(?:\r?\n)+<\/urlset>/, '\n</urlset>');
 
   const today = todayKST();
 
