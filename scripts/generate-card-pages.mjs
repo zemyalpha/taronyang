@@ -20,7 +20,7 @@ import { MAJOR_ARCANA, MINOR_ARCANA, ALL_CARDS, getNextCard, getPrevCard } from 
 
 const __scriptDir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__scriptDir, '..');
-const SITE_URL = process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang';
+const SITE_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
 
 function slugify(card) {
   return `${card.id}-${card.slug}`;

@@ -29,7 +29,7 @@ const __scriptDir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__scriptDir, '..');
 const DAILY_DIR = join(ROOT, 'frontend', 'blog', 'daily');
 const SITEMAP_PATH = join(ROOT, 'frontend', 'sitemap.xml');
-const SITE_URL = process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang';
+const SITE_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
 
 // ── Deterministic PRNG ────────────────────────────────────────────
 
@@ -225,7 +225,7 @@ function generateDailyPage(dateStr, cards) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
+      { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
       { '@type': 'ListItem', position: 2, name: '블로그', item: `${SITE_URL}/blog/` },
       { '@type': 'ListItem', position: 3, name: '오늘의 운세', item: `${SITE_URL}/blog/daily/` },
       { '@type': 'ListItem', position: 4, name: dateKr, item: `${SITE_URL}/blog/daily/${dateStr}.html` },
@@ -475,7 +475,7 @@ function generateDailyIndex(fortuneDates) {
     description: '매일 업데이트되는 오늘의 타로운세 모음.',
     url: `${SITE_URL}/blog/daily/`,
     inLanguage: 'ko-KR',
-    isPartOf: { '@type': 'WebSite', name: '타로냥', url: SITE_URL },
+    isPartOf: { '@type': 'WebSite', name: '타로냥', url: `${SITE_URL}/` },
   };
 
   const itemHtml = (dateStr) => {

@@ -39,11 +39,13 @@ function minifyCss(css) {
     .trim();
 }
 
-// Canonical domain used in source files → actual GitHub Pages URL
-// SITE_URL env var controls the target deployment URL for easy rollback
-// when taronyang.com is secured. Set SITE_URL=https://taronyang.com to switch back.
-const CANONICAL_DOMAIN = process.env.CANONICAL_DOMAIN || 'https://taronyang.com';
-const GH_PAGES_URL = process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang';
+// Domain currently embedded in source files → target deployment URL.
+// Source files now embed the GitHub Pages URL (ZEMA-2747), so the search
+// domain must match what is actually present for the rewrite to work.
+// To roll back to a custom domain, set SITE_URL=https://taronyang.com and
+// the build will replace the GitHub Pages URL with the custom domain.
+const CANONICAL_DOMAIN = process.env.CANONICAL_DOMAIN || 'https://zemyalpha.github.io/taronyang';
+const GH_PAGES_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
 
 // File extensions that may contain taronyang.com URLs and need domain rewriting
 const DOMAIN_REWRITE_EXTENSIONS = new Set(['.html', '.xml', '.txt', '.js', '.json']);
@@ -363,7 +365,8 @@ console.log('[build] Processing manifest.json...');
   const manifestPath = join(BUILD, 'manifest.json');
   if (!existsSync(manifestPath)) return;
   let manifest = readFileSync(manifestPath, 'utf-8');
-  if (GH_PAGES_URL !== `https://zemyalpha.github.io${BASE_PATH}`) {
+  const normalizedExpectedUrl = `https://zemyalpha.github.io${BASE_PATH}`;
+  if (GH_PAGES_URL !== normalizedExpectedUrl) {
     manifest = manifest.split(`${BASE_PATH}/`).join('/');
     console.log(`  ✓ manifest.json — stripped ${BASE_PATH}/ prefix for custom domain`);
   } else {
