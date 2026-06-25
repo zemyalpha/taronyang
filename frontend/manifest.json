@@ -4,9 +4,9 @@
   "description": "무료 AI 타로 서비스. 연애운, 재물운, 직장운, 종합운을 카드로 해석해 드립니다.",
   "lang": "ko-KR",
   "dir": "ltr",
-  "id": "/",
-  "start_url": "/?source=pwa",
-  "scope": "/",
+  "id": "/taronyang/",
+  "start_url": "/taronyang/?source=pwa",
+  "scope": "/taronyang/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0a0a2e",
@@ -14,19 +14,19 @@
   "categories": ["lifestyle", "entertainment"],
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/taronyang/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/taronyang/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512-maskable.png",
+      "src": "/taronyang/icons/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -37,15 +37,15 @@
       "name": "타로 보기",
       "short_name": "타로",
       "description": "바로 타로 카드를 뽑습니다",
-      "url": "/tarot?source=pwa_shortcut",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "url": "/taronyang/tarot?source=pwa_shortcut",
+      "icons": [{ "src": "/taronyang/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "오늘의 운세",
       "short_name": "운세",
       "description": "오늘의 한 줄 운세를 확인합니다",
-      "url": "/daily?source=pwa_shortcut",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "url": "/taronyang/daily?source=pwa_shortcut",
+      "icons": [{ "src": "/taronyang/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

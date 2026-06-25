@@ -19,4 +19,4 @@ Disallow: /mypage
 Disallow: /history
 Disallow: /login
 
-Sitemap: https://taronyang.com/sitemap.xml
+Sitemap: https://zemyalpha.github.io/taronyang/sitemap.xml
