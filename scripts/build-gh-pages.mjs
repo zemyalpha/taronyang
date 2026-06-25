@@ -44,7 +44,7 @@ function minifyCss(css) {
 // domain must match what is actually present for the rewrite to work.
 // To roll back to a custom domain, set SITE_URL=https://taronyang.com and
 // the build will replace the GitHub Pages URL with the custom domain.
-const CANONICAL_DOMAIN = process.env.CANONICAL_DOMAIN || 'https://zemyalpha.github.io/taronyang';
+const CANONICAL_DOMAIN = (process.env.CANONICAL_DOMAIN || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
 const GH_PAGES_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
 
 // File extensions that may contain taronyang.com URLs and need domain rewriting
@@ -364,15 +364,39 @@ console.log('[build] Processing manifest.json...');
 (function rewriteManifestPaths() {
   const manifestPath = join(BUILD, 'manifest.json');
   if (!existsSync(manifestPath)) return;
-  let manifest = readFileSync(manifestPath, 'utf-8');
   const normalizedExpectedUrl = `https://zemyalpha.github.io${BASE_PATH}`;
-  if (GH_PAGES_URL !== normalizedExpectedUrl) {
-    manifest = manifest.split(`${BASE_PATH}/`).join('/');
-    console.log(`  ✓ manifest.json — stripped ${BASE_PATH}/ prefix for custom domain`);
-  } else {
+  if (GH_PAGES_URL === normalizedExpectedUrl) {
     console.log('  ✓ manifest.json — GitHub Pages paths already correct');
+    return;
   }
-  writeFileSync(manifestPath, manifest);
+
+  // Custom domain: parse and rewrite only path fields (id, start_url, scope,
+  // icons, shortcuts) so unrelated values like name/description are never touched.
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+  const prefix = `${BASE_PATH}/`;
+  const stripBasePath = (value) =>
+    typeof value === 'string' && value.startsWith(prefix)
+      ? '/' + value.slice(prefix.length)
+      : value;
+
+  if (typeof manifest.id === 'string') manifest.id = stripBasePath(manifest.id);
+  if (typeof manifest.start_url === 'string') manifest.start_url = stripBasePath(manifest.start_url);
+  if (typeof manifest.scope === 'string') manifest.scope = stripBasePath(manifest.scope);
+  if (Array.isArray(manifest.icons)) {
+    manifest.icons = manifest.icons.map((icon) => ({ ...icon, src: stripBasePath(icon.src) }));
+  }
+  if (Array.isArray(manifest.shortcuts)) {
+    manifest.shortcuts = manifest.shortcuts.map((shortcut) => ({
+      ...shortcut,
+      url: stripBasePath(shortcut.url),
+      icons: Array.isArray(shortcut.icons)
+        ? shortcut.icons.map((icon) => ({ ...icon, src: stripBasePath(icon.src) }))
+        : shortcut.icons,
+    }));
+  }
+
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+  console.log(`  ✓ manifest.json — stripped ${BASE_PATH}/ prefix for custom domain`);
 })();
 
 // 6. Create directory-based routing for clean URLs
