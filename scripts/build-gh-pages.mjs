@@ -40,8 +40,10 @@ function minifyCss(css) {
 }
 
 // Canonical domain used in source files → actual GitHub Pages URL
-const CANONICAL_DOMAIN = 'https://taronyang.com';
-const GH_PAGES_URL = 'https://zemyalpha.github.io/taronyang';
+// SITE_URL env var controls the target deployment URL for easy rollback
+// when taronyang.com is secured. Set SITE_URL=https://taronyang.com to switch back.
+const CANONICAL_DOMAIN = process.env.CANONICAL_DOMAIN || 'https://taronyang.com';
+const GH_PAGES_URL = process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang';
 
 // File extensions that may contain taronyang.com URLs and need domain rewriting
 const DOMAIN_REWRITE_EXTENSIONS = new Set(['.html', '.xml', '.txt', '.js', '.json']);
@@ -352,6 +354,23 @@ function rewriteDomainInNonHtmlFiles(dir) {
   }
 }
 rewriteDomainInNonHtmlFiles(BUILD);
+
+// 5.6 Rewrite manifest.json paths for custom domain support
+// Source manifest.json has /taronyang/ prefixed paths for GitHub Pages.
+// When deploying to a custom domain (SITE_URL set), strip the base path prefix.
+console.log('[build] Processing manifest.json...');
+(function rewriteManifestPaths() {
+  const manifestPath = join(BUILD, 'manifest.json');
+  if (!existsSync(manifestPath)) return;
+  let manifest = readFileSync(manifestPath, 'utf-8');
+  if (GH_PAGES_URL !== `https://zemyalpha.github.io${BASE_PATH}`) {
+    manifest = manifest.split(`${BASE_PATH}/`).join('/');
+    console.log(`  ✓ manifest.json — stripped ${BASE_PATH}/ prefix for custom domain`);
+  } else {
+    console.log('  ✓ manifest.json — GitHub Pages paths already correct');
+  }
+  writeFileSync(manifestPath, manifest);
+})();
 
 // 6. Create directory-based routing for clean URLs
 console.log('[build] Creating directory-based routes...');
