@@ -19,6 +19,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 concurrency:
   group: daily-fortune
@@ -98,7 +99,13 @@ jobs:
               echo "::error::PR ${PR_URL} is open — merge manually if needed."
               exit 1
             }
-            echo "✅ PR merged immediately. Deploy-pages workflow will trigger after merge."
+            echo "✅ PR merged immediately."
+            # GITHUB_TOKEN push events do NOT trigger other workflows (GitHub design),
+            # so we explicitly dispatch the deploy workflow. Without this, auto-published
+            # fortunes land on main but never reach GitHub Pages. (ZEMA-2744)
+            echo "Dispatching deploy-pages workflow..."
+            gh workflow run deploy-pages.yml --ref main
+            echo "✅ Deploy dispatched."
           fi
 
       - name: Notify on failure
