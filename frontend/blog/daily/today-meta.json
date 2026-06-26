@@ -1,26 +1,26 @@
 {
-  "date": "2026-06-26",
-  "weekday": "금요일",
+  "date": "2026-06-27",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "태양",
-      "symbol": "☀️",
-      "slug": "19-sun"
+      "name": "별",
+      "symbol": "⭐",
+      "slug": "17-star"
     },
     {
-      "name": "세계",
-      "symbol": "🌍",
-      "slug": "21-world"
+      "name": "여황제",
+      "symbol": "👑",
+      "slug": "3-empress"
     },
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "탑",
+      "symbol": "🗼",
+      "slug": "16-tower"
     }
   ],
-  "summary": "오늘은 「성공」의 에너지가 흐르는 날이에요. 밝은 에너지가 가득해요! 지금 하는 일이 좋은 결과를 맺을 거예요. 다만 「완성」과 관련된 부분은 조심하고, 매달린 사람이 주는 …",
-  "luckyColor": "소프트 그린",
-  "luckyColorHex": "#86efac",
-  "luckyNumber": 1,
-  "url": "/blog/daily/2026-06-26.html"
+  "summary": "오늘은 「희망」의 에너지가 흐르는 날이에요. 희망의 빛이 비치고 있어요. 어려움 속에서도 빛은 항상 있어요. 다만 「과잉보호」와 관련된 부분은 조심하고, 탑이 주는 「급변」의…",
+  "luckyColor": "라벤더 퍼플",
+  "luckyColorHex": "#a78bfa",
+  "luckyNumber": 6,
+  "url": "/blog/daily/2026-06-27.html"
 }
