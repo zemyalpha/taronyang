@@ -11,9 +11,10 @@
  *   - today-meta.json         — today's fortune metadata for homepage preview
  *
  * Usage:
- *   node scripts/generate-daily-fortune.mjs [YYYY-MM-DD] [--days N]
+ *   node scripts/generate-daily-fortune.mjs [YYYY-MM-DD] [--days N] [--ahead N]
  *
- *   --days N  Generate N days of fortune ending today (backfill). Default: 1.
+ *   --days N   Generate N days of fortune ending today (backfill). Default: 1.
+ *   --ahead N  Also pre-generate N days into the future (forward-fill buffer).
  *
  * The generated pages use the existing design system (/static/css/style.css)
  * with absolute root paths that build-gh-pages.mjs rewrites to the GitHub
@@ -660,10 +661,14 @@ function main() {
   const args = process.argv.slice(2);
   let targetDate = todayKST();
   let days = 1;
+  let ahead = 0;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--days') {
       days = parseInt(args[i + 1], 10) || 1;
+      i++;
+    } else if (args[i] === '--ahead') {
+      ahead = parseInt(args[i + 1], 10) || 0;
       i++;
     } else if (/^\d{4}-\d{2}-\d{2}$/.test(args[i])) {
       targetDate = args[i];
@@ -671,8 +676,14 @@ function main() {
   }
 
   const dates = [];
+  // Backfill: today and previous days (ensures no gaps)
   for (let i = 0; i < days; i++) {
     dates.push(subtractDays(targetDate, i));
+  }
+  // Forward-fill: pre-generate future days for a reliability buffer so that
+  // a missed or delayed cron run does not cause 404s for end users.
+  for (let i = 1; i <= ahead; i++) {
+    dates.push(subtractDays(targetDate, -i));
   }
 
   console.log('[daily-fortune] Generating daily fortunes...');

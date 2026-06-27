@@ -2,7 +2,11 @@ name: Daily Fortune Auto-Publish
 
 on:
   schedule:
-    # KST 07:00 = UTC 22:00 (previous day)
+    # KST 00:00 (midnight) = UTC 15:00 — generate the day's fortune at the
+    # start of the KST day so it is live before any user visits.
+    - cron: '0 15 * * *'
+    # Safety-net run at KST 07:00 in case the midnight run was delayed/skipped
+    # (GitHub Actions scheduled workflows can be delayed during peak load).
     - cron: '0 22 * * *'
   workflow_dispatch:
     inputs:
@@ -15,6 +19,11 @@ on:
         required: false
         type: string
         default: '1'
+      ahead:
+        description: 'Pre-generate N days into the future (forward-fill buffer). Default: 3'
+        required: false
+        type: string
+        default: '3'
 
 permissions:
   contents: write
@@ -43,7 +52,10 @@ jobs:
           ARGS=""
           if [ -n "${{ inputs.date }}" ]; then ARGS="${{ inputs.date }}"; fi
           if [ -n "${{ inputs.days }}" ]; then ARGS="$ARGS --days ${{ inputs.days }}"; fi
-          if [ -z "$ARGS" ]; then ARGS="--days 1"; fi
+          if [ -n "${{ inputs.ahead }}" ]; then ARGS="$ARGS --ahead ${{ inputs.ahead }}"; fi
+          # For scheduled (cron) runs, inputs.* are empty — default to
+          # backfill 1 + forward-fill 3 days so a missed cron never causes 404s.
+          if [ -z "$ARGS" ]; then ARGS="--days 1 --ahead 3"; fi
           echo "Running: node scripts/generate-daily-fortune.mjs $ARGS"
           node scripts/generate-daily-fortune.mjs $ARGS
 
