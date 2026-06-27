@@ -241,7 +241,7 @@ function updateSitemapWithDailyFortunes(buildDir) {
   if (fortunes.length === 0) return;
 
   let sitemap = readFileSync(sitemapPath, 'utf-8');
-  sitemap = sitemap.replace(/\n  <!-- daily-fortune-start -->[\s\S]*?<!-- daily-fortune-end -->/g, '');
+  sitemap = sitemap.replace(/\r?\n[ \t]*<!-- daily-fortune-start -->[\s\S]*?<!-- daily-fortune-end -->[ \t]*(\r?\n)?/g, '');
 
   const today = todayKST;
 
