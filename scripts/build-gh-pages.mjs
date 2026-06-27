@@ -227,9 +227,14 @@ function updateSitemapWithDailyFortunes(buildDir) {
   const dailyDir = join(buildDir, 'blog', 'daily');
   if (!existsSync(dailyDir)) return;
 
+  // KST is UTC+9 — match the generate script's visibility cutoff so
+  // pre-generated (forward-fill) future pages stay hidden until their date.
+  const todayKST = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+
   const fortunes = readdirSync(dailyDir)
     .filter((f) => /^\d{4}-\d{2}-\d{2}\.html$/.test(f))
     .map((f) => f.replace('.html', ''))
+    .filter((date) => date <= todayKST)
     .sort()
     .reverse();
 
@@ -238,7 +243,7 @@ function updateSitemapWithDailyFortunes(buildDir) {
   let sitemap = readFileSync(sitemapPath, 'utf-8');
   sitemap = sitemap.replace(/\n  <!-- daily-fortune-start -->[\s\S]*?<!-- daily-fortune-end -->/g, '');
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayKST;
 
   const indexUrl = [
     `  <url>`,
