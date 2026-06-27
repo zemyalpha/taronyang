@@ -697,7 +697,8 @@ function main() {
   // Regenerate index — only show current and past fortunes (hide pre-generated
   // future pages from index/sitemap until their date arrives)
   const allFortunes = scanExistingFortunes();
-  const visibleFortunes = allFortunes.filter((date) => date <= targetDate);
+  const today = todayKST();
+  const visibleFortunes = allFortunes.filter((date) => date <= today);
   const indexHtml = generateDailyIndex(visibleFortunes);
   writeFileSync(join(DAILY_DIR, 'index.html'), indexHtml);
   console.log(`  ✓ index.html (${visibleFortunes.length} fortunes listed)`);
