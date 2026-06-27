@@ -32,8 +32,16 @@ const TUNNEL_URL = process.env.TUNNEL_URL || '';
 // SEO / Analytics injection (ZEMA-2794) — env-var based, optional.
 // Values provided at deploy time by the board (Google accounts).
 // When absent, build output is unchanged (graceful no-op).
-const GSC_VERIFICATION_CODE = process.env.GSC_VERIFICATION_CODE || '';
-const GA4_MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID || '';
+// Trimmed + format-validated so typos fail fast at build time.
+const GSC_VERIFICATION_CODE = (process.env.GSC_VERIFICATION_CODE || '').trim();
+const GA4_MEASUREMENT_ID = (process.env.GA4_MEASUREMENT_ID || '').trim();
+
+if (GSC_VERIFICATION_CODE && !/^[a-zA-Z0-9_-]+$/.test(GSC_VERIFICATION_CODE)) {
+  throw new Error(`Invalid GSC_VERIFICATION_CODE format: "${GSC_VERIFICATION_CODE}"`);
+}
+if (GA4_MEASUREMENT_ID && !/^[A-Za-z0-9-]+$/.test(GA4_MEASUREMENT_ID)) {
+  throw new Error(`Invalid GA4_MEASUREMENT_ID format: "${GA4_MEASUREMENT_ID}"`);
+}
 
 function minifyCss(css) {
   return css
@@ -180,15 +188,18 @@ function injectSeoTags(html) {
   const injections = [];
 
   if (GSC_VERIFICATION_CODE && !html.includes('google-site-verification')) {
+    const safeGsc = GSC_VERIFICATION_CODE.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     injections.push(
-      `<meta name="google-site-verification" content="${GSC_VERIFICATION_CODE}">`,
+      `<meta name="google-site-verification" content="${safeGsc}">`,
     );
   }
 
   if (GA4_MEASUREMENT_ID && !html.includes('googletagmanager.com/gtag/js')) {
+    const safeGa4Url = encodeURIComponent(GA4_MEASUREMENT_ID);
+    const safeGa4Js = GA4_MEASUREMENT_ID.replace(/'/g, "\\'");
     injections.push(
-      `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}"></script>`,
-      `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA4_MEASUREMENT_ID}');</script>`,
+      `<script async src="https://www.googletagmanager.com/gtag/js?id=${safeGa4Url}"></script>`,
+      `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${safeGa4Js}');</script>`,
     );
   }
 
