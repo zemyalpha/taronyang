@@ -205,8 +205,8 @@ function injectSeoTags(html) {
 
   if (injections.length === 0) return html;
 
-  const block = '\n    ' + injections.join('\n    ');
-  return html.replace(/<head\b[^>]*>/i, (match) => `${match}${block}`);
+  const block = injections.map((tag) => `    ${tag}`).join('\n') + '\n';
+  return html.replace(/<\/head>/i, (match) => `${block}${match}`);
 }
 
 function rewriteDomain(content) {
