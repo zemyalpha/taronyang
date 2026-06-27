@@ -189,7 +189,7 @@ function cardFullUrl(card) {
 
 // ── Daily fortune HTML page ────────────────────────────────────────
 
-function generateDailyPage(dateStr, cards) {
+function generateDailyPage(dateStr, cards, allDates = []) {
   const weekday = getWeekday(dateStr);
   const dateKr = formatDateKorean(dateStr);
   const summary = overallSummary(cards);
@@ -257,8 +257,8 @@ function generateDailyPage(dateStr, cards) {
 
   const prevDate = subtractDays(dateStr, 1);
   const nextDate = subtractDays(dateStr, -1);
-  const prevExists = existsSync(join(DAILY_DIR, `${prevDate}.html`));
-  const nextExists = existsSync(join(DAILY_DIR, `${nextDate}.html`));
+  const prevExists = allDates.includes(prevDate) || existsSync(join(DAILY_DIR, `${prevDate}.html`));
+  const nextExists = allDates.includes(nextDate) || existsSync(join(DAILY_DIR, `${nextDate}.html`));
 
   const navHtml = `
             <nav class="card-nav" aria-label="일운 탐색">
@@ -689,19 +689,21 @@ function main() {
   console.log('[daily-fortune] Generating daily fortunes...');
   for (const dateStr of dates) {
     const cards = pickCardsForDate(dateStr);
-    const html = generateDailyPage(dateStr, cards);
+    const html = generateDailyPage(dateStr, cards, dates);
     writeFileSync(join(DAILY_DIR, `${dateStr}.html`), html);
     console.log(`  ✓ ${dateStr} — ${cards.map(c => c.name).join(' · ')}`);
   }
 
-  // Regenerate index with all existing fortunes
+  // Regenerate index — only show current and past fortunes (hide pre-generated
+  // future pages from index/sitemap until their date arrives)
   const allFortunes = scanExistingFortunes();
-  const indexHtml = generateDailyIndex(allFortunes);
+  const visibleFortunes = allFortunes.filter((date) => date <= targetDate);
+  const indexHtml = generateDailyIndex(visibleFortunes);
   writeFileSync(join(DAILY_DIR, 'index.html'), indexHtml);
-  console.log(`  ✓ index.html (${allFortunes.length} fortunes listed)`);
+  console.log(`  ✓ index.html (${visibleFortunes.length} fortunes listed)`);
 
-  // Auto-update sitemap.xml with all daily fortune URLs (ZEMA-2676)
-  updateSitemapWithDailyFortunes(allFortunes);
+  // Auto-update sitemap.xml with visible daily fortune URLs (ZEMA-2676)
+  updateSitemapWithDailyFortunes(visibleFortunes);
 
   // Generate today-meta.json for homepage preview
   const todayCards = pickCardsForDate(targetDate);
