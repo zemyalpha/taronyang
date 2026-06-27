@@ -706,11 +706,13 @@ function main() {
   // Auto-update sitemap.xml with visible daily fortune URLs (ZEMA-2676)
   updateSitemapWithDailyFortunes(visibleFortunes);
 
-  // Generate today-meta.json for homepage preview
-  const todayCards = pickCardsForDate(targetDate);
-  const meta = generateTodayMeta(targetDate, todayCards);
+  // Generate today-meta.json for homepage preview — always use the actual
+  // current date (not targetDate) so backfills never overwrite the homepage
+  // preview with stale data.
+  const todayCards = pickCardsForDate(today);
+  const meta = generateTodayMeta(today, todayCards);
   writeFileSync(join(DAILY_DIR, 'today-meta.json'), JSON.stringify(meta, null, 2));
-  console.log(`  ✓ today-meta.json (${targetDate})`);
+  console.log(`  ✓ today-meta.json (${today})`);
 
   console.log(`[daily-fortune] ✅ Done! Generated ${dates.length} fortune(s).`);
 }
