@@ -190,6 +190,9 @@ function cardFullUrl(card) {
 // ── Daily fortune HTML page ────────────────────────────────────────
 
 function generateDailyPage(dateStr, cards, allDates = []) {
+  const today = todayKST();
+  const isFuture = dateStr > today;
+  const robotsMeta = isFuture ? 'noindex, nofollow' : 'index, follow';
   const weekday = getWeekday(dateStr);
   const dateKr = formatDateKorean(dateStr);
   const summary = overallSummary(cards);
@@ -301,7 +304,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     <meta name="twitter:title" content="${dateKr} ${weekday} 오늘의 타로운세 | 타로냥">
     <meta name="twitter:description" content="${escapeHtml(summary)}">
     <meta name="twitter:image" content="${SITE_URL}/og-image.png">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="${robotsMeta}">
     <meta name="author" content="타로냥">
     <link rel="canonical" href="${SITE_URL}/blog/daily/${dateStr}.html">
     <script type="application/ld+json">
@@ -665,10 +668,10 @@ function main() {
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--days') {
-      days = parseInt(args[i + 1], 10) || 1;
+      days = Math.max(1, parseInt(args[i + 1], 10) || 1);
       i++;
     } else if (args[i] === '--ahead') {
-      ahead = parseInt(args[i + 1], 10) || 0;
+      ahead = Math.max(0, parseInt(args[i + 1], 10) || 0);
       i++;
     } else if (/^\d{4}-\d{2}-\d{2}$/.test(args[i])) {
       targetDate = args[i];
