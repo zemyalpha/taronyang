@@ -29,6 +29,12 @@ const BUILD = join(ROOT, 'gh-pages-build');
 const BASE_PATH = '/taronyang';
 const TUNNEL_URL = process.env.TUNNEL_URL || '';
 
+// SEO / Analytics injection (ZEMA-2794) — env-var based, optional.
+// Values provided at deploy time by the board (Google accounts).
+// When absent, build output is unchanged (graceful no-op).
+const GSC_VERIFICATION_CODE = process.env.GSC_VERIFICATION_CODE || '';
+const GA4_MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID || '';
+
 function minifyCss(css) {
   return css
     .replace(/\/\*[\s\S]*?\*\//g, '')
@@ -156,6 +162,40 @@ function injectConfigScript(html) {
   const scriptTag = `<script src="${BASE_PATH}/static/js/config.js"></script>`;
   if (html.includes('static/js/config.js')) return html;
   return html.replace(/<head\b[^>]*>/i, (match) => `${match}\n    ${scriptTag}`);
+}
+
+/**
+ * Inject GSC verification meta tag and/or GA4 gtag snippet into <head>.
+ *
+ * Both are env-var gated (ZEMA-2794):
+ *   - GSC_VERIFICATION_CODE → <meta name="google-site-verification" content="...">
+ *   - GA4_MEASUREMENT_ID    → Google gtag.js snippet
+ *
+ * Idempotent: skips injection if the tag/snippet is already present.
+ * When neither env var is set, the HTML is returned unchanged.
+ */
+function injectSeoTags(html) {
+  if (!GSC_VERIFICATION_CODE && !GA4_MEASUREMENT_ID) return html;
+
+  const injections = [];
+
+  if (GSC_VERIFICATION_CODE && !html.includes('google-site-verification')) {
+    injections.push(
+      `<meta name="google-site-verification" content="${GSC_VERIFICATION_CODE}">`,
+    );
+  }
+
+  if (GA4_MEASUREMENT_ID && !html.includes('googletagmanager.com/gtag/js')) {
+    injections.push(
+      `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}"></script>`,
+      `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA4_MEASUREMENT_ID}');</script>`,
+    );
+  }
+
+  if (injections.length === 0) return html;
+
+  const block = '\n    ' + injections.join('\n    ');
+  return html.replace(/<head\b[^>]*>/i, (match) => `${match}${block}`);
 }
 
 function rewriteDomain(content) {
@@ -333,6 +373,7 @@ for (const file of htmlFiles) {
   let html = readFileSync(file, 'utf-8');
   html = rewritePaths(html);
   html = injectConfigScript(html);
+  html = injectSeoTags(html);
   writeFileSync(file, html);
   console.log(`  ✓ ${relative(BUILD, file)}`);
 }
@@ -431,5 +472,7 @@ console.log(`  Output: ${relative(ROOT, BUILD)}/`);
 console.log(`  HTML files: ${allFiles.length}`);
 console.log(`  Base path: ${BASE_PATH}`);
 console.log(`  API base: ${TUNNEL_URL ? TUNNEL_URL + '/api' : '(same-origin)'}`);
+console.log(`  GSC verification: ${GSC_VERIFICATION_CODE ? '✓ injected' : '(not set)'}`);
+console.log(`  GA4 gtag: ${GA4_MEASUREMENT_ID ? '✓ injected' : '(not set)'}`);
 console.log('');
 console.log('  Deploy to: https://zemyalpha.github.io/taronyang/');
