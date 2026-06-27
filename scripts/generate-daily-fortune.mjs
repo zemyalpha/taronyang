@@ -706,13 +706,16 @@ function main() {
   // Auto-update sitemap.xml with visible daily fortune URLs (ZEMA-2676)
   updateSitemapWithDailyFortunes(visibleFortunes);
 
-  // Generate today-meta.json for homepage preview — always use the actual
-  // current date (not targetDate) so backfills never overwrite the homepage
-  // preview with stale data.
-  const todayCards = pickCardsForDate(today);
-  const meta = generateTodayMeta(today, todayCards);
+  // Generate today-meta.json for homepage preview — prefer the most recent
+  // actually-existing visible fortune so the preview never links to a page
+  // that is missing from disk (e.g. a delayed/missed cron, or a local-dev
+  // backfill that only generated specific dates). Falls back to `today` only
+  // when no visible fortune files exist yet. `visibleFortunes` is sorted
+  // descending, so [0] is today when it exists, else the latest available.
+  const previewDate = visibleFortunes.length > 0 ? visibleFortunes[0] : today;
+  const meta = generateTodayMeta(previewDate, pickCardsForDate(previewDate));
   writeFileSync(join(DAILY_DIR, 'today-meta.json'), JSON.stringify(meta, null, 2));
-  console.log(`  ✓ today-meta.json (${today})`);
+  console.log(`  ✓ today-meta.json (${previewDate})`);
 
   console.log(`[daily-fortune] ✅ Done! Generated ${dates.length} fortune(s).`);
 }
