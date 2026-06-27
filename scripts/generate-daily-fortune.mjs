@@ -11,9 +11,10 @@
  *   - today-meta.json         — today's fortune metadata for homepage preview
  *
  * Usage:
- *   node scripts/generate-daily-fortune.mjs [YYYY-MM-DD] [--days N]
+ *   node scripts/generate-daily-fortune.mjs [YYYY-MM-DD] [--days N] [--ahead N]
  *
- *   --days N  Generate N days of fortune ending today (backfill). Default: 1.
+ *   --days N   Generate N days of fortune ending today (backfill). Default: 1.
+ *   --ahead N  Also pre-generate N days into the future (forward-fill buffer).
  *
  * The generated pages use the existing design system (/static/css/style.css)
  * with absolute root paths that build-gh-pages.mjs rewrites to the GitHub
@@ -188,7 +189,10 @@ function cardFullUrl(card) {
 
 // ── Daily fortune HTML page ────────────────────────────────────────
 
-function generateDailyPage(dateStr, cards) {
+function generateDailyPage(dateStr, cards, allDates = []) {
+  const today = todayKST();
+  const isFuture = dateStr > today;
+  const robotsMeta = isFuture ? 'noindex, nofollow' : 'index, follow';
   const weekday = getWeekday(dateStr);
   const dateKr = formatDateKorean(dateStr);
   const summary = overallSummary(cards);
@@ -256,8 +260,8 @@ function generateDailyPage(dateStr, cards) {
 
   const prevDate = subtractDays(dateStr, 1);
   const nextDate = subtractDays(dateStr, -1);
-  const prevExists = existsSync(join(DAILY_DIR, `${prevDate}.html`));
-  const nextExists = existsSync(join(DAILY_DIR, `${nextDate}.html`));
+  const prevExists = allDates.includes(prevDate) || existsSync(join(DAILY_DIR, `${prevDate}.html`));
+  const nextExists = allDates.includes(nextDate) || existsSync(join(DAILY_DIR, `${nextDate}.html`));
 
   const navHtml = `
             <nav class="card-nav" aria-label="일운 탐색">
@@ -300,7 +304,7 @@ function generateDailyPage(dateStr, cards) {
     <meta name="twitter:title" content="${dateKr} ${weekday} 오늘의 타로운세 | 타로냥">
     <meta name="twitter:description" content="${escapeHtml(summary)}">
     <meta name="twitter:image" content="${SITE_URL}/og-image.png">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="${robotsMeta}">
     <meta name="author" content="타로냥">
     <link rel="canonical" href="${SITE_URL}/blog/daily/${dateStr}.html">
     <script type="application/ld+json">
@@ -660,10 +664,14 @@ function main() {
   const args = process.argv.slice(2);
   let targetDate = todayKST();
   let days = 1;
+  let ahead = 0;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--days') {
-      days = parseInt(args[i + 1], 10) || 1;
+      days = Math.max(1, parseInt(args[i + 1], 10) || 1);
+      i++;
+    } else if (args[i] === '--ahead') {
+      ahead = Math.max(0, parseInt(args[i + 1], 10) || 0);
       i++;
     } else if (/^\d{4}-\d{2}-\d{2}$/.test(args[i])) {
       targetDate = args[i];
@@ -671,32 +679,46 @@ function main() {
   }
 
   const dates = [];
+  // Backfill: today and previous days (ensures no gaps)
   for (let i = 0; i < days; i++) {
     dates.push(subtractDays(targetDate, i));
+  }
+  // Forward-fill: pre-generate future days for a reliability buffer so that
+  // a missed or delayed cron run does not cause 404s for end users.
+  for (let i = 1; i <= ahead; i++) {
+    dates.push(subtractDays(targetDate, -i));
   }
 
   console.log('[daily-fortune] Generating daily fortunes...');
   for (const dateStr of dates) {
     const cards = pickCardsForDate(dateStr);
-    const html = generateDailyPage(dateStr, cards);
+    const html = generateDailyPage(dateStr, cards, dates);
     writeFileSync(join(DAILY_DIR, `${dateStr}.html`), html);
     console.log(`  ✓ ${dateStr} — ${cards.map(c => c.name).join(' · ')}`);
   }
 
-  // Regenerate index with all existing fortunes
+  // Regenerate index — only show current and past fortunes (hide pre-generated
+  // future pages from index/sitemap until their date arrives)
   const allFortunes = scanExistingFortunes();
-  const indexHtml = generateDailyIndex(allFortunes);
+  const today = todayKST();
+  const visibleFortunes = allFortunes.filter((date) => date <= today);
+  const indexHtml = generateDailyIndex(visibleFortunes);
   writeFileSync(join(DAILY_DIR, 'index.html'), indexHtml);
-  console.log(`  ✓ index.html (${allFortunes.length} fortunes listed)`);
+  console.log(`  ✓ index.html (${visibleFortunes.length} fortunes listed)`);
 
-  // Auto-update sitemap.xml with all daily fortune URLs (ZEMA-2676)
-  updateSitemapWithDailyFortunes(allFortunes);
+  // Auto-update sitemap.xml with visible daily fortune URLs (ZEMA-2676)
+  updateSitemapWithDailyFortunes(visibleFortunes);
 
-  // Generate today-meta.json for homepage preview
-  const todayCards = pickCardsForDate(targetDate);
-  const meta = generateTodayMeta(targetDate, todayCards);
+  // Generate today-meta.json for homepage preview — prefer the most recent
+  // actually-existing visible fortune so the preview never links to a page
+  // that is missing from disk (e.g. a delayed/missed cron, or a local-dev
+  // backfill that only generated specific dates). Falls back to `today` only
+  // when no visible fortune files exist yet. `visibleFortunes` is sorted
+  // descending, so [0] is today when it exists, else the latest available.
+  const previewDate = visibleFortunes.length > 0 ? visibleFortunes[0] : today;
+  const meta = generateTodayMeta(previewDate, pickCardsForDate(previewDate));
   writeFileSync(join(DAILY_DIR, 'today-meta.json'), JSON.stringify(meta, null, 2));
-  console.log(`  ✓ today-meta.json (${targetDate})`);
+  console.log(`  ✓ today-meta.json (${previewDate})`);
 
   console.log(`[daily-fortune] ✅ Done! Generated ${dates.length} fortune(s).`);
 }
