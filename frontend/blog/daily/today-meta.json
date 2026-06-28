@@ -1,26 +1,26 @@
 {
-  "date": "2026-06-28",
-  "weekday": "일요일",
+  "date": "2026-06-29",
+  "weekday": "월요일",
   "cards": [
     {
-      "name": "탑",
-      "symbol": "🗼",
-      "slug": "16-tower"
+      "name": "연인",
+      "symbol": "💕",
+      "slug": "6-lovers"
     },
     {
-      "name": "운명의 수레바퀴",
-      "symbol": "🎡",
-      "slug": "10-wheel-of-fortune"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     },
     {
-      "name": "절제",
-      "symbol": "🏺",
-      "slug": "14-temperance"
+      "name": "황제",
+      "symbol": "🏛️",
+      "slug": "4-emperor"
     }
   ],
-  "summary": "오늘은 「급변」의 에너지가 흐르는 날이에요. 갑작스러운 변화가 찾아올 수 있어요. 하지만 무너진 자리에 더 강한 것이 세워질 거예요. 다만 「역경」과 관련된 부분은 조심하고,…",
-  "luckyColor": "민트",
-  "luckyColorHex": "#34d399",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-06-28.html"
+  "summary": "오늘은 「사랑」의 에너지가 흐르는 날이에요. 중요한 선택의 순간이에요. 마음이 이끄는 대로 선택하세요. 다만 「용기」와 관련된 부분은 조심하고, 황제가 주는 「권위」의 메시지…",
+  "luckyColor": "라벤더 퍼플",
+  "luckyColorHex": "#a78bfa",
+  "luckyNumber": 8,
+  "url": "/blog/daily/2026-06-29.html"
 }
