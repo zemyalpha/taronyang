@@ -187,7 +187,7 @@ function injectSeoTags(html) {
 
   const injections = [];
 
-  if (GSC_VERIFICATION_CODE && !/<meta\s+name=["']google-site-verification["']/i.test(html)) {
+  if (GSC_VERIFICATION_CODE && !/<meta\b[^>]*\bname\s*=\s*["']?google-site-verification(?=["'\s>])/i.test(html)) {
     const safeGsc = GSC_VERIFICATION_CODE.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     injections.push(
       `<meta name="google-site-verification" content="${safeGsc}">`,
