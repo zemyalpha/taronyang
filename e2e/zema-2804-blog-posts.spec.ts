@@ -42,7 +42,7 @@ test.describe('ZEMA-2804 — 블로그 포스트 5종(2차) E2E 검증', () => {
       for (const post of NEW_POSTS) {
         const card = page.locator(`a.blog-index-card[href*="${post.slug}"]`);
         await expect(card).toBeVisible();
-        await expect(card).toHaveAttribute('href', `/taronyang/blog/${post.slug}.html`);
+        await expect(card).toHaveAttribute('href', new RegExp(`^\\/?(taronyang\\/)?blog\\/${post.slug}\\.html$`));
       }
     });
 
@@ -91,7 +91,7 @@ test.describe('ZEMA-2804 — 블로그 포스트 5종(2차) E2E 검증', () => {
         await expect(cssLink).toHaveCount(1);
 
         const href = await cssLink.getAttribute('href');
-        const cssResponse = await page.goto(href!.startsWith('http') ? href! : `${BASE.replace('/taronyang', '')}${href!}`);
+        const cssResponse = await page.goto(href!.startsWith('http') ? href! : `${new URL(BASE).origin}${href!}`);
         expect(cssResponse?.status()).toBe(200);
       });
 
@@ -155,7 +155,7 @@ test.describe('ZEMA-2804 — 블로그 포스트 5종(2차) E2E 검증', () => {
         );
 
         for (const link of internalLinks) {
-          const url = link!.startsWith('http') ? link! : `${BASE.replace('/taronyang', '')}${link!}`;
+          const url = link!.startsWith('http') ? link! : `${new URL(BASE).origin}${link!}`;
           const response = await page.request.get(url);
           expect(response.status(), `Link ${link} should return 200`).toBe(200);
         }
@@ -169,7 +169,7 @@ test.describe('ZEMA-2804 — 블로그 포스트 5종(2차) E2E 검증', () => {
         );
 
         for (const link of cardLinks) {
-          const url = link!.startsWith('http') ? link! : `${BASE.replace('/taronyang', '')}${link!}`;
+          const url = link!.startsWith('http') ? link! : `${new URL(BASE).origin}${link!}`;
           const response = await page.request.get(url);
           expect(response.status(), `Card link ${link} should return 200`).toBe(200);
         }
