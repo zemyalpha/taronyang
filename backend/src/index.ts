@@ -52,7 +52,8 @@ const corsOrigins = config.nodeEnv === 'production'
   ? [config.frontendUrl, ...config.extraCorsOrigins].filter(Boolean)
   : true;
 
-// Quick Tunnel URL 회전에도 CORS가 차단되지 않도록 명시적 Origin 검증
+// 명시적 Origin 검증 — credentials: true이므로 와일드카드 패턴(*.github.io 등) 금지 (ZEMA-2715)
+// 허용할 Origin은 FRONTEND_URL 또는 EXTRA_CORS_ORIGINS 환경변수에 명시적으로 등록
 function corsOriginCheck(origin: string | undefined, callback: (err: Error | null, ok?: boolean) => void) {
   // 개발 모드: 모든 Origin 허용
   if (config.nodeEnv !== 'production') {
@@ -61,7 +62,7 @@ function corsOriginCheck(origin: string | undefined, callback: (err: Error | nul
   if (!origin) {
     return callback(null, true); // Same-origin 요청 (Origin 헤더 없음)
   }
-  // 명시적으로 허용된 Origin
+  // 명시적으로 허용된 Origin (FRONTEND_URL + EXTRA_CORS_ORIGINS)
   if (Array.isArray(corsOrigins) && corsOrigins.includes(origin)) {
     return callback(null, true);
   }
