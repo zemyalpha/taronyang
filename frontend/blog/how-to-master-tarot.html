@@ -84,7 +84,7 @@
             <a href="/blog/" class="header-login">블로그</a>
         </header>
 
-        <article id="main-content">
+        <article id="main-content" tabindex="-1">
             <nav class="breadcrumb" aria-label="breadcrumb">
                 <a href="/">홈</a>
                 <span aria-hidden="true">›</span>
@@ -226,22 +226,7 @@
         </footer>
     </div>
 
-    <script>
-        (function() {
-            const starsEl = document.getElementById('stars');
-            if (starsEl) {
-                for (let i = 0; i < 30; i++) {
-                    const star = document.createElement('div');
-                    star.className = 'star';
-                    star.style.left = Math.random() * 100 + '%';
-                    star.style.top = Math.random() * 100 + '%';
-                    star.style.animationDuration = (2 + Math.random() * 3) + 's';
-                    star.style.animationDelay = Math.random() * 3 + 's';
-                    starsEl.appendChild(star);
-                }
-            }
-        })();
-    </script>
+    <script src="/static/js/stars.js"></script>
     <script src="/static/js/share.js"></script>
 </body>
 </html>
