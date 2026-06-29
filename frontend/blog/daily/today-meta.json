@@ -1,26 +1,26 @@
 {
-  "date": "2026-06-29",
-  "weekday": "월요일",
+  "date": "2026-06-30",
+  "weekday": "화요일",
   "cards": [
+    {
+      "name": "매달린 사람",
+      "symbol": "🔄",
+      "slug": "12-hanged-man"
+    },
     {
       "name": "연인",
       "symbol": "💕",
       "slug": "6-lovers"
     },
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
-    },
-    {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     }
   ],
-  "summary": "오늘은 「사랑」의 에너지가 흐르는 날이에요. 중요한 선택의 순간이에요. 마음이 이끄는 대로 선택하세요. 다만 「용기」와 관련된 부분은 조심하고, 황제가 주는 「권위」의 메시지…",
-  "luckyColor": "라벤더 퍼플",
-  "luckyColorHex": "#a78bfa",
-  "luckyNumber": 8,
-  "url": "/blog/daily/2026-06-29.html"
+  "summary": "오늘은 「희생」의 에너지가 흐르는 날이에요. 다르게 바라볼 시간이에요. 기다림 속에서 새로운 깨달음을 얻을 거예요. 다만 「사랑」과 관련된 부분은 조심하고, 정의가 주는 「공…",
+  "luckyColor": "로즈 골드",
+  "luckyColorHex": "#f472b6",
+  "luckyNumber": 6,
+  "url": "/blog/daily/2026-06-30.html"
 }
