@@ -5,7 +5,8 @@
     var starsEl = document.getElementById('stars');
     if (!starsEl) return;
 
-    var count = parseInt(starsEl.getAttribute('data-star-count'), 10) || 30;
+    var count = parseInt(starsEl.getAttribute('data-star-count'), 10);
+    if (isNaN(count)) count = 30;
 
     for (var i = 0; i < count; i++) {
       var star = document.createElement('div');
