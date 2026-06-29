@@ -39,8 +39,8 @@ const GA4_MEASUREMENT_ID = (process.env.GA4_MEASUREMENT_ID || '').trim();
 if (GSC_VERIFICATION_CODE && !/^[a-zA-Z0-9_-]+$/.test(GSC_VERIFICATION_CODE)) {
   throw new Error(`Invalid GSC_VERIFICATION_CODE format: "${GSC_VERIFICATION_CODE}"`);
 }
-if (GA4_MEASUREMENT_ID && !/^[A-Za-z0-9-]+$/.test(GA4_MEASUREMENT_ID)) {
-  throw new Error(`Invalid GA4_MEASUREMENT_ID format: "${GA4_MEASUREMENT_ID}"`);
+if (GA4_MEASUREMENT_ID && !/^G-[A-Za-z0-9]+$/.test(GA4_MEASUREMENT_ID)) {
+  throw new Error(`Invalid GA4_MEASUREMENT_ID format: "${GA4_MEASUREMENT_ID}". Must start with "G-" (e.g., G-XXXXXXXXXX).`);
 }
 
 function minifyCss(css) {
@@ -182,7 +182,7 @@ function injectConfigScript(html) {
  * Idempotent: skips injection if the tag/snippet is already present.
  * When neither env var is set, the HTML is returned unchanged.
  */
-function injectSeoTags(html) {
+function injectSeoTags(html, filePath = '') {
   if (!GSC_VERIFICATION_CODE && !GA4_MEASUREMENT_ID) return html;
 
   const injections = [];
@@ -206,7 +206,11 @@ function injectSeoTags(html) {
   if (injections.length === 0) return html;
 
   const block = injections.map((tag) => `    ${tag}`).join('\n') + '\n';
-  return html.replace(/<\/head>/i, (match) => `${block}${match}`);
+  const result = html.replace(/<\/head>/i, (match) => `${block}${match}`);
+  if (result === html) {
+    console.warn(`⚠️  SEO tags not injected: no </head> tag found in ${filePath}`);
+  }
+  return result;
 }
 
 function rewriteDomain(content) {
@@ -384,7 +388,7 @@ for (const file of htmlFiles) {
   let html = readFileSync(file, 'utf-8');
   html = rewritePaths(html);
   html = injectConfigScript(html);
-  html = injectSeoTags(html);
+  html = injectSeoTags(html, file);
   writeFileSync(file, html);
   console.log(`  ✓ ${relative(BUILD, file)}`);
 }
