@@ -6,7 +6,7 @@
     <string>com.taronyang.backend</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/opt/homebrew/bin/node</string>
+        <string>/Users/zemyblue-mac-mini-m1/.nvm/versions/node/v22.23.0/bin/node</string>
         <string>dist/index.js</string>
     </array>
     <key>WorkingDirectory</key>
@@ -25,6 +25,10 @@
         <string>/usr/local/bin:/usr/bin:/bin</string>
         <key>NODE_ENV</key>
         <string>production</string>
+        <key>FRONTEND_URL</key>
+        <string>https://zemyalpha.github.io</string>
+        <key>EXTRA_CORS_ORIGINS</key>
+        <string>https://zemyalpha.github.io</string>
     </dict>
 </dict>
 </plist>

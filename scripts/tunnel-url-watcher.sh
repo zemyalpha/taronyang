@@ -14,8 +14,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BEACON_FILE="$PROJECT_DIR/api-beacon.json"
-TUNNEL_ERR_LOG="$HOME/Library/Logs/taronyang-tunnel.err"
-TUNNEL_OUT_LOG="$HOME/Library/Logs/taronyang-tunnel.log"
+# Log paths MUST match the launchd plist's StandardOutPath/StandardErrorPath.
+# The com.taronyang.tunnel.plist writes to /tmp/ — not ~/Library/Logs/.
+TUNNEL_ERR_LOG="/tmp/taronyang-tunnel.err"
+TUNNEL_OUT_LOG="/tmp/taronyang-tunnel.log"
 
 # 현재 터널 URL 추출 (stderr 우선, stdout 폴백)
 extract_tunnel_url() {
