@@ -3,10 +3,11 @@ import { test, expect } from '@playwright/test';
 /**
  * ZEMA-2918: blog/daily skip-nav tabindex fix verification
  *
- * Daily fortune pages (blog/daily/*.html) use a <div> as the skip-nav
- * target (#main-content). <div> is not natively focusable, so
- * tabindex="-1" must be present for the skip link to move keyboard /
- * screen-reader focus (WCAG 2.1 AA).
+ * Daily fortune pages (blog/daily/*.html) use a semantic <article> (or
+ * <section> on the index) as the skip-nav target (#main-content), placed
+ * after the header so the skip truly bypasses navigation. These tags are
+ * not natively focusable, so tabindex="-1" must be present for the skip
+ * link to move keyboard / screen-reader focus (WCAG 2.1 AA).
  */
 
 // Spot-check representative pages
@@ -40,11 +41,12 @@ for (const pageCase of SPOT_CHECK_PAGES) {
       const mainContent = page.locator('#main-content');
       await expect(mainContent).toHaveCount(1);
 
-      // 3. target has tabindex="-1" (makes a <div> programmatically focusable)
+      // 3. target has tabindex="-1" (makes non-focusable tags programmatically focusable)
       await expect(mainContent).toHaveAttribute('tabindex', '-1');
 
-      // 4. target is a <div> (daily page pattern)
-      await expect(mainContent).toHaveJSProperty('tagName', 'DIV');
+      // 4. target is a semantic <article> (daily pages) or <section> (index)
+      const expectedTag = pageCase.path.endsWith('index.html') ? 'SECTION' : 'ARTICLE';
+      await expect(mainContent).toHaveJSProperty('tagName', expectedTag);
     });
 
     test('skip-nav link becomes visible on focus', async ({ page }) => {
