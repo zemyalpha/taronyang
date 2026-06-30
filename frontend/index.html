@@ -299,6 +299,16 @@
         document.getElementById('today-count').textContent = '1,247';
 
         // 오늘의 타로운세 미리보기 (ZEMA-2666)
+        // 클라이언트 사이드 날짜 검증 (ZEMA-2910): today-meta.json이 스테일한 경우
+        // (GitHub Actions cron 지연 등) 오늘 페이지에서 데이터를 동적으로 추출하여
+        // 어제 운세가 표시되는 것을 방지
+        function getTodayKST() {
+            var kst = new Date(new Date().getTime() + 9 * 3600000);
+            var y = kst.getUTCFullYear();
+            var m = String(kst.getUTCMonth() + 1).padStart(2, '0');
+            var d = String(kst.getUTCDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
         (async function() {
             try {
                 var resp = await fetch('blog/daily/today-meta.json', { cache: 'no-cache' });
@@ -311,6 +321,40 @@
                 var numberEl = document.getElementById('daily-fortune-number');
                 var sectionEl = document.getElementById('daily-fortune-section');
                 if (!linkEl || !data) return;
+
+                var todayStr = getTodayKST();
+                if (data.date && data.date < todayStr) {
+                    try {
+                        var todayPageUrl = 'blog/daily/' + todayStr + '.html';
+                        var pageResp = await fetch(todayPageUrl, { cache: 'no-cache' });
+                        if (pageResp.ok) {
+                            var html = await pageResp.text();
+                            var doc = new DOMParser().parseFromString(html, 'text/html');
+                            var symbols = Array.from(doc.querySelectorAll('.daily-card-symbol')).map(function(el) { return el.textContent.trim(); });
+                            var names = Array.from(doc.querySelectorAll('.daily-card-name')).map(function(el) {
+                                return el.textContent.replace(/\s*\(.*?\)/, '').trim();
+                            });
+                            if (symbols.length > 0) {
+                                data.cards = names.map(function(name, i) { return { name: name, symbol: symbols[i] || '' }; });
+                            }
+                            var descMeta = doc.querySelector('meta[name="description"]');
+                            if (descMeta) { data.summary = descMeta.content; }
+                            var heroMeta = doc.querySelector('.blog-hero-meta');
+                            if (heroMeta) {
+                                var colorSpan = heroMeta.querySelector('span[style*="color"]');
+                                if (colorSpan) {
+                                    var hexMatch = colorSpan.getAttribute('style').match(/#([0-9a-fA-F]{6})/);
+                                    if (hexMatch) { data.luckyColorHex = '#' + hexMatch[1]; }
+                                    data.luckyColor = colorSpan.textContent.trim();
+                                }
+                                var numMatch = heroMeta.textContent.match(/행운의 숫자\s*(\d+)/);
+                                if (numMatch) { data.luckyNumber = parseInt(numMatch[1], 10); }
+                            }
+                            data.url = '/blog/daily/' + todayStr + '.html';
+                        }
+                    } catch (e) { /* fallback failed — use stale meta data as-is */ }
+                }
+
                 linkEl.href = data.url;
                 cardsEl.textContent = data.cards.map(function(c) { return c.symbol; }).join(' ');
                 cardsEl.setAttribute('aria-label', data.cards.map(function(c) { return c.name; }).join(', '));
