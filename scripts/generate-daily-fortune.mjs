@@ -330,7 +330,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <div class="stars" id="stars"></div>
 
-    <div class="container" id="main-content">
+    <div class="container" id="main-content" tabindex="-1">
         <header class="header">
             <a href="/" class="header-logo">🔮 타로냥</a>
             <a href="/blog/daily/" class="header-login">일운 목록</a>
@@ -537,7 +537,7 @@ function generateDailyIndex(fortuneDates) {
     <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <div class="stars" id="stars"></div>
 
-    <div class="container" id="main-content">
+    <div class="container" id="main-content" tabindex="-1">
         <header class="header">
             <a href="/" class="header-logo">🔮 타로냥</a>
             <a href="/blog/" class="header-login">블로그</a>
