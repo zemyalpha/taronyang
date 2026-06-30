@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync, readdirSync } from 'fs';
+import { join } from 'path';
 
 /**
  * ZEMA-2918: blog/daily skip-nav tabindex fix verification
@@ -18,14 +20,12 @@ const SPOT_CHECK_PAGES = [
   { label: 'daily index', path: '/blog/daily/index.html' },
 ];
 
-// Exhaustive list of all daily pages (generated from the repo)
-const ALL_DAILY_PAGES = [
-  '2026-06-17', '2026-06-18', '2026-06-19', '2026-06-20', '2026-06-21',
-  '2026-06-22', '2026-06-23', '2026-06-24', '2026-06-25', '2026-06-26',
-  '2026-06-27', '2026-06-28', '2026-06-29', '2026-06-30', '2026-07-01',
-  '2026-07-02', '2026-07-03', '2026-07-04', '2026-07-05', '2026-07-06',
-  '2026-07-07', '2026-07-08',
-].map((d) => `/blog/daily/${d}.html`);
+// Exhaustive sweep reads static HTML files directly from disk (no browser),
+// which is far faster than 22 separate page navigations.
+const DAILY_DIR = join(__dirname, '..', 'frontend', 'blog', 'daily');
+const ALL_DAILY_FILES = readdirSync(DAILY_DIR).filter((f) =>
+  /^\d{4}-\d{2}-\d{2}\.html$/.test(f)
+);
 
 for (const pageCase of SPOT_CHECK_PAGES) {
   test.describe(`ZEMA-2918 daily skip-nav: ${pageCase.label}`, () => {
@@ -51,7 +51,6 @@ for (const pageCase of SPOT_CHECK_PAGES) {
 
     test('skip-nav link becomes visible on focus', async ({ page }) => {
       await page.goto(pageCase.path, { waitUntil: 'load' });
-      await page.waitForTimeout(500);
 
       const skipLink = page.locator('a.skip-nav');
 
@@ -98,15 +97,20 @@ for (const pageCase of SPOT_CHECK_PAGES) {
   });
 }
 
-// Exhaustive sweep: every daily page must have tabindex="-1"
-test.describe('ZEMA-2918 daily skip-nav: all daily pages', () => {
-  for (const pagePath of ALL_DAILY_PAGES) {
-    test(`${pagePath} has focusable #main-content`, async ({ page }) => {
-      await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
+// Exhaustive sweep: every daily page must have a focusable #main-content.
+// Reads files directly from disk (no browser navigation) for speed.
+test.describe('ZEMA-2918 daily skip-nav: all daily pages (static check)', () => {
+  for (const file of ALL_DAILY_FILES) {
+    test(`${file}: #main-content has tabindex="-1"`, () => {
+      const html = readFileSync(join(DAILY_DIR, file), 'utf8');
 
-      const mainContent = page.locator('#main-content');
-      await expect(mainContent).toHaveCount(1);
-      await expect(mainContent).toHaveAttribute('tabindex', '-1');
+      // Locate the opening tag that carries id="main-content"
+      const tagMatch = html.match(/<\w[^>]*\sid="main-content"[^>]*>/i);
+      expect(tagMatch, `${file}: missing id="main-content"`).not.toBeNull();
+      expect(
+        tagMatch[0],
+        `${file}: #main-content must have tabindex="-1"`
+      ).toContain('tabindex="-1"');
     });
   }
 });
