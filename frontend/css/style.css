@@ -1427,6 +1427,10 @@ body {
     border-radius: 4px;
 }
 
+#main-content:focus {
+    outline: none;
+}
+
 /* === Share buttons (ZEMA-2683) === */
 
 .share-section {
