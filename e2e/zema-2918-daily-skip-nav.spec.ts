@@ -99,18 +99,27 @@ for (const pageCase of SPOT_CHECK_PAGES) {
 
 // Exhaustive sweep: every daily page must have a focusable #main-content.
 // Reads files directly from disk (no browser navigation) for speed.
-test.describe('ZEMA-2918 daily skip-nav: all daily pages (static check)', () => {
-  for (const file of ALL_DAILY_FILES) {
-    test(`${file}: #main-content has tabindex="-1"`, () => {
-      const html = readFileSync(join(DAILY_DIR, file), 'utf8');
+// All files are checked in a single test case to avoid test-runner startup
+// overhead and report clutter as the number of daily pages grows.
+test('all daily pages: #main-content has tabindex="-1" (static sweep)', () => {
+  const failures: string[] = [];
 
-      // Locate the opening tag that carries id="main-content"
-      const tagMatch = html.match(/<\w[^>]*\sid="main-content"[^>]*>/i);
-      expect(tagMatch, `${file}: missing id="main-content"`).not.toBeNull();
-      expect(
-        tagMatch[0],
-        `${file}: #main-content must have tabindex="-1"`
-      ).toContain('tabindex="-1"');
-    });
+  for (const file of ALL_DAILY_FILES) {
+    const html = readFileSync(join(DAILY_DIR, file), 'utf8');
+
+    const tagMatch = html.match(/<\w[^>]*\sid=["']main-content["'][^>]*>/i);
+    if (!tagMatch) {
+      failures.push(`${file}: missing id="main-content"`);
+      continue;
+    }
+
+    if (!/tabindex=["']-1["']/.test(tagMatch[0])) {
+      failures.push(`${file}: #main-content must have tabindex="-1"`);
+    }
   }
+
+  expect(
+    failures,
+    `${failures.length} of ${ALL_DAILY_FILES.length} daily pages failed the skip-nav static check:\n${failures.join('\n')}`
+  ).toHaveLength(0);
 });
