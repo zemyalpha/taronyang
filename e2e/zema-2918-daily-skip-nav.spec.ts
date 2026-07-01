@@ -12,20 +12,20 @@ import { join } from 'path';
  * link to move keyboard / screen-reader focus (WCAG 2.1 AA).
  */
 
-// Spot-check representative pages
-const SPOT_CHECK_PAGES = [
-  { label: 'daily 2026-07-01', path: '/blog/daily/2026-07-01.html' },
-  { label: 'daily 2026-06-20', path: '/blog/daily/2026-06-20.html' },
-  { label: 'daily 2026-07-05', path: '/blog/daily/2026-07-05.html' },
-  { label: 'daily index', path: '/blog/daily/index.html' },
-];
-
-// Exhaustive sweep reads static HTML files directly from disk (no browser),
-// which is far faster than 22 separate page navigations.
 const DAILY_DIR = join(__dirname, '..', 'frontend', 'blog', 'daily');
 const ALL_DAILY_FILES = readdirSync(DAILY_DIR).filter((f) =>
   /^\d{4}-\d{2}-\d{2}\.html$/.test(f)
 );
+
+// Spot-check representative pages: pick dynamically from files on disk so
+// the tests don't break if old daily pages are cleaned up or dates change.
+const SPOT_CHECK_PAGES = [
+  ...ALL_DAILY_FILES.slice(0, 3).map((file) => ({
+    label: 'daily ' + file.replace('.html', ''),
+    path: '/blog/daily/' + file,
+  })),
+  { label: 'daily index', path: '/blog/daily/index.html' },
+];
 
 for (const pageCase of SPOT_CHECK_PAGES) {
   test.describe(`ZEMA-2918 daily skip-nav: ${pageCase.label}`, () => {
