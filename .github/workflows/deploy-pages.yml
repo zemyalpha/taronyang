@@ -36,6 +36,8 @@ jobs:
       - name: Build frontend for GitHub Pages
         env:
           TUNNEL_URL: ${{ vars.TUNNEL_URL }}
+          GSC_VERIFICATION_CODE: ${{ vars.GSC_VERIFICATION_CODE }}
+          GA4_MEASUREMENT_ID: ${{ vars.GA4_MEASUREMENT_ID }}
         run: node scripts/build-gh-pages.mjs
 
       - name: Upload Pages artifact
