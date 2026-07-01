@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 
 /**
@@ -13,9 +13,9 @@ import { join } from 'path';
  */
 
 const DAILY_DIR = join(__dirname, '..', 'frontend', 'blog', 'daily');
-const ALL_DAILY_FILES = readdirSync(DAILY_DIR).filter((f) =>
-  /^\d{4}-\d{2}-\d{2}\.html$/.test(f)
-);
+const ALL_DAILY_FILES = existsSync(DAILY_DIR)
+  ? readdirSync(DAILY_DIR).filter((f) => /^\d{4}-\d{2}-\d{2}\.html$/.test(f))
+  : [];
 
 // Spot-check representative pages: pick dynamically from files on disk so
 // the tests don't break if old daily pages are cleaned up or dates change.
@@ -89,10 +89,7 @@ for (const pageCase of SPOT_CHECK_PAGES) {
       await mainContent.focus();
 
       // CSS #main-content:focus { outline: none; } suppresses the ring
-      const outlineStyle = await mainContent.evaluate(
-        (el) => getComputedStyle(el).outlineStyle
-      );
-      expect(outlineStyle).toBe('none');
+      await expect(mainContent).toHaveCSS('outline-style', 'none');
     });
   });
 }
@@ -102,6 +99,7 @@ for (const pageCase of SPOT_CHECK_PAGES) {
 // All files are checked in a single test case to avoid test-runner startup
 // overhead and report clutter as the number of daily pages grows.
 test('all daily pages: #main-content has tabindex="-1" (static sweep)', () => {
+  expect(ALL_DAILY_FILES.length).toBeGreaterThan(0);
   const failures: string[] = [];
 
   for (const file of ALL_DAILY_FILES) {
