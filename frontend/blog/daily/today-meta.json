@@ -1,6 +1,6 @@
 {
-  "date": "2026-06-29",
-  "weekday": "월요일",
+  "date": "2026-07-01",
+  "weekday": "수요일",
   "cards": [
     {
       "name": "연인",
@@ -8,19 +8,19 @@
       "slug": "6-lovers"
     },
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "바보",
+      "symbol": "🃏",
+      "slug": "0-fool"
     },
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "여황제",
+      "symbol": "👑",
+      "slug": "3-empress"
     }
   ],
-  "summary": "오늘은 「사랑」의 에너지가 흐르는 날이에요. 중요한 선택의 순간이에요. 마음이 이끄는 대로 선택하세요. 다만 「용기」와 관련된 부분은 조심하고, 황제가 주는 「권위」의 메시지…",
-  "luckyColor": "라벤더 퍼플",
-  "luckyColorHex": "#a78bfa",
-  "luckyNumber": 8,
-  "url": "/blog/daily/2026-06-29.html"
+  "summary": "오늘은 「사랑」의 에너지가 흐르는 날이에요. 중요한 선택의 순간이에요. 마음이 이끄는 대로 선택하세요. 다만 「새시작」과 관련된 부분은 조심하고, 여황제가 주는 「풍요」의 메…",
+  "luckyColor": "소프트 그린",
+  "luckyColorHex": "#86efac",
+  "luckyNumber": 1,
+  "url": "/blog/daily/2026-07-01.html"
 }
