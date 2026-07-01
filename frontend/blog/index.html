@@ -59,7 +59,7 @@
     </noscript>
 </head>
 <body>
-    <div class="stars" id="stars"></div>
+    <div class="stars" id="stars" data-star-count="40"></div>
 
     <div class="container">
         <header class="header">
@@ -120,6 +120,11 @@
                     <div class="blog-index-emoji" aria-hidden="true">🃏</div>
                     <div class="blog-index-title">타로카드 의미 총정리 — 78장 완벽 해설</div>
                     <p class="blog-index-desc">대아르카나 22장부터 소아르카나 56장까지 78장 전체의 의미를 한눈에. 정·역방향 해석.</p>
+                </a>
+                <a href="/blog/tarot-card-interpretation-basics.html" class="blog-index-card">
+                    <div class="blog-index-emoji" aria-hidden="true">📖</div>
+                    <div class="blog-index-title">타로 카드 해석 기초 — 처음부터 차근차근</div>
+                    <p class="blog-index-desc">메이저·마이너 아르카나 구조, 정·역방향 읽는 법, 카드 조합, 초보자 해석 원칙 5가지까지.</p>
                 </a>
                 <a href="/blog/how-to-read-tarot-beginner.html" class="blog-index-card">
                     <div class="blog-index-emoji" aria-hidden="true">🔮</div>
@@ -228,21 +233,6 @@
         </footer>
     </div>
 
-    <script>
-        (function() {
-            const starsEl = document.getElementById('stars');
-            if (starsEl) {
-                for (let i = 0; i < 40; i++) {
-                    const star = document.createElement('div');
-                    star.className = 'star';
-                    star.style.left = Math.random() * 100 + '%';
-                    star.style.top = Math.random() * 100 + '%';
-                    star.style.animationDuration = (2 + Math.random() * 3) + 's';
-                    star.style.animationDelay = Math.random() * 3 + 's';
-                    starsEl.appendChild(star);
-                }
-            }
-        })();
-    </script>
+    <script src="/static/js/stars.js"></script>
 </body>
 </html>
