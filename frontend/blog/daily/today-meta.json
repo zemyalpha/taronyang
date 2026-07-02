@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-02",
-  "weekday": "목요일",
+  "date": "2026-07-03",
+  "weekday": "금요일",
   "cards": [
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "운명의 수레바퀴",
+      "symbol": "🎡",
+      "slug": "10-wheel-of-fortune"
     },
     {
-      "name": "여황제",
-      "symbol": "👑",
-      "slug": "3-empress"
+      "name": "별",
+      "symbol": "⭐",
+      "slug": "17-star"
     },
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
     }
   ],
-  "summary": "오늘은 「권위」의 에너지가 흐르는 날이에요. 질서와 안정이 필요한 시기예요. 체계적으로 계획을 세워보세요. 다만 「풍요」와 관련된 부분은 조심하고, 매달린 사람이 주는 「희생…",
-  "luckyColor": "딥 네이비",
-  "luckyColorHex": "#6366f1",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-07-02.html"
+  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「희망」과 관련된 부분은 조심하고, 심판이 주는 「부활」의 …",
+  "luckyColor": "스카이 블루",
+  "luckyColorHex": "#38bdf8",
+  "luckyNumber": 6,
+  "url": "/blog/daily/2026-07-03.html"
 }
