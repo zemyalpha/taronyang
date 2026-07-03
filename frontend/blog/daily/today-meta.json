@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-03",
-  "weekday": "금요일",
+  "date": "2026-07-04",
+  "weekday": "토요일",
   "cards": [
-    {
-      "name": "운명의 수레바퀴",
-      "symbol": "🎡",
-      "slug": "10-wheel-of-fortune"
-    },
     {
       "name": "별",
       "symbol": "⭐",
       "slug": "17-star"
     },
     {
-      "name": "심판",
-      "symbol": "📯",
-      "slug": "20-judgement"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
+    },
+    {
+      "name": "죽음",
+      "symbol": "🦋",
+      "slug": "13-death"
     }
   ],
-  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「희망」과 관련된 부분은 조심하고, 심판이 주는 「부활」의 …",
+  "summary": "오늘은 「희망」의 에너지가 흐르는 날이에요. 희망의 빛이 비치고 있어요. 어려움 속에서도 빛은 항상 있어요. 다만 「공정」과 관련된 부분은 조심하고, 죽음이 주는 「끝과시작」…",
   "luckyColor": "스카이 블루",
   "luckyColorHex": "#38bdf8",
-  "luckyNumber": 6,
-  "url": "/blog/daily/2026-07-03.html"
+  "luckyNumber": 8,
+  "url": "/blog/daily/2026-07-04.html"
 }

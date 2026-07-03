@@ -178,9 +178,15 @@
   <!-- daily-fortune-start -->
   <url>
     <loc>https://zemyalpha.github.io/taronyang/blog/daily/</loc>
-    <lastmod>2026-07-03</lastmod>
+    <lastmod>2026-07-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://zemyalpha.github.io/taronyang/blog/daily/2026-07-04.html</loc>
+    <lastmod>2026-07-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://zemyalpha.github.io/taronyang/blog/daily/2026-07-03.html</loc>
