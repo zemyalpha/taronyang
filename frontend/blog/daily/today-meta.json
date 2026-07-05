@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-05",
-  "weekday": "일요일",
+  "date": "2026-07-06",
+  "weekday": "월요일",
   "cards": [
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "세계",
+      "symbol": "🌍",
+      "slug": "21-world"
     },
     {
-      "name": "별",
-      "symbol": "⭐",
-      "slug": "17-star"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     },
     {
-      "name": "탑",
-      "symbol": "🗼",
-      "slug": "16-tower"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     }
   ],
-  "summary": "오늘은 「권위」의 에너지가 흐르는 날이에요. 질서와 안정이 필요한 시기예요. 체계적으로 계획을 세워보세요. 다만 「희망」과 관련된 부분은 조심하고, 탑이 주는 「급변」의 메시…",
+  "summary": "오늘은 「완성」의 에너지가 흐르는 날이에요. 하나의 큰 순환이 완성되고 있어요. 지금까지의 노력이 아름답게 완성될 거예요. 다만 「공정」과 관련된 부분은 조심하고, 힘이 주는…",
   "luckyColor": "로즈 골드",
   "luckyColorHex": "#f472b6",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-07-05.html"
+  "luckyNumber": 5,
+  "url": "/blog/daily/2026-07-06.html"
 }
