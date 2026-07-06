@@ -71,12 +71,14 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
 export async function generateAllHoroscopes(): Promise<Record<string, string>> {
   const today = getKstDate();
   const db = getDb();
+  const stmt = db.prepare(
+    'SELECT full_reading FROM daily_horoscopes WHERE zodiac_sign = ? AND date = ?'
+  );
   const entries: [string, string][] = [];
   for (let i = 0; i < ZODIAC_SIGNS.length; i++) {
     const sign = ZODIAC_SIGNS[i];
-    const isCached = !!db.prepare(
-      'SELECT 1 FROM daily_horoscopes WHERE zodiac_sign = ? AND date = ?'
-    ).get(sign, today);
+    const cached = stmt.get(sign, today) as { full_reading?: string } | undefined;
+    const isCached = !!cached?.full_reading;
 
     const horoscope = await generateDailyHoroscope(sign, today);
     entries.push([sign, horoscope]);
