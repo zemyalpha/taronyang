@@ -12,7 +12,7 @@ import { join } from 'path';
  * link to move keyboard / screen-reader focus (WCAG 2.1 AA).
  */
 
-const DAILY_DIR = join(process.cwd(), 'frontend', 'blog', 'daily');
+const DAILY_DIR = join(__dirname, '..', 'frontend', 'blog', 'daily');
 const ALL_DAILY_FILES = existsSync(DAILY_DIR)
   ? readdirSync(DAILY_DIR)
       .filter((f) => /^\d{4}-\d{2}-\d{2}\.html$/.test(f))
