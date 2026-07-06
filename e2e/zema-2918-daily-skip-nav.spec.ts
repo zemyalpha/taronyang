@@ -98,7 +98,7 @@ for (const pageCase of SPOT_CHECK_PAGES) {
 // All files are checked in a single test case to avoid test-runner startup
 // overhead and report clutter as the number of daily pages grows.
 test('all daily pages: #main-content has tabindex="-1" (static sweep)', () => {
-  expect(ALL_DAILY_FILES.length).toBeGreaterThan(0);
+  expect(ALL_DAILY_FILES.length, 'No daily fortune files found in frontend/blog/daily. Please run the generator script first.').toBeGreaterThan(0);
   const failures: string[] = [];
 
   for (const file of ALL_DAILY_FILES) {
