@@ -75,18 +75,19 @@ export async function generateAllHoroscopes(): Promise<Record<string, string>> {
     'SELECT full_reading FROM daily_horoscopes WHERE zodiac_sign = ? AND date = ?'
   );
   const entries: [string, string][] = [];
-  for (let i = 0; i < ZODIAC_SIGNS.length; i++) {
-    const sign = ZODIAC_SIGNS[i];
+  let needsDelay = false;
+  for (const sign of ZODIAC_SIGNS) {
     const cached = stmt.get(sign, today) as { full_reading?: string } | undefined;
 
     let horoscope: string;
     if (cached && cached.full_reading) {
       horoscope = cached.full_reading;
     } else {
-      horoscope = await generateDailyHoroscope(sign, today);
-      if (i < ZODIAC_SIGNS.length - 1) {
+      if (needsDelay) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
       }
+      horoscope = await generateDailyHoroscope(sign, today);
+      needsDelay = true;
     }
     entries.push([sign, horoscope]);
   }
