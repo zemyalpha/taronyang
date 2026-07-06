@@ -103,7 +103,10 @@ test('all daily pages: #main-content has tabindex="-1" (static sweep)', () => {
 
   for (const file of ALL_DAILY_FILES) {
     const html = readFileSync(join(DAILY_DIR, file), 'utf8');
-    const cleanHtml = html.replace(/<!--[\s\S]*?-->/g, '');
+    const cleanHtml = html
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '');
 
     const allMatches = cleanHtml.match(/id\s*=\s*(["']?)main-content\1/gi) || [];
     if (allMatches.length === 0) {
