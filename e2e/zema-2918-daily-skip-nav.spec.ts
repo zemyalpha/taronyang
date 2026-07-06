@@ -14,7 +14,9 @@ import { join } from 'path';
 
 const DAILY_DIR = join(process.cwd(), 'frontend', 'blog', 'daily');
 const ALL_DAILY_FILES = existsSync(DAILY_DIR)
-  ? readdirSync(DAILY_DIR).filter((f) => /^\d{4}-\d{2}-\d{2}\.html$/.test(f))
+  ? readdirSync(DAILY_DIR)
+      .filter((f) => /^\d{4}-\d{2}-\d{2}\.html$/.test(f))
+      .sort()
   : [];
 
 // Spot-check representative pages: pick dynamically from files on disk so
@@ -50,7 +52,7 @@ for (const pageCase of SPOT_CHECK_PAGES) {
     });
 
     test('skip-nav link becomes visible on focus', async ({ page }) => {
-      await page.goto(pageCase.path, { waitUntil: 'domcontentloaded' });
+      await page.goto(pageCase.path);
 
       const skipLink = page.locator('a.skip-nav');
 
@@ -83,7 +85,7 @@ for (const pageCase of SPOT_CHECK_PAGES) {
     });
 
     test('#main-content has no visible focus outline', async ({ page }) => {
-      await page.goto(pageCase.path, { waitUntil: 'domcontentloaded' });
+      await page.goto(pageCase.path);
 
       const mainContent = page.locator('#main-content');
       await mainContent.focus();
@@ -106,13 +108,23 @@ test('all daily pages: #main-content has tabindex="-1" (static sweep)', () => {
     const html = readFileSync(join(DAILY_DIR, file), 'utf8');
     const cleanHtml = html.replace(/<!--[\s\S]*?-->/g, '');
 
-    const tagMatch = cleanHtml.match(/<\w[^>]*\sid\s*=\s*["']?main-content["']?[^>]*>/i);
+    const allMatches = cleanHtml.match(/id\s*=\s*(["']?)main-content\1/gi) || [];
+    if (allMatches.length === 0) {
+      failures.push(`${file}: missing id="main-content"`);
+      continue;
+    }
+    if (allMatches.length > 1) {
+      failures.push(`${file}: multiple elements with id="main-content"`);
+      continue;
+    }
+
+    const tagMatch = cleanHtml.match(/<\w[^>]*\sid\s*=\s*(["']?)main-content\1[^>]*>/i);
     if (!tagMatch) {
       failures.push(`${file}: missing id="main-content"`);
       continue;
     }
 
-    if (!/tabindex\s*=\s*["']?-1["']?/.test(tagMatch[0])) {
+    if (!/tabindex\s*=\s*(["']?)-1\1/i.test(tagMatch[0])) {
       failures.push(`${file}: #main-content must have tabindex="-1"`);
     }
   }
