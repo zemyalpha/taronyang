@@ -104,14 +104,15 @@ test('all daily pages: #main-content has tabindex="-1" (static sweep)', () => {
 
   for (const file of ALL_DAILY_FILES) {
     const html = readFileSync(join(DAILY_DIR, file), 'utf8');
+    const cleanHtml = html.replace(/<!--[\s\S]*?-->/g, '');
 
-    const tagMatch = html.match(/<\w[^>]*\sid\s*=\s*["']main-content["'][^>]*>/i);
+    const tagMatch = cleanHtml.match(/<\w[^>]*\sid\s*=\s*["']?main-content["']?[^>]*>/i);
     if (!tagMatch) {
       failures.push(`${file}: missing id="main-content"`);
       continue;
     }
 
-    if (!/tabindex\s*=\s*["']-1["']/.test(tagMatch[0])) {
+    if (!/tabindex\s*=\s*["']?-1["']?/.test(tagMatch[0])) {
       failures.push(`${file}: #main-content must have tabindex="-1"`);
     }
   }
