@@ -108,7 +108,7 @@ test('all daily pages: #main-content has tabindex="-1" (static sweep)', () => {
       .replace(/<script[\s\S]*?<\/script>/gi, '')
       .replace(/<style[\s\S]*?<\/style>/gi, '');
 
-    const allMatches = cleanHtml.match(/id\s*=\s*(["']?)main-content\1/gi) || [];
+    const allMatches = cleanHtml.match(/\sid\s*=\s*(["']?)main-content\1/gi) || [];
     if (allMatches.length === 0) {
       failures.push(`${file}: missing id="main-content"`);
       continue;
