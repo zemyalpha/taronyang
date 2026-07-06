@@ -67,12 +67,17 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
   }
 }
 
-/** 12별자리 전체 일운 생성 */
+/** 12별자리 전체 일운 생성 (순차 처리로 API 레이트 리미트 방지) */
 export async function generateAllHoroscopes(): Promise<Record<string, string>> {
   const today = getKstDate();
-  const entries = await Promise.all(
-    ZODIAC_SIGNS.map(async (sign) => [sign, await generateDailyHoroscope(sign, today)] as const)
-  );
+  const entries: [string, string][] = [];
+  for (const sign of ZODIAC_SIGNS) {
+    const horoscope = await generateDailyHoroscope(sign, today);
+    entries.push([sign, horoscope]);
+    if (sign !== ZODIAC_SIGNS[ZODIAC_SIGNS.length - 1]) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+  }
   return Object.fromEntries(entries);
 }
 
