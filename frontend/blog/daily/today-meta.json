@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-06",
-  "weekday": "월요일",
+  "date": "2026-07-07",
+  "weekday": "화요일",
   "cards": [
     {
-      "name": "세계",
-      "symbol": "🌍",
-      "slug": "21-world"
+      "name": "태양",
+      "symbol": "☀️",
+      "slug": "19-sun"
     },
     {
-      "name": "정의",
-      "symbol": "⚖️",
-      "slug": "11-justice"
+      "name": "마법사",
+      "symbol": "🧙",
+      "slug": "1-magician"
     },
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "바보",
+      "symbol": "🃏",
+      "slug": "0-fool"
     }
   ],
-  "summary": "오늘은 「완성」의 에너지가 흐르는 날이에요. 하나의 큰 순환이 완성되고 있어요. 지금까지의 노력이 아름답게 완성될 거예요. 다만 「공정」과 관련된 부분은 조심하고, 힘이 주는…",
-  "luckyColor": "로즈 골드",
-  "luckyColorHex": "#f472b6",
-  "luckyNumber": 5,
-  "url": "/blog/daily/2026-07-06.html"
+  "summary": "오늘은 「성공」의 에너지가 흐르는 날이에요. 밝은 에너지가 가득해요! 지금 하는 일이 좋은 결과를 맺을 거예요. 다만 「창조」와 관련된 부분은 조심하고, 바보가 주는 「새시작…",
+  "luckyColor": "라벤더 퍼플",
+  "luckyColorHex": "#a78bfa",
+  "luckyNumber": 8,
+  "url": "/blog/daily/2026-07-07.html"
 }
