@@ -57,10 +57,7 @@ for (const pageCase of SPOT_CHECK_PAGES) {
       const skipLink = page.locator('a.skip-nav');
 
       // Before focus: CSS top is -100px (off-screen)
-      const topBefore = await skipLink.evaluate(
-        (el) => getComputedStyle(el).top
-      );
-      expect(topBefore).toBe('-100px');
+      await expect(skipLink).toHaveCSS('top', '-100px');
 
       // Focus the skip-nav link directly
       await skipLink.focus();
@@ -124,7 +121,7 @@ test('all daily pages: #main-content has tabindex="-1" (static sweep)', () => {
       continue;
     }
 
-    if (!/tabindex\s*=\s*(["']?)-1\1/i.test(tagMatch[0])) {
+    if (!/\btabindex\s*=\s*(["']?)-1\1/i.test(tagMatch[0])) {
       failures.push(`${file}: #main-content must have tabindex="-1"`);
     }
   }
