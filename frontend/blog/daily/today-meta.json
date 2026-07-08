@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-08",
-  "weekday": "수요일",
+  "date": "2026-07-09",
+  "weekday": "목요일",
   "cards": [
     {
-      "name": "교황",
-      "symbol": "⛪",
-      "slug": "5-hierophant"
+      "name": "여사제",
+      "symbol": "🌙",
+      "slug": "2-high-priestess"
     },
     {
-      "name": "태양",
-      "symbol": "☀️",
-      "slug": "19-sun"
+      "name": "연인",
+      "symbol": "💕",
+      "slug": "6-lovers"
     },
     {
-      "name": "별",
-      "symbol": "⭐",
-      "slug": "17-star"
+      "name": "여황제",
+      "symbol": "👑",
+      "slug": "3-empress"
     }
   ],
-  "summary": "오늘은 「전통」의 에너지가 흐르는 날이에요. 좋은 스승이나 멘토를 만날 수 있는 시기예요. 배움에 열려있으세요. 다만 「성공」과 관련된 부분은 조심하고, 별이 주는 「희망」의…",
-  "luckyColor": "딥 네이비",
-  "luckyColorHex": "#6366f1",
+  "summary": "오늘은 「직관」의 에너지가 흐르는 날이에요. 내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요. 다만 「사랑」과 관련된 부분은 조심하고, 여황제가 주는 「풍요」의…",
+  "luckyColor": "로즈 골드",
+  "luckyColorHex": "#f472b6",
   "luckyNumber": 2,
-  "url": "/blog/daily/2026-07-08.html"
+  "url": "/blog/daily/2026-07-09.html"
 }
