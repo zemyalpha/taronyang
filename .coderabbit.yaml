@@ -1,8 +1,9 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: ko
 reviews:
   auto_review:
     enabled: true
     drafts: false
-  language: ko
   path_instructions:
     - path: backend/src/**
       instructions: |
@@ -26,4 +27,4 @@ reviews:
   high_level_summary: true
   poem: false
   review_status: true
-  walkthrough: true
+  collapse_walkthrough: false
