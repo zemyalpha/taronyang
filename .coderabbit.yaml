@@ -5,14 +5,14 @@ reviews:
     enabled: true
     drafts: false
   path_instructions:
-    - path: backend/src/**
+    - path: backend/src/**/*.{ts,js}
       instructions: |
         Review TypeScript backend code for:
         - Error handling completeness (try/catch, user-friendly messages)
         - SQL injection prevention (parameterized queries)
         - Rate limiting and input validation (Zod schemas)
         - No secrets or API keys in source code
-    - path: frontend/**
+    - path: frontend/**/*.{html,js,css}
       instructions: |
         Review frontend code for:
         - WCAG 2.1 AA accessibility (semantic HTML, aria labels, keyboard nav)
