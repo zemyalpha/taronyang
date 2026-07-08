@@ -37,7 +37,7 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
       throw new Error(`Z.ai API 오류: ${response.status} ${response.statusText} ${body.slice(0, 200)}`);
     }
 
-    const data = await response.json() as any;
+    const data = await response.json() as { choices?: Array<{ message?: { content?: string; reasoning_content?: string } }> };
     const message = data.choices?.[0]?.message;
     if (!message) {
       throw new Error('Z.ai API 응답 형식 오류');
@@ -54,8 +54,8 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
       return reasoning;
     }
     throw new Error('Z.ai API 응답 형식 오류: content와 reasoning_content 모두 비어있음');
-  } catch (err: any) {
-    if (err.name === 'AbortError') {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') {
       throw new Error(`Z.ai API 타임아웃 (${LLM_TIMEOUT_MS}ms)`);
     }
     throw err;

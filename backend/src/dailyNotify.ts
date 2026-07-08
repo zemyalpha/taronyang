@@ -23,7 +23,7 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
   // 캐시 확인
   const cached = db.prepare(
     'SELECT full_reading FROM daily_horoscopes WHERE zodiac_sign = ? AND date = ?'
-  ).get(zodiacSign, date) as any;
+  ).get(zodiacSign, date) as { full_reading?: string } | undefined;
 
   if (cached?.full_reading) return cached.full_reading;
 
@@ -160,7 +160,7 @@ export async function sendDailyNotifications(): Promise<void> {
   const today = getKstDate();
   const alreadySent = db.prepare(
     'SELECT COUNT(*) as cnt FROM daily_horoscopes WHERE date = ? AND email_sent = 1'
-  ).get(today) as any;
+  ).get(today) as { cnt: number };
   if (alreadySent.cnt >= ZODIAC_SIGNS.length) {
     logger.info('오늘 이미 발송 완료 — 건너뜀', { date: today });
     return;
@@ -171,7 +171,7 @@ export async function sendDailyNotifications(): Promise<void> {
     "SELECT id, email, nickname, zodiac_sign, settings FROM users " +
     "WHERE zodiac_sign IS NOT NULL AND zodiac_sign != '' AND email IS NOT NULL " +
     "AND (json_extract(settings, '$.daily_email') IS NULL OR json_extract(settings, '$.daily_email') != 0)"
-  ).all() as any[];
+  ).all() as Array<{ id: string; email: string; nickname: string | null; zodiac_sign: string; settings: string }>;
 
   if (!enabled.length) {
     logger.info('구독자 없음 — 발송 건너뜀');

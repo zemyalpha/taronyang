@@ -2,7 +2,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
-import { createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, getDb, User } from '../database';
+import { createUser, verifyUser, getUserById, getUserByEmail, getDb, User } from '../database';
 import { signupSchema, loginSchema, updateMeSchema } from '../validation';
 
 export const authRouter = Router();
@@ -29,7 +29,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
       res.status(401).json({ detail: '사용자를 찾을 수 없습니다' });
       return;
     }
-    (req as any).user = user;
+    req.user = user;
     next();
   } catch {
     res.status(401).json({ detail: '토큰이 만료되었거나 유효하지 않습니다' });
@@ -38,7 +38,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 
 /** 관리자 권한 확인 */
 export function adminMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const user = (req as any).user as User;
+  const user = req.user;
   if (!user?.is_admin) {
     res.status(403).json({ detail: '관리자 권한이 필요합니다' });
     return;
@@ -104,7 +104,7 @@ authRouter.post('/login', (req: Request, res: Response) => {
 
 /** 내 정보 조회 */
 authRouter.get('/me', authMiddleware, (req: Request, res: Response) => {
-  const user = (req as any).user as User;
+  const user = req.user;
   res.json(makeUserResponse(user));
 });
 
@@ -116,12 +116,12 @@ authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
     return;
   }
 
-  const user = (req as any).user as User;
+  const user = req.user;
   const { nickname, birth_date } = parsed.data;
 
   const db = getDb();
   const updates: string[] = [];
-  const params: any[] = [];
+  const params: (string | number | null)[] = [];
 
   if (nickname !== undefined) {
     updates.push('nickname = ?');

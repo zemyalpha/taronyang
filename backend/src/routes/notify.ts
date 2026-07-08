@@ -13,14 +13,14 @@ interface UserSettings {
   notify_channel?: string;
 }
 
-function getSettings(user: any): UserSettings {
+function getSettings(user: { settings: string | null }): UserSettings {
   try { return JSON.parse(user.settings || '{}'); }
   catch { return {}; }
 }
 
 /** 알림 설정 조회 */
 notifyRouter.get('/settings', authMiddleware, (req: Request, res: Response) => {
-  const user = (req as any).user;
+  const user = req.user;
   const settings = getSettings(user);
   res.json({
     daily_email: settings.daily_email !== 0,
@@ -38,7 +38,7 @@ notifyRouter.put('/settings', authMiddleware, (req: Request, res: Response) => {
     return;
   }
 
-  const user = (req as any).user;
+  const user = req.user;
   const { daily_email, notify_time, notify_channel } = parsed.data;
   const db = getDb();
 
@@ -71,7 +71,7 @@ notifyRouter.put('/zodiac', authMiddleware, (req: Request, res: Response) => {
 
   const sign = parsed.data.zodiac_sign;
   const db = getDb();
-  db.prepare('UPDATE users SET zodiac_sign = ? WHERE id = ?').run(sign, (req as any).user.id);
+  db.prepare('UPDATE users SET zodiac_sign = ? WHERE id = ?').run(sign, req.user.id);
   res.json({ ok: true });
 });
 
@@ -91,7 +91,7 @@ notifyRouter.get('/horoscope/:sign', async (req: Request, res: Response) => {
   try {
     const horoscope = await generateDailyHoroscope(sign, today);
     res.json({ zodiac_sign: sign, date: today, horoscope });
-  } catch (err: any) {
+  } catch {
     res.status(500).json({ detail: '운세 생성에 실패했습니다' });
   }
 });
