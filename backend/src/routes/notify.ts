@@ -20,7 +20,7 @@ function getSettings(user: { settings: string | null }): UserSettings {
 
 /** 알림 설정 조회 */
 notifyRouter.get('/settings', authMiddleware, (req: Request, res: Response) => {
-  const user = req.user;
+  const user = req.user!;
   const settings = getSettings(user);
   res.json({
     daily_email: settings.daily_email !== 0,
@@ -38,7 +38,7 @@ notifyRouter.put('/settings', authMiddleware, (req: Request, res: Response) => {
     return;
   }
 
-  const user = req.user;
+  const user = req.user!;
   const { daily_email, notify_time, notify_channel } = parsed.data;
   const db = getDb();
 
@@ -71,7 +71,7 @@ notifyRouter.put('/zodiac', authMiddleware, (req: Request, res: Response) => {
 
   const sign = parsed.data.zodiac_sign;
   const db = getDb();
-  db.prepare('UPDATE users SET zodiac_sign = ? WHERE id = ?').run(sign, req.user.id);
+  db.prepare('UPDATE users SET zodiac_sign = ? WHERE id = ?').run(sign, req.user!.id);
   res.json({ ok: true });
 });
 

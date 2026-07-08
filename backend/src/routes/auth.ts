@@ -104,7 +104,7 @@ authRouter.post('/login', (req: Request, res: Response) => {
 
 /** 내 정보 조회 */
 authRouter.get('/me', authMiddleware, (req: Request, res: Response) => {
-  const user = req.user;
+  const user = req.user!;
   res.json(makeUserResponse(user));
 });
 
@@ -116,7 +116,7 @@ authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
     return;
   }
 
-  const user = req.user;
+  const user = req.user!;
   const { nickname, birth_date } = parsed.data;
 
   const db = getDb();
