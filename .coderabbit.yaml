@@ -1,0 +1,29 @@
+reviews:
+  auto_review:
+    enabled: true
+    drafts: false
+  language: ko
+  path_instructions:
+    - path: backend/src/**
+      instructions: |
+        Review TypeScript backend code for:
+        - Error handling completeness (try/catch, user-friendly messages)
+        - SQL injection prevention (parameterized queries)
+        - Rate limiting and input validation (Zod schemas)
+        - No secrets or API keys in source code
+    - path: frontend/**
+      instructions: |
+        Review frontend code for:
+        - WCAG 2.1 AA accessibility (semantic HTML, aria labels, keyboard nav)
+        - Mobile-first responsive design (320px-4K)
+        - Performance (minimal JS, lazy loading)
+    - path: .github/workflows/**
+      instructions: |
+        Review GitHub Actions workflows for:
+        - Proper permissions scoping
+        - Secret usage (never echo secrets)
+        - CI/CD best practices
+  high_level_summary: true
+  poem: false
+  review_status: true
+  walkthrough: true
