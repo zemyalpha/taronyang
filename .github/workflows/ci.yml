@@ -27,7 +27,7 @@ jobs:
         run: npm install
 
       - name: Lint (ESLint)
-        run: npx eslint src/ --ext .ts || true
+        run: npx eslint src/ --ext .ts
 
       - name: Type check
         run: npx tsc --noEmit
