@@ -18,7 +18,7 @@ reviews:
         - WCAG 2.1 AA accessibility (semantic HTML, aria labels, keyboard nav)
         - Mobile-first responsive design (320px-4K)
         - Performance (minimal JS, lazy loading)
-    - path: .github/workflows/**
+    - path: .github/workflows/**/*.{yml,yaml}
       instructions: |
         Review GitHub Actions workflows for:
         - Proper permissions scoping
