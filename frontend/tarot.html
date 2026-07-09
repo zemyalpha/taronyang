@@ -214,6 +214,15 @@
             return API + path;
         }
 
+        // 에러 응답에서 detail 추출 (실패시 기본 메시지)
+        async function getErrorMessage(res, defaultMsg) {
+            try {
+                const errData = await res.json();
+                if (errData && typeof errData.detail === 'string') return errData.detail;
+            } catch (_) { /* keep default */ }
+            return defaultMsg;
+        }
+
         // Step 전환
         function showStep(id) {
             document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
@@ -244,7 +253,7 @@
             try {
                 const res = await fetch(apiUrl('/api/tarot/shuffle?count=10'), { headers });
                 if (!res.ok) {
-                    showToast('카드를 불러오지 못했어요. 다시 시도해주세요.');
+                    showToast(await getErrorMessage(res, '카드를 불러오지 못했어요. 다시 시도해주세요.'));
                     showStep('question');
                     document.getElementById('loading').classList.add('hidden');
                     return;
@@ -323,7 +332,7 @@
                     body: JSON.stringify({ category, question, cards })
                 });
                 if (!res.ok) {
-                    document.getElementById('result-text').textContent = '해석을 불러오지 못했어요 😿 다시 시도해주세요.';
+                    document.getElementById('result-text').textContent = await getErrorMessage(res, '해석을 불러오지 못했어요 😿 다시 시도해주세요.');
                     document.getElementById('loading').classList.add('hidden');
                     return;
                 }
@@ -384,7 +393,7 @@
                     })
                 });
                 if (!res.ok) {
-                    loadingEl.textContent = '응답을 받지 못했어요 😿';
+                    loadingEl.textContent = await getErrorMessage(res, '응답을 받지 못했어요 😿');
                     return;
                 }
                 const data = await res.json();
