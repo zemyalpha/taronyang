@@ -59,6 +59,42 @@ describe('tarotPrompt', () => {
       const result = buildReadingPrompt('연애운', '질문', mockCards);
       expect(result).not.toMatch(/\{card\d|category|question\}/);
     });
+
+    it('preserves $ characters in question (replaceAll special pattern fix)', () => {
+      const dollarQuestion = '내 월급이 $& 인상될까요? $1 달러 짜리 아닌가요?';
+      const result = buildReadingPrompt('재물운', dollarQuestion, mockCards);
+      expect(result).toContain('$&');
+      expect(result).toContain('$1');
+      expect(result).not.toContain('{question}');
+    });
+
+    it('preserves $$ and $` and $\' characters in question', () => {
+      const specialQuestion = "test $$ backtick $` quote $' end";
+      const result = buildReadingPrompt('종합운', specialQuestion, mockCards);
+      expect(result).toContain('$$');
+      expect(result).toContain('$`');
+      expect(result).toContain("$'");
+    });
+
+    it('preserves $ characters in category', () => {
+      const result = buildReadingPrompt('재물$$운', '질문', mockCards);
+      expect(result).toContain('재물$$운');
+    });
+
+    it('preserves $ characters in card names and keywords', () => {
+      const cards = [
+        { name: '카드$&이름', is_upright: true, keywords_up: ['키워드$$'], keywords_down: ['x'] },
+        { name: '카드$`이름', is_upright: true, keywords_up: ['키워드$\''], keywords_down: ['x'] },
+        { name: '카드$1이름', is_upright: false, keywords_down: ['키워드$&'], keywords_up: ['x'] },
+      ];
+      const result = buildReadingPrompt('종합운', '', cards);
+      expect(result).toContain('카드$&이름');
+      expect(result).toContain('카드$`이름');
+      expect(result).toContain('카드$1이름');
+      expect(result).toContain('키워드$$');
+      expect(result).toContain("키워드$'");
+      expect(result).toContain('키워드$&');
+    });
   });
 
   describe('READING_PROMPT template', () => {
