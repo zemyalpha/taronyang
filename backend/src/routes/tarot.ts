@@ -1,6 +1,5 @@
 /** 타로 API 라우터 */
 import { Router, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import { ALL_CARDS, getCard, CATEGORY_NAMES } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
 import { tarotReading, callLlm } from '../llm';
@@ -8,21 +7,10 @@ import { saveReading } from './readings';
 import { tarotReadSchema, tarotChatSchema } from '../validation';
 import { logger } from '../logger';
 import { config } from '../config';
-import { checkAndIncrementFreeQuota, getRemainingFreeCount, getUserById, User } from '../database';
+import { checkAndIncrementFreeQuota, getRemainingFreeCount, User } from '../database';
+import { authMiddleware } from './auth';
 
 export const tarotRouter = Router();
-
-/** JWT에서 사용자 추출 (선택적 — 비회원도 허용) */
-function extractUser(req: Request): User | null {
-  const auth = req.headers.authorization;
-  if (!auth?.startsWith('Bearer ')) return null;
-  try {
-    const payload = jwt.verify(auth.slice(7), config.jwtSecret) as { user_id: string };
-    return getUserById(payload.user_id);
-  } catch {
-    return null;
-  }
-}
 
 /** 카테고리 목록 */
 tarotRouter.get('/categories', (_req: Request, res: Response) => {
@@ -53,8 +41,8 @@ tarotRouter.get('/shuffle', (req: Request, res: Response) => {
   res.json({ cards });
 });
 
-/** 타로 해석 */
-tarotRouter.post('/read', async (req: Request, res: Response) => {
+/** 타로 해석 — 로그인 필수 (무료 할당량 적용) */
+tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) => {
   const parsed = tarotReadSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -67,16 +55,14 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
     return;
   }
 
-  // 사용자 확인 (선택적) + 무료 할당량 검사
-  const user = extractUser(req);
-  if (user) {
-    if (!checkAndIncrementFreeQuota(user)) {
-      res.status(429).json({
-        detail: '오늘의 무료 타로 횟수를 모두 사용했어요. 내일 다시 이용하거나 프리미엄으로 업그레이드해주세요.',
-        remaining: 0,
-      });
-      return;
-    }
+  // 무료 할당량 검사 (프리미엄 제외)
+  const user = (req as any).user as User;
+  if (!checkAndIncrementFreeQuota(user)) {
+    res.status(429).json({
+      detail: '오늘의 무료 타로 횟수를 모두 사용했어요. 내일 다시 이용하거나 프리미엄으로 업그레이드해주세요.',
+      remaining: 0,
+    });
+    return;
   }
 
   // 카드 데이터 조회
@@ -98,9 +84,9 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
   try {
     const interpretation = await tarotReading(SYSTEM_PROMPT, prompt);
 
-    // 기록 저장 (회원인 경우 user_id 연결)
+    // 기록 저장
     try {
-      saveReading(user?.id ?? null, category, question, cards, interpretation);
+      saveReading(user.id, category, question, cards, interpretation);
     } catch {
       /* 기록 저장 실패는 무시 */
     }
@@ -115,7 +101,7 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
         position: c.is_upright ? '정위치' : '역위치',
       })),
       interpretation,
-      remaining_free: user ? getRemainingFreeCount(user) : undefined,
+      remaining_free: getRemainingFreeCount(user),
     });
   } catch (err) {
     const errMsg = String(err);
@@ -129,8 +115,8 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
   }
 });
 
-/** 추가 대화 */
-tarotRouter.post('/chat', async (req: Request, res: Response) => {
+/** 추가 대화 — 로그인 필수 */
+tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) => {
   const parsed = tarotChatSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -138,11 +124,17 @@ tarotRouter.post('/chat', async (req: Request, res: Response) => {
   }
   const { question, chat_history, category, cards_summary, previous_reading } = parsed.data;
 
-  // 회원만 채팅 가능 (비회원은 타로 해석 1회만)
-  const user = extractUser(req);
-  if (!user) {
-    res.status(401).json({ detail: '추가 질문은 로그인이 필요해요.' });
-    return;
+  const user = (req as any).user as User;
+
+  // 추가 질문 수 제한 (프리미엄 제외)
+  if (user.subscription_status !== 'premium') {
+    const chatCount = chat_history ? Math.ceil(chat_history.length / 2) : 0;
+    if (chatCount >= config.maxChatPerReading) {
+      res.status(429).json({
+        detail: `추가 질문은 최대 ${config.maxChatPerReading}회까지 가능해요. 프리미엄으로 업그레이드하면 무제한입니다.`,
+      });
+      return;
+    }
   }
 
   const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [

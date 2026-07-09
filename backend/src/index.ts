@@ -103,6 +103,17 @@ const authLimiter = rateLimit({
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
 
+// 타로 API 레이트 리미팅 — LLM 비용 방어 (read/chat만)
+const tarotLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '타로 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/tarot/read', tarotLimiter);
+app.use('/api/tarot/chat', tarotLimiter);
+
 // API 라우터
 app.use('/api/tarot', tarotRouter);
 app.use('/api/auth', authRouter);

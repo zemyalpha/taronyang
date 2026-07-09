@@ -331,6 +331,13 @@
                     headers: { 'Content-Type': 'application/json', ...headers },
                     body: JSON.stringify({ category, question, cards })
                 });
+                if (res.status === 401) {
+                    showToast('로그인이 필요해요. 로그인 페이지로 이동합니다.');
+                    setTimeout(() => { window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search); }, 1200);
+                    document.getElementById('loading').classList.add('hidden');
+                    showStep('question');
+                    return;
+                }
                 if (!res.ok) {
                     document.getElementById('result-text').textContent = await getErrorMessage(res, '해석을 불러오지 못했어요 😿 다시 시도해주세요.');
                     document.getElementById('loading').classList.add('hidden');
@@ -392,6 +399,12 @@
                         question: msg
                     })
                 });
+                if (res.status === 401) {
+                    loadingEl.textContent = '로그인이 필요해요.';
+                    showToast('로그인이 필요해요. 로그인 페이지로 이동합니다.');
+                    setTimeout(() => { window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search); }, 1200);
+                    return;
+                }
                 if (!res.ok) {
                     loadingEl.textContent = await getErrorMessage(res, '응답을 받지 못했어요 😿');
                     return;
