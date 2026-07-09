@@ -323,7 +323,8 @@
                     body: JSON.stringify({ category, question, cards })
                 });
                 if (!res.ok) {
-                    document.getElementById('result-text').textContent = '해석을 불러오지 못했어요 😿 다시 시도해주세요.';
+                    const errData = await res.json().catch(() => ({}));
+                    document.getElementById('result-text').textContent = errData.detail || '해석을 불러오지 못했어요 😿 다시 시도해주세요.';
                     document.getElementById('loading').classList.add('hidden');
                     return;
                 }
@@ -384,7 +385,8 @@
                     })
                 });
                 if (!res.ok) {
-                    loadingEl.textContent = '응답을 받지 못했어요 😿';
+                    const errData = await res.json().catch(() => ({}));
+                    loadingEl.textContent = errData.detail || '응답을 받지 못했어요 😿';
                     return;
                 }
                 const data = await res.json();
