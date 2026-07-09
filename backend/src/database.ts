@@ -207,6 +207,7 @@ export function checkAndIncrementFreeQuota(user: User): boolean {
   if (user.free_reset_date !== today) {
     db.prepare('UPDATE users SET free_count_today = 0, free_reset_date = ? WHERE id = ?').run(today, user.id);
     user.free_count_today = 0;
+    user.free_reset_date = today;
   }
 
   if (user.free_count_today >= config.freeDailyLimit) return false;
