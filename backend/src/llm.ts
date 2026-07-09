@@ -17,6 +17,17 @@ export class RateLimitError extends Error {
   }
 }
 
+class NonRetryableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NonRetryableError';
+  }
+}
+
+function isRetryableStatus(status: number): boolean {
+  return status === 429 || (status >= 500 && status < 600);
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -48,20 +59,23 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
         signal: controller.signal,
       });
 
-      if (response.status === 429) {
+      if (!response.ok) {
         const body = await response.text().catch(() => '');
-        lastError = new RateLimitError(`Z.ai API 오류: 429 Too Many Requests ${body.slice(0, 200)}`);
-        if (attempt < MAX_RETRIES) {
+        const status = response.status;
+        const errorMsg = `Z.ai API 오류: ${status} ${response.statusText} ${body.slice(0, 200)}`;
+
+        if (isRetryableStatus(status) && attempt < MAX_RETRIES) {
+          lastError = status === 429 ? new RateLimitError(errorMsg) : new Error(errorMsg);
           const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
           await sleep(delay);
           continue;
         }
-        throw lastError;
-      }
 
-      if (!response.ok) {
-        const body = await response.text().catch(() => '');
-        throw new Error(`Z.ai API 오류: ${response.status} ${response.statusText} ${body.slice(0, 200)}`);
+        throw status === 429
+          ? new RateLimitError(errorMsg)
+          : isRetryableStatus(status)
+            ? new Error(errorMsg)
+            : new NonRetryableError(errorMsg);
       }
 
       const data = await response.json() as { choices?: Array<{ message?: { content?: unknown; reasoning_content?: unknown } }> };
@@ -82,18 +96,22 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
       }
       throw new Error('Z.ai API 응답 형식 오류: content와 reasoning_content 모두 비어있음');
     } catch (err: unknown) {
-      if (err instanceof RateLimitError) {
+      if (err instanceof RateLimitError || err instanceof NonRetryableError) {
         throw err;
       }
-      if (err instanceof Error && err.name === 'AbortError') {
-        lastError = new Error(`Z.ai API 타임아웃 (${LLM_TIMEOUT_MS}ms)`);
-        if (attempt < MAX_RETRIES) {
-          await sleep(RETRY_BASE_DELAY_MS * Math.pow(2, attempt));
-          continue;
-        }
-        throw lastError;
+
+      const isAbort = err instanceof Error && err.name === 'AbortError';
+      const error = isAbort
+        ? new Error(`Z.ai API 타임아웃 (${LLM_TIMEOUT_MS}ms)`)
+        : (err instanceof Error ? err : new Error(String(err)));
+
+      if (attempt < MAX_RETRIES) {
+        lastError = error;
+        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+        await sleep(delay);
+        continue;
       }
-      throw err;
+      throw error;
     } finally {
       clearTimeout(timer);
     }
