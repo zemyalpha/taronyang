@@ -1,13 +1,28 @@
 /** 타로 API 라우터 */
 import { Router, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import { ALL_CARDS, getCard, CATEGORY_NAMES } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
 import { tarotReading, callLlm } from '../llm';
 import { saveReading } from './readings';
 import { tarotReadSchema, tarotChatSchema } from '../validation';
 import { logger } from '../logger';
+import { config } from '../config';
+import { checkAndIncrementFreeQuota, getRemainingFreeCount, getUserById, User } from '../database';
 
 export const tarotRouter = Router();
+
+/** JWT에서 사용자 추출 (선택적 — 비회원도 허용) */
+function extractUser(req: Request): User | null {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) return null;
+  try {
+    const payload = jwt.verify(auth.slice(7), config.jwtSecret) as { user_id: string };
+    return getUserById(payload.user_id);
+  } catch {
+    return null;
+  }
+}
 
 /** 카테고리 목록 */
 tarotRouter.get('/categories', (_req: Request, res: Response) => {
@@ -52,6 +67,18 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
     return;
   }
 
+  // 사용자 확인 (선택적) + 무료 할당량 검사
+  const user = extractUser(req);
+  if (user) {
+    if (!checkAndIncrementFreeQuota(user)) {
+      res.status(429).json({
+        detail: '오늘의 무료 타로 횟수를 모두 사용했어요. 내일 다시 이용하거나 프리미엄으로 업그레이드해주세요.',
+        remaining: 0,
+      });
+      return;
+    }
+  }
+
   // 카드 데이터 조회
   let cards: any[];
   try {
@@ -71,9 +98,9 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
   try {
     const interpretation = await tarotReading(SYSTEM_PROMPT, prompt);
 
-    // 기록 저장 (비회원도)
+    // 기록 저장 (회원인 경우 user_id 연결)
     try {
-      saveReading(null, category, question, cards, interpretation);
+      saveReading(user?.id ?? null, category, question, cards, interpretation);
     } catch {
       /* 기록 저장 실패는 무시 */
     }
@@ -88,10 +115,17 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
         position: c.is_upright ? '정위치' : '역위치',
       })),
       interpretation,
+      remaining_free: user ? getRemainingFreeCount(user) : undefined,
     });
   } catch (err) {
-    logger.error('AI 해석 실패', { error: String(err) });
-    res.status(500).json({ detail: 'AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.' });
+    const errMsg = String(err);
+    if (errMsg.includes('429')) {
+      logger.warn('AI 해석 429', { error: errMsg });
+      res.status(429).json({ detail: 'AI 서버가 혼잡합니다. 잠시 후 다시 시도해주세요.' });
+    } else {
+      logger.error('AI 해석 실패', { error: errMsg });
+      res.status(500).json({ detail: 'AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.' });
+    }
   }
 });
 
@@ -103,6 +137,13 @@ tarotRouter.post('/chat', async (req: Request, res: Response) => {
     return;
   }
   const { question, chat_history, category, cards_summary, previous_reading } = parsed.data;
+
+  // 회원만 채팅 가능 (비회원은 타로 해석 1회만)
+  const user = extractUser(req);
+  if (!user) {
+    res.status(401).json({ detail: '추가 질문은 로그인이 필요해요.' });
+    return;
+  }
 
   const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
     { role: 'system', content: SYSTEM_PROMPT },
@@ -123,7 +164,13 @@ tarotRouter.post('/chat', async (req: Request, res: Response) => {
     const reply = await callLlm(messages, 1000, 0.8);
     res.json({ reply });
   } catch (err) {
-    logger.error('AI 응답 실패', { error: String(err) });
-    res.status(500).json({ detail: 'AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.' });
+    const errMsg = String(err);
+    if (errMsg.includes('429')) {
+      logger.warn('AI 응답 429', { error: errMsg });
+      res.status(429).json({ detail: 'AI 서버가 혼잡합니다. 잠시 후 다시 시도해주세요.' });
+    } else {
+      logger.error('AI 응답 실패', { error: errMsg });
+      res.status(500).json({ detail: 'AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.' });
+    }
   }
 });

@@ -122,11 +122,12 @@ export function createUser(email: string, password: string, nickname?: string): 
   const userId = randomUUID();
   const hashed = bcrypt.hashSync(password, 10);
   const nick = nickname || email.split('@')[0];
+  const isAdmin = isAdminEmail(email) ? 1 : 0;
 
   try {
     db.prepare(
-      'INSERT INTO users (id, provider, email, password_hash, nickname) VALUES (?, ?, ?, ?, ?)'
-    ).run(userId, 'email', email, hashed, nick);
+      'INSERT INTO users (id, provider, email, password_hash, nickname, is_admin) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run(userId, 'email', email, hashed, nick, isAdmin);
     return getUserById(userId);
   } catch (err) {
     logger.error('사용자 생성 실패', { error: String(err) });
@@ -175,10 +176,50 @@ export function findOrCreateOAuthUser(info: { provider: string; provider_id: str
   // 새 사용자 생성
   const userId = randomUUID();
   const nickname = info.nickname || info.email?.split('@')[0] || '사용자';
-  db.prepare('INSERT INTO users (id, provider, provider_id, email, nickname) VALUES (?, ?, ?, ?, ?)').run(userId, info.provider, info.provider_id, info.email || null, nickname);
+  const isAdmin = info.email ? (isAdminEmail(info.email) ? 1 : 0) : 0;
+  db.prepare('INSERT INTO users (id, provider, provider_id, email, nickname, is_admin) VALUES (?, ?, ?, ?, ?, ?)').run(userId, info.provider, info.provider_id, info.email || null, nickname, isAdmin);
   return getUserById(userId)!;
 }
 
 function randomUUID(): string {
   return crypto.randomUUID();
+}
+
+/** 관리자 이메일 확인 */
+function isAdminEmail(email: string): boolean {
+  return config.adminEmails.includes(email.toLowerCase());
+}
+
+/** 오늘 날짜 (KST 기준 YYYY-MM-DD) */
+function todayString(): string {
+  const now = new Date();
+  now.setHours(now.getHours() + 9);
+  return now.toISOString().slice(0, 10);
+}
+
+/** 무료 월터 사용량 확인 및 증가 — true면 허용, false면 초과 */
+export function checkAndIncrementFreeQuota(user: User): boolean {
+  const db = getDb();
+  const today = todayString();
+
+  if (user.subscription_status === 'premium') return true;
+
+  if (user.free_reset_date !== today) {
+    db.prepare('UPDATE users SET free_count_today = 0, free_reset_date = ? WHERE id = ?').run(today, user.id);
+    user.free_count_today = 0;
+  }
+
+  if (user.free_count_today >= config.freeDailyLimit) return false;
+
+  db.prepare('UPDATE users SET free_count_today = free_count_today + 1 WHERE id = ?').run(user.id);
+  user.free_count_today += 1;
+  return true;
+}
+
+/** 사용자의 남은 무료 월터 횟수 */
+export function getRemainingFreeCount(user: User): number {
+  if (user.subscription_status === 'premium') return -1;
+  const today = todayString();
+  if (user.free_reset_date !== today) return config.freeDailyLimit;
+  return Math.max(0, config.freeDailyLimit - user.free_count_today);
 }
