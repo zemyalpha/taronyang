@@ -74,15 +74,15 @@ export function buildReadingPrompt(
   }));
 
   return READING_PROMPT
-    .replace('{category}', category)
-    .replace('{question}', question || '종합적인 운세')
-    .replace('{card1_name}', cardData[0].name)
-    .replace('{card1_position}', cardData[0].position)
-    .replace('{card1_keywords}', cardData[0].keywords)
-    .replace('{card2_name}', cardData[1].name)
-    .replace('{card2_position}', cardData[1].position)
-    .replace('{card2_keywords}', cardData[1].keywords)
-    .replace('{card3_name}', cardData[2].name)
-    .replace('{card3_position}', cardData[2].position)
-    .replace('{card3_keywords}', cardData[2].keywords);
+    .replaceAll('{category}', category)
+    .replaceAll('{question}', question || '종합적인 운세')
+    .replaceAll('{card1_name}', cardData[0].name)
+    .replaceAll('{card1_position}', cardData[0].position)
+    .replaceAll('{card1_keywords}', cardData[0].keywords)
+    .replaceAll('{card2_name}', cardData[1].name)
+    .replaceAll('{card2_position}', cardData[1].position)
+    .replaceAll('{card2_keywords}', cardData[1].keywords)
+    .replaceAll('{card3_name}', cardData[2].name)
+    .replaceAll('{card3_position}', cardData[2].position)
+    .replaceAll('{card3_keywords}', cardData[2].keywords);
 }
