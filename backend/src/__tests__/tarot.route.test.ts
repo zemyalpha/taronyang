@@ -42,13 +42,13 @@ describe('POST /api/tarot/read — auth required', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('unauthenticated request — should return 401', async () => {
+  it('unauthenticated request — should return 401 with detail message', async () => {
     const res = await request(app)
       .post('/api/tarot/read')
       .send({ category: 'love', cards: VALID_CARDS });
 
     expect(res.status).toBe(401);
-    expect(res.body.detail).toContain('로그인');
+    expect(res.body.detail).toBe('로그인이 필요합니다');
   });
 
   it('missing Authorization header — should return 401', async () => {
@@ -57,6 +57,7 @@ describe('POST /api/tarot/read — auth required', () => {
       .send({ category: 'love', cards: VALID_CARDS });
 
     expect(res.status).toBe(401);
+    expect(res.body.detail).toBeDefined();
   });
 
   it('invalid JWT — should return 401', async () => {
@@ -79,6 +80,8 @@ describe('POST /api/tarot/read — auth required', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.interpretation).toBeDefined();
+    expect(res.body.remaining_free).toBe(0);
+    expect(res.body.cards).toHaveLength(3);
   });
 
   it('authenticated free user — second read should be blocked (429)', async () => {
@@ -148,12 +151,13 @@ describe('POST /api/tarot/chat — auth + chat limit', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('unauthenticated request — should return 401', async () => {
+  it('unauthenticated request — should return 401 with detail message', async () => {
     const res = await request(app)
       .post('/api/tarot/chat')
       .send({ question: '추가 질문입니다' });
 
     expect(res.status).toBe(401);
+    expect(res.body.detail).toBe('로그인이 필요합니다');
   });
 
   it('authenticated free user — should succeed (200)', async () => {
