@@ -190,11 +190,11 @@ function isAdminEmail(email: string): boolean {
   return config.adminEmails.includes(email.toLowerCase());
 }
 
-/** 오늘 날짜 (KST 기준 YYYY-MM-DD) */
+/** 오늘 날짜 (KST 기준 YYYY-MM-DD) — UTC epoch 기반으로 timezone 독립적 */
 function todayString(): string {
   const now = new Date();
-  now.setHours(now.getHours() + 9);
-  return now.toISOString().slice(0, 10);
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  return kst.toISOString().slice(0, 10);
 }
 
 /** 무료 월터 사용량 확인 및 증가 — true면 허용, false면 초과 */
@@ -210,9 +210,12 @@ export function checkAndIncrementFreeQuota(user: User): boolean {
     user.free_reset_date = today;
   }
 
-  if (user.free_count_today >= config.freeDailyLimit) return false;
+  const result = db.prepare(
+    'UPDATE users SET free_count_today = free_count_today + 1 WHERE id = ? AND free_count_today < ?'
+  ).run(user.id, config.freeDailyLimit);
 
-  db.prepare('UPDATE users SET free_count_today = free_count_today + 1 WHERE id = ?').run(user.id);
+  if (result.changes === 0) return false;
+
   user.free_count_today += 1;
   return true;
 }

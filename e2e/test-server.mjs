@@ -1,9 +1,13 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { join, extname } from 'node:path';
+import { join, extname, resolve, sep } from 'node:path';
 
-const ROOT = join(process.cwd(), 'frontend');
+const ROOT = resolve(join(process.cwd(), 'frontend'));
 const PORT = 8000;
+
+function isPathSafe(filePath) {
+  return filePath === ROOT || filePath.startsWith(ROOT + sep);
+}
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -25,7 +29,13 @@ createServer(async (req, res) => {
     let urlPath = decodeURIComponent(req.url.split('?')[0]);
     if (urlPath === '/') urlPath = '/index.html';
 
-    let filePath = join(ROOT, urlPath);
+    let filePath = resolve(join(ROOT, urlPath));
+
+    if (!isPathSafe(filePath)) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('Forbidden');
+      return;
+    }
 
     // Try exact file first
     let info;
@@ -33,7 +43,12 @@ createServer(async (req, res) => {
       info = await stat(filePath);
     } catch {
       // Clean URL fallback: /tarot -> tarot.html
-      filePath = join(ROOT, urlPath + '.html');
+      filePath = resolve(join(ROOT, urlPath + '.html'));
+      if (!isPathSafe(filePath)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
       try {
         info = await stat(filePath);
       } catch {
@@ -44,7 +59,7 @@ createServer(async (req, res) => {
     }
 
     if (info.isDirectory()) {
-      filePath = join(filePath, 'index.html');
+      filePath = resolve(join(filePath, 'index.html'));
     }
 
     const data = await readFile(filePath);
