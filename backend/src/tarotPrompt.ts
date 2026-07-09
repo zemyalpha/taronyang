@@ -73,16 +73,20 @@ export function buildReadingPrompt(
     keywords: (c.is_upright ? c.keywords_up : c.keywords_down).join(', '),
   }));
 
+  const card1 = cardData[0] || { name: '', position: '', keywords: '' };
+  const card2 = cardData[1] || { name: '', position: '', keywords: '' };
+  const card3 = cardData[2] || { name: '', position: '', keywords: '' };
+
   return READING_PROMPT
     .replaceAll('{category}', () => category)
     .replaceAll('{question}', () => question || '종합적인 운세')
-    .replaceAll('{card1_name}', () => cardData[0].name)
-    .replaceAll('{card1_position}', () => cardData[0].position)
-    .replaceAll('{card1_keywords}', () => cardData[0].keywords)
-    .replaceAll('{card2_name}', () => cardData[1].name)
-    .replaceAll('{card2_position}', () => cardData[1].position)
-    .replaceAll('{card2_keywords}', () => cardData[1].keywords)
-    .replaceAll('{card3_name}', () => cardData[2].name)
-    .replaceAll('{card3_position}', () => cardData[2].position)
-    .replaceAll('{card3_keywords}', () => cardData[2].keywords);
+    .replaceAll('{card1_name}', () => card1.name)
+    .replaceAll('{card1_position}', () => card1.position)
+    .replaceAll('{card1_keywords}', () => card1.keywords)
+    .replaceAll('{card2_name}', () => card2.name)
+    .replaceAll('{card2_position}', () => card2.position)
+    .replaceAll('{card2_keywords}', () => card2.keywords)
+    .replaceAll('{card3_name}', () => card3.name)
+    .replaceAll('{card3_position}', () => card3.position)
+    .replaceAll('{card3_keywords}', () => card3.keywords);
 }
