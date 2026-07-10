@@ -204,19 +204,20 @@ export function checkAndIncrementFreeQuota(user: User): boolean {
 
   if (user.subscription_status === 'premium') return true;
 
-  if (user.free_reset_date !== today) {
-    db.prepare('UPDATE users SET free_count_today = 0, free_reset_date = ? WHERE id = ?').run(today, user.id);
-    user.free_count_today = 0;
-    user.free_reset_date = today;
-  }
-
   const result = db.prepare(
-    'UPDATE users SET free_count_today = free_count_today + 1 WHERE id = ? AND free_count_today < ?'
-  ).run(user.id, config.freeDailyLimit);
+    "UPDATE users " +
+    "SET free_count_today = CASE WHEN free_reset_date = ? THEN free_count_today + 1 ELSE 1 END, " +
+    "    free_reset_date = ? " +
+    "WHERE id = ? AND (free_reset_date IS NULL OR free_reset_date != ? OR free_count_today < ?)"
+  ).run(today, today, user.id, today, config.freeDailyLimit);
 
   if (result.changes === 0) return false;
 
-  user.free_count_today += 1;
+  const updated = getUserById(user.id);
+  if (updated) {
+    user.free_count_today = updated.free_count_today;
+    user.free_reset_date = updated.free_reset_date;
+  }
   return true;
 }
 

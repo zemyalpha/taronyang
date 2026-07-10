@@ -98,7 +98,7 @@ const authLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: '인증 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+  message: { detail: '인증 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
@@ -109,7 +109,7 @@ const tarotLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: '타로 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+  message: { detail: '타로 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 });
 app.use('/api/tarot/read', tarotLimiter);
 app.use('/api/tarot/chat', tarotLimiter);
