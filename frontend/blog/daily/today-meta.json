@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-10",
-  "weekday": "금요일",
+  "date": "2026-07-11",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "악마",
-      "symbol": "😈",
-      "slug": "15-devil"
+      "name": "은둔자",
+      "symbol": "🏔️",
+      "slug": "9-hermit"
     },
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
     },
     {
-      "name": "여황제",
-      "symbol": "👑",
-      "slug": "3-empress"
+      "name": "매달린 사람",
+      "symbol": "🔄",
+      "slug": "12-hanged-man"
     }
   ],
-  "summary": "오늘은 「집착」의 에너지가 흐르는 날이에요. 무언가에 지나치게 집착하고 있을 수 있어요. 스스로를 옭아매는 것에서 벗어나세요. 다만 「용기」와 관련된 부분은 조심하고, 여황제…",
-  "luckyColor": "스카이 블루",
-  "luckyColorHex": "#38bdf8",
-  "luckyNumber": 5,
-  "url": "/blog/daily/2026-07-10.html"
+  "summary": "오늘은 「성찰」의 에너지가 흐르는 날이에요. 혼자만의 시간이 필요해요. 내면을 깊이 들여다보며 답을 찾으세요. 다만 「자기의심」과 관련된 부분은 조심하고, 매달린 사람이 주는…",
+  "luckyColor": "딥 네이비",
+  "luckyColorHex": "#6366f1",
+  "luckyNumber": 1,
+  "url": "/blog/daily/2026-07-11.html"
 }
