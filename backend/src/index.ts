@@ -88,7 +88,7 @@ const apiLimiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+  message: { detail: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 });
 app.use('/api/', apiLimiter);
 
