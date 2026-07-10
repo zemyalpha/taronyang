@@ -105,9 +105,15 @@ paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {
 
 /** 구독 취소 */
 paymentRouter.post('/cancel', authMiddleware, (req: Request, res: Response) => {
+  const user = (req as any).user;
+  if (user.subscription_status !== 'premium') {
+    res.status(400).json({ detail: '활성 프리미엄 구독이 없습니다.' });
+    return;
+  }
+
   const db = getDb();
   db.prepare("UPDATE users SET subscription_status = 'cancelling' WHERE id = ?")
-    .run((req as any).user.id);
+    .run(user.id);
 
   res.json({ ok: true, message: '구독이 만료 후 취소됩니다.' });
 });
