@@ -346,7 +346,12 @@
                 cardsEl.textContent = data.cards.map(function(c) { return c.symbol; }).join(' ');
                 cardsEl.setAttribute('aria-label', data.cards.map(function(c) { return c.name; }).join(', '));
                 summaryEl.textContent = data.summary;
-                colorEl.innerHTML = '🎨 행운의 색: <span style="color:' + data.luckyColorHex + ';font-weight:700;">' + data.luckyColor + '</span>';
+                colorEl.textContent = '🎨 행운의 색: ';
+                var colorNameSpan = document.createElement('span');
+                colorNameSpan.style.color = data.luckyColorHex;
+                colorNameSpan.style.fontWeight = '700';
+                colorNameSpan.textContent = data.luckyColor;
+                colorEl.appendChild(colorNameSpan);
                 numberEl.textContent = '🔢 행운의 숫자: ' + data.luckyNumber;
                 sectionEl.style.display = '';
             } catch (e) { /* today-meta.json 없을 시 섹션 숨김 유지 */ }
