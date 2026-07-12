@@ -1,0 +1,273 @@
+import { initDb, getDb, createUser, getUserById, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, User } from '../database';
+
+function makeFreeUser(overrides: Partial<User> = {}): User {
+  return {
+    id: crypto.randomUUID(),
+    provider: 'email',
+    provider_id: null,
+    email: `user-${Date.now()}-${Math.random()}@test.com`,
+    password_hash: null,
+    nickname: 'tester',
+    birth_date: null,
+    zodiac_sign: null,
+    created_at: new Date().toISOString(),
+    free_count_today: 0,
+    free_reset_date: null,
+    subscription_status: 'free',
+    subscription_expires_at: null,
+    settings: '{}',
+    is_admin: 0,
+    ...overrides,
+  };
+}
+
+function insertUser(user: User): User {
+  const db = getDb();
+  db.prepare(
+    'INSERT INTO users (id, provider, email, password_hash, nickname, birth_date, zodiac_sign, created_at, free_count_today, free_reset_date, subscription_status, subscription_expires_at, settings, is_admin) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+  ).run(
+    user.id, user.provider, user.email, user.password_hash, user.nickname,
+    user.birth_date, user.zodiac_sign, user.created_at,
+    user.free_count_today, user.free_reset_date, user.subscription_status,
+    user.subscription_expires_at, user.settings, user.is_admin
+  );
+  return getUserById(user.id)!;
+}
+
+describe('checkAndIncrementFreeQuota', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('free user first read — should allow (returns true) and increment count', () => {
+    const user = insertUser(makeFreeUser({ free_count_today: 0 }));
+    const result = checkAndIncrementFreeQuota(user);
+    expect(result).toBe(true);
+    expect(user.free_count_today).toBe(1);
+
+    const dbUser = getUserById(user.id);
+    expect(dbUser!.free_count_today).toBe(1);
+  });
+
+  it('free user second read after exhausting limit — should deny (returns false)', () => {
+    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    const user = insertUser(makeFreeUser({ free_count_today: 1, free_reset_date: todayStr }));
+    const result = checkAndIncrementFreeQuota(user);
+    expect(result).toBe(false);
+    expect(user.free_count_today).toBe(1);
+  });
+
+  it('premium user — should always allow regardless of count', () => {
+    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    const user = insertUser(makeFreeUser({
+      subscription_status: 'premium',
+      free_count_today: 99,
+      free_reset_date: todayStr,
+    }));
+    const result = checkAndIncrementFreeQuota(user);
+    expect(result).toBe(true);
+    expect(user.free_count_today).toBe(99);
+  });
+
+  it('free user with stale reset_date — should reset counter then allow', () => {
+    const user = insertUser(makeFreeUser({
+      free_count_today: 5,
+      free_reset_date: '2020-01-01',
+    }));
+    const result = checkAndIncrementFreeQuota(user);
+    expect(result).toBe(true);
+    expect(user.free_count_today).toBe(1);
+
+    const dbUser = getUserById(user.id);
+    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    expect(dbUser!.free_reset_date).toBe(todayStr);
+    expect(dbUser!.free_count_today).toBe(1);
+  });
+
+  it('free user at limit with stale date — should reset and allow one more', () => {
+    const user = insertUser(makeFreeUser({
+      free_count_today: 10,
+      free_reset_date: '2020-01-01',
+    }));
+    const result = checkAndIncrementFreeQuota(user);
+    expect(result).toBe(true);
+    expect(user.free_count_today).toBe(1);
+  });
+
+  it('free user at limit with today date — should deny and not increment', () => {
+    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    const user = insertUser(makeFreeUser({
+      free_count_today: 1,
+      free_reset_date: todayStr,
+    }));
+    const result = checkAndIncrementFreeQuota(user);
+    expect(result).toBe(false);
+
+    const dbUser = getUserById(user.id);
+    expect(dbUser!.free_count_today).toBe(1);
+  });
+});
+
+describe('FIX (ZEMA-3023): free_reset_date updated in user object after reset', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('user.free_reset_date is set to today after quota check', () => {
+    const user = insertUser(makeFreeUser({ free_count_today: 0, free_reset_date: null }));
+
+    checkAndIncrementFreeQuota(user);
+
+    const dbUser = getUserById(user.id);
+    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    expect(dbUser!.free_reset_date).toBe(todayStr);
+    expect(user.free_count_today).toBe(1);
+    expect(user.free_reset_date).toBe(todayStr);
+  });
+
+  it('getRemainingFreeCount returns 0 after first read (not full limit)', () => {
+    const user = insertUser(makeFreeUser({ free_count_today: 0, free_reset_date: null }));
+
+    checkAndIncrementFreeQuota(user);
+
+    const remaining = getRemainingFreeCount(user);
+
+    expect(remaining).toBe(0);
+  });
+});
+
+describe('getRemainingFreeCount', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('premium user — should return -1 (unlimited)', () => {
+    const user = insertUser(makeFreeUser({ subscription_status: 'premium' }));
+    expect(getRemainingFreeCount(user)).toBe(-1);
+  });
+
+  it('free user fresh (no reset_date) — should return freeDailyLimit', () => {
+    const user = insertUser(makeFreeUser({ free_count_today: 0, free_reset_date: null }));
+    expect(getRemainingFreeCount(user)).toBe(1);
+  });
+
+  it('free user used all today — should return 0', () => {
+    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    const user = insertUser(makeFreeUser({ free_count_today: 1, free_reset_date: todayStr }));
+    expect(getRemainingFreeCount(user)).toBe(0);
+  });
+
+  it('free user with stale date — should return full limit (counter resets)', () => {
+    const user = insertUser(makeFreeUser({ free_count_today: 5, free_reset_date: '2020-01-01' }));
+    expect(getRemainingFreeCount(user)).toBe(1);
+  });
+
+  it('free user with negative-ish overflow — should not go below 0', () => {
+    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    const user = insertUser(makeFreeUser({ free_count_today: 99, free_reset_date: todayStr }));
+    expect(getRemainingFreeCount(user)).toBe(0);
+  });
+});
+
+describe('createUser — admin bootstrap', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('regular email — should create user with is_admin=0', () => {
+    const user = createUser('normal@test.com', 'password123');
+    expect(user).not.toBeNull();
+    expect(user!.is_admin).toBe(0);
+  });
+
+  it('configured admin email — should create user with is_admin=1', () => {
+    const user = createUser('admin-test@taronyang.com', 'password123');
+    expect(user).not.toBeNull();
+    expect(user!.is_admin).toBe(1);
+  });
+
+  it('second configured admin email — should also get is_admin=1', () => {
+    const user = createUser('root@taronyang.com', 'password123');
+    expect(user).not.toBeNull();
+    expect(user!.is_admin).toBe(1);
+  });
+
+  it('email with different case — should still match (case-insensitive check)', () => {
+    const user = createUser('Admin-Test@taronyang.com', 'password123');
+    expect(user).not.toBeNull();
+    expect(user!.is_admin).toBe(1);
+  });
+
+  it('email that partially matches admin — should NOT get admin', () => {
+    const user = createUser('notadmin-test@taronyang.com', 'password123');
+    expect(user).not.toBeNull();
+    expect(user!.is_admin).toBe(0);
+  });
+});
+
+describe('findOrCreateOAuthUser — admin bootstrap', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('OAuth with admin email — should create user with is_admin=1', () => {
+    const user = findOrCreateOAuthUser({
+      provider: 'kakao',
+      provider_id: 'kakao-123',
+      email: 'admin-test@taronyang.com',
+      nickname: 'AdminUser',
+    });
+    expect(user.is_admin).toBe(1);
+  });
+
+  it('OAuth with regular email — should create user with is_admin=0', () => {
+    const user = findOrCreateOAuthUser({
+      provider: 'google',
+      provider_id: 'google-456',
+      email: 'regular@test.com',
+      nickname: 'RegularUser',
+    });
+    expect(user.is_admin).toBe(0);
+  });
+
+  it('OAuth without email — should create user with is_admin=0', () => {
+    const user = findOrCreateOAuthUser({
+      provider: 'naver',
+      provider_id: 'naver-789',
+      email: undefined,
+      nickname: 'NoEmailUser',
+    });
+    expect(user.is_admin).toBe(0);
+  });
+
+  it('OAuth with admin email (second admin) — should get is_admin=1', () => {
+    const user = findOrCreateOAuthUser({
+      provider: 'kakao',
+      provider_id: 'kakao-admin2',
+      email: 'root@taronyang.com',
+      nickname: 'RootUser',
+    });
+    expect(user.is_admin).toBe(1);
+  });
+});

@@ -6,6 +6,9 @@ import { tarotReading, callLlm, RateLimitError } from '../llm';
 import { saveReading } from './readings';
 import { tarotReadSchema, tarotChatSchema } from '../validation';
 import { logger } from '../logger';
+import { config } from '../config';
+import { checkAndIncrementFreeQuota, getRemainingFreeCount, User } from '../database';
+import { authMiddleware } from './auth';
 
 export const tarotRouter = Router();
 
@@ -38,8 +41,8 @@ tarotRouter.get('/shuffle', (req: Request, res: Response) => {
   res.json({ cards });
 });
 
-/** 타로 해석 */
-tarotRouter.post('/read', async (req: Request, res: Response) => {
+/** 타로 해석 — 로그인 필수 (무료 할당량 적용) */
+tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) => {
   const parsed = tarotReadSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -49,6 +52,16 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
 
   if (!CATEGORY_NAMES[category]) {
     res.status(400).json({ detail: `잘못된 카테고리: ${category}` });
+    return;
+  }
+
+  // 무료 할당량 검사 (프리미엄 제외)
+  const user = (req as any).user as User;
+  if (!checkAndIncrementFreeQuota(user)) {
+    res.status(429).json({
+      detail: '오늘의 무료 타로 횟수를 모두 사용했어요. 내일 다시 이용하거나 프리미엄으로 업그레이드해주세요.',
+      remaining: 0,
+    });
     return;
   }
 
@@ -71,9 +84,9 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
   try {
     const interpretation = await tarotReading(SYSTEM_PROMPT, prompt);
 
-    // 기록 저장 (비회원도)
+    // 기록 저장
     try {
-      saveReading(null, category, question, cards, interpretation);
+      saveReading(user.id, category, question, cards, interpretation);
     } catch {
       /* 기록 저장 실패는 무시 */
     }
@@ -88,6 +101,7 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
         position: c.is_upright ? '정위치' : '역위치',
       })),
       interpretation,
+      remaining_free: getRemainingFreeCount(user),
     });
   } catch (err) {
     if (err instanceof RateLimitError) {
@@ -100,14 +114,27 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
   }
 });
 
-/** 추가 대화 */
-tarotRouter.post('/chat', async (req: Request, res: Response) => {
+/** 추가 대화 — 로그인 필수 */
+tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) => {
   const parsed = tarotChatSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
     return;
   }
   const { question, chat_history, category, cards_summary, previous_reading } = parsed.data;
+
+  const user = (req as any).user as User;
+
+  // 추가 질문 수 제한 (프리미엄 제외)
+  if (user.subscription_status !== 'premium') {
+    const chatCount = chat_history ? Math.ceil(chat_history.length / 2) : 0;
+    if (chatCount >= config.maxChatPerReading) {
+      res.status(429).json({
+        detail: `추가 질문은 최대 ${config.maxChatPerReading}회까지 가능해요. 프리미엄으로 업그레이드하면 무제한입니다.`,
+      });
+      return;
+    }
+  }
 
   const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
     { role: 'system', content: SYSTEM_PROMPT },
