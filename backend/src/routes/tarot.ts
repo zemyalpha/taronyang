@@ -2,7 +2,7 @@
 import { Router, Request, Response } from 'express';
 import { ALL_CARDS, getCard, CATEGORY_NAMES, TarotCard } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
-import { tarotReading, callLlm } from '../llm';
+import { tarotReading, callLlm, RateLimitError } from '../llm';
 import { saveReading } from './readings';
 import { tarotReadSchema, tarotChatSchema } from '../validation';
 import { logger } from '../logger';
@@ -90,8 +90,13 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
       interpretation,
     });
   } catch (err) {
-    logger.error('AI 해석 실패', { error: String(err) });
-    res.status(500).json({ detail: 'AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.' });
+    if (err instanceof RateLimitError) {
+      logger.warn('AI 해석 429 — 재시도 후에도 레이트 리밋', { error: String(err) });
+      res.status(429).json({ detail: 'AI 서버가 혼잡합니다. 잠시 후 다시 시도해주세요.' });
+    } else {
+      logger.error('AI 해석 실패', { error: String(err) });
+      res.status(500).json({ detail: 'AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.' });
+    }
   }
 });
 
@@ -123,7 +128,12 @@ tarotRouter.post('/chat', async (req: Request, res: Response) => {
     const reply = await callLlm(messages, 1000, 0.8);
     res.json({ reply });
   } catch (err) {
-    logger.error('AI 응답 실패', { error: String(err) });
-    res.status(500).json({ detail: 'AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.' });
+    if (err instanceof RateLimitError) {
+      logger.warn('AI 응답 429 — 재시도 후에도 레이트 리밋', { error: String(err) });
+      res.status(429).json({ detail: 'AI 서버가 혼잡합니다. 잠시 후 다시 시도해주세요.' });
+    } else {
+      logger.error('AI 응답 실패', { error: String(err) });
+      res.status(500).json({ detail: 'AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.' });
+    }
   }
 });
