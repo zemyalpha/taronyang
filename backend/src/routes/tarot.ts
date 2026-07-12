@@ -1,6 +1,6 @@
 /** 타로 API 라우터 */
 import { Router, Request, Response } from 'express';
-import { ALL_CARDS, getCard, CATEGORY_NAMES } from '../tarotData';
+import { ALL_CARDS, getCard, CATEGORY_NAMES, TarotCard } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
 import { tarotReading, callLlm } from '../llm';
 import { saveReading } from './readings';
@@ -53,7 +53,7 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
   }
 
   // 카드 데이터 조회
-  let cards: any[];
+  let cards: Array<TarotCard & { is_upright: boolean }>;
   try {
     cards = selectedCards.map((s) => {
       const card = getCard(s.id);
@@ -79,7 +79,7 @@ tarotRouter.post('/read', async (req: Request, res: Response) => {
     }
 
     res.json({
-      cards: cards.map((c: any) => ({
+      cards: cards.map((c) => ({
         id: c.id,
         name: c.name,
         name_en: c.name_en,
