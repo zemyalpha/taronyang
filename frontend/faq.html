@@ -182,7 +182,7 @@
 </head>
 <body>
     <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
-    <div class="stars" id="stars"></div>
+    <div class="stars" id="stars" data-star-count="40"></div>
 
     <div class="container">
         <header class="header">
@@ -384,22 +384,7 @@
         </footer>
     </div>
 
-    <script>
-        (function() {
-            const starsEl = document.getElementById('stars');
-            if (starsEl) {
-                for (let i = 0; i < 40; i++) {
-                    const star = document.createElement('div');
-                    star.className = 'star';
-                    star.style.left = Math.random() * 100 + '%';
-                    star.style.top = Math.random() * 100 + '%';
-                    star.style.animationDuration = (2 + Math.random() * 3) + 's';
-                    star.style.animationDelay = Math.random() * 3 + 's';
-                    starsEl.appendChild(star);
-                }
-            }
-        })();
-    </script>
+    <script src="/static/js/stars.js"></script>
     <script src="/static/js/config.js"></script>
     <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
