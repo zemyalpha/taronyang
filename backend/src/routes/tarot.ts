@@ -1,8 +1,8 @@
 /** 타로 API 라우터 */
 import { Router, Request, Response } from 'express';
-import { ALL_CARDS, getCard, CATEGORY_NAMES } from '../tarotData';
+import { ALL_CARDS, getCard, CATEGORY_NAMES, TarotCard } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
-import { tarotReading, callLlm } from '../llm';
+import { tarotReading, callLlm, RateLimitError } from '../llm';
 import { saveReading } from './readings';
 import { tarotReadSchema, tarotChatSchema } from '../validation';
 import { logger } from '../logger';
@@ -66,7 +66,7 @@ tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) =>
   }
 
   // 카드 데이터 조회
-  let cards: any[];
+  let cards: Array<TarotCard & { is_upright: boolean }>;
   try {
     cards = selectedCards.map((s) => {
       const card = getCard(s.id);
@@ -92,7 +92,7 @@ tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) =>
     }
 
     res.json({
-      cards: cards.map((c: any) => ({
+      cards: cards.map((c) => ({
         id: c.id,
         name: c.name,
         name_en: c.name_en,
@@ -104,12 +104,11 @@ tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) =>
       remaining_free: getRemainingFreeCount(user),
     });
   } catch (err) {
-    const errMsg = String(err);
-    if (errMsg.includes('429')) {
-      logger.warn('AI 해석 429', { error: errMsg });
+    if (err instanceof RateLimitError) {
+      logger.warn('AI 해석 429 — 재시도 후에도 레이트 리밋', { error: String(err) });
       res.status(429).json({ detail: 'AI 서버가 혼잡합니다. 잠시 후 다시 시도해주세요.' });
     } else {
-      logger.error('AI 해석 실패', { error: errMsg });
+      logger.error('AI 해석 실패', { error: String(err) });
       res.status(500).json({ detail: 'AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.' });
     }
   }
@@ -156,12 +155,11 @@ tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) =>
     const reply = await callLlm(messages, 1000, 0.8);
     res.json({ reply });
   } catch (err) {
-    const errMsg = String(err);
-    if (errMsg.includes('429')) {
-      logger.warn('AI 응답 429', { error: errMsg });
+    if (err instanceof RateLimitError) {
+      logger.warn('AI 응답 429 — 재시도 후에도 레이트 리밋', { error: String(err) });
       res.status(429).json({ detail: 'AI 서버가 혼잡합니다. 잠시 후 다시 시도해주세요.' });
     } else {
-      logger.error('AI 응답 실패', { error: errMsg });
+      logger.error('AI 응답 실패', { error: String(err) });
       res.status(500).json({ detail: 'AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.' });
     }
   }
