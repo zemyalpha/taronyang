@@ -110,6 +110,16 @@ paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {
 /** 구독 취소 */
 paymentRouter.post('/cancel', authMiddleware, (req: Request, res: Response) => {
   const user = req.user!;
+
+  if (user.subscription_status === 'premium' && user.subscription_expires_at) {
+    if (new Date(user.subscription_expires_at) < new Date()) {
+      const db = getDb();
+      db.prepare("UPDATE users SET subscription_status = 'free', subscription_expires_at = NULL WHERE id = ?")
+        .run(user.id);
+      user.subscription_status = 'free';
+    }
+  }
+
   if (user.subscription_status !== 'premium') {
     res.status(400).json({ detail: '활성 프리미엄 구독이 없습니다.' });
     return;
