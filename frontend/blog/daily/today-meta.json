@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-13",
-  "weekday": "월요일",
+  "date": "2026-07-14",
+  "weekday": "화요일",
   "cards": [
     {
-      "name": "여황제",
-      "symbol": "👑",
-      "slug": "3-empress"
+      "name": "달",
+      "symbol": "🌕",
+      "slug": "18-moon"
     },
     {
-      "name": "죽음",
-      "symbol": "🦋",
-      "slug": "13-death"
+      "name": "여사제",
+      "symbol": "🌙",
+      "slug": "2-high-priestess"
     },
     {
-      "name": "바보",
-      "symbol": "🃏",
-      "slug": "0-fool"
+      "name": "매달린 사람",
+      "symbol": "🔄",
+      "slug": "12-hanged-man"
     }
   ],
-  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「저항」과 관련된 부분은 조심하고, 바보가 주는 「새시…",
+  "summary": "오늘은 「환상」의 에너지가 흐르는 날이에요. 상황이 불명확하고 혼란스러울 수 있어요. 시간이 지나면 진실이 드러날 거예요. 다만 「비밀」과 관련된 부분은 조심하고, 매달린 사…",
   "luckyColor": "스카이 블루",
   "luckyColorHex": "#38bdf8",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-07-13.html"
+  "luckyNumber": 6,
+  "url": "/blog/daily/2026-07-14.html"
 }
