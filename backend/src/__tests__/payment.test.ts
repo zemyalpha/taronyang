@@ -92,6 +92,53 @@ describe('Payment routes', () => {
     expect(updated.subscription_status).toBe('free');
   });
 
+  it('GET /payment/status — active cancelling user gets cancelling status', async () => {
+    const user = createUser('cancelling@example.com', 'password123', 'cancellinguser')!;
+    const future = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    getDb()
+      .prepare("UPDATE users SET subscription_status = 'cancelling', subscription_expires_at = ? WHERE id = ?")
+      .run(future, user.id);
+
+    const res = await request(app)
+      .get('/payment/status')
+      .set(authHeader(user.id));
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('cancelling');
+  });
+
+  it('GET /payment/status — expired cancelling auto-downgrades to free', async () => {
+    const user = createUser('expired-cancelling@example.com', 'password123', 'expiredcancel')!;
+    const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    getDb()
+      .prepare("UPDATE users SET subscription_status = 'cancelling', subscription_expires_at = ? WHERE id = ?")
+      .run(past, user.id);
+
+    const res = await request(app)
+      .get('/payment/status')
+      .set(authHeader(user.id));
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('free');
+    expect(res.body.expires_at).toBeNull();
+
+    const updated = getDb()
+      .prepare('SELECT subscription_status FROM users WHERE id = ?')
+      .get(user.id) as { subscription_status: string };
+    expect(updated.subscription_status).toBe('free');
+  });
+
+  it('GET /payment/status — expired premium returns null expires_at after downgrade', async () => {
+    const user = createUser('expired-status@example.com', 'password123', 'expiredstatus')!;
+    const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    setPremium(user.id, past);
+
+    const res = await request(app)
+      .get('/payment/status')
+      .set(authHeader(user.id));
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('free');
+    expect(res.body.expires_at).toBeNull();
+  });
+
   // --- POST /payment/cancel ---
 
   it('POST /payment/cancel — rejects unauthenticated (401)', async () => {
@@ -128,6 +175,24 @@ describe('Payment routes', () => {
     const user = createUser('expired-cancel@example.com', 'password123', 'expiredcancel')!;
     const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     setPremium(user.id, past);
+
+    const res = await request(app)
+      .post('/payment/cancel')
+      .set(authHeader(user.id));
+    expect(res.status).toBe(400);
+
+    const updated = getDb()
+      .prepare('SELECT subscription_status FROM users WHERE id = ?')
+      .get(user.id) as { subscription_status: string };
+    expect(updated.subscription_status).toBe('free');
+  });
+
+  it('POST /payment/cancel — expired cancelling is downgraded and rejected (400)', async () => {
+    const user = createUser('expired-cancel-cancelling@example.com', 'password123', 'expiredcancelc')!;
+    const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    getDb()
+      .prepare("UPDATE users SET subscription_status = 'cancelling', subscription_expires_at = ? WHERE id = ?")
+      .run(past, user.id);
 
     const res = await request(app)
       .post('/payment/cancel')
