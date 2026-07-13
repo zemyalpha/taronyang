@@ -7,7 +7,7 @@
     "dev": "ts-node-dev --respawn src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "lint": "eslint src/",
+    "lint": "eslint src/ __tests__/ jest.config.ts",
     "test": "jest --coverage",
     "prepare": "husky"
   },
