@@ -52,6 +52,10 @@ describe('analytics routes', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.stored).toBe(3);
+
+      const db = getDb();
+      const count = db.prepare('SELECT COUNT(*) as n FROM analytics_events').get() as { n: number };
+      expect(count.n).toBe(3);
     });
 
     it('rejects an empty events array (400)', async () => {
