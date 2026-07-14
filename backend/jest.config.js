@@ -7,5 +7,6 @@ module.exports = {
   collectCoverageFrom: [
     'src/database.ts',
     'src/routes/tarot.ts',
+    'src/routes/analytics.ts',
   ],
 };
