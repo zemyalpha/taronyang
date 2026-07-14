@@ -133,6 +133,7 @@ describe('analytics routes', () => {
 
     it('rejects non-admin user (403)', async () => {
       const user = createUser('regular@test.com', 'pass123');
+      expect(user).not.toBeNull();
       const res = await request(app)
         .get('/api/analytics/summary')
         .set('Authorization', `Bearer ${makeToken(user!.id)}`);
@@ -142,6 +143,7 @@ describe('analytics routes', () => {
 
     it('returns summary data for admin', async () => {
       const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
+      expect(admin).not.toBeNull();
 
       const db = getDb();
       const insert = db.prepare(`
@@ -165,6 +167,7 @@ describe('analytics routes', () => {
       expect(Array.isArray(res.body.pageViews)).toBe(true);
 
       const pageView = res.body.topEvents.find((e: { name: string }) => e.name === 'page_view');
+      expect(pageView).toBeDefined();
       expect(pageView.count).toBe(2);
     });
   });
