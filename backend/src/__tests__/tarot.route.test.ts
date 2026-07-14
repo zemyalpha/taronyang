@@ -293,30 +293,23 @@ describe('GET /api/tarot/categories', () => {
     app = createTestApp();
   });
 
-  it('should return 200 with categories object (no auth required)', async () => {
+  it('should return 200 with all 6 categories and non-empty display names', async () => {
     const res = await request(app).get('/api/tarot/categories');
 
     expect(res.status).toBe(200);
-    expect(res.body.categories).toBeDefined();
-    expect(typeof res.body.categories).toBe('object');
-  });
+    const categories = res.body.categories;
+    expect(categories).toBeDefined();
+    expect(typeof categories).toBe('object');
 
-  it('should return all 6 expected category keys', async () => {
-    const res = await request(app).get('/api/tarot/categories');
-
-    const keys = Object.keys(res.body.categories);
+    const keys = Object.keys(categories);
     expect(keys).toHaveLength(6);
     expect(keys).toEqual(
       expect.arrayContaining([
         'love', 'money', 'career', 'general', 'newyear', 'compatibility',
       ]),
     );
-  });
 
-  it('should return non-empty display names for each category', async () => {
-    const res = await request(app).get('/api/tarot/categories');
-
-    for (const val of Object.values(res.body.categories)) {
+    for (const val of Object.values(categories)) {
       expect(typeof val).toBe('string');
       expect((val as string).length).toBeGreaterThan(0);
     }
@@ -338,72 +331,36 @@ describe('GET /api/tarot/shuffle', () => {
     expect(Array.isArray(res.body.cards)).toBe(true);
   });
 
-  it('should return 10 cards by default', async () => {
-    const res = await request(app).get('/api/tarot/shuffle');
+  it.each([
+    ['default (no param)', '', 10],
+    ['count=5', '5', 5],
+    ['count=3 (min boundary)', '3', 3],
+    ['count=20 (max boundary)', '20', 20],
+    ['count=2 (below min, clamp to 3)', '2', 3],
+    ['count=0 (falsy, default 10)', '0', 10],
+    ['count=-5 (negative, clamp to 3)', '-5', 3],
+    ['count=50 (above max, clamp to 20)', '50', 20],
+    ['count=abc (non-numeric, default 10)', 'abc', 10],
+    ['count= (empty, default 10)', '', 10],
+  ])('should return correct card count for ?count=%s', async (_label, count, expected) => {
+    const url = count ? `/api/tarot/shuffle?count=${count}` : '/api/tarot/shuffle';
+    const res = await request(app).get(url);
 
-    expect(res.body.cards).toHaveLength(10);
+    expect(res.status).toBe(200);
+    expect(res.body.cards).toHaveLength(expected);
   });
 
-  it('should return the requested count (?count=5)', async () => {
-    const res = await request(app).get('/api/tarot/shuffle?count=5');
-
-    expect(res.body.cards).toHaveLength(5);
-  });
-
-  it('should return 3 cards at boundary minimum (?count=3)', async () => {
-    const res = await request(app).get('/api/tarot/shuffle?count=3');
-
-    expect(res.body.cards).toHaveLength(3);
-  });
-
-  it('should return 20 cards at boundary maximum (?count=20)', async () => {
+  it('should return valid cards with correct structure, unique IDs, and consistent position', async () => {
     const res = await request(app).get('/api/tarot/shuffle?count=20');
 
-    expect(res.body.cards).toHaveLength(20);
-  });
+    expect(res.status).toBe(200);
+    const cards = res.body.cards;
 
-  it('should clamp below-minimum count to 3 (?count=2)', async () => {
-    const res = await request(app).get('/api/tarot/shuffle?count=2');
-
-    expect(res.body.cards).toHaveLength(3);
-  });
-
-  it('should treat count=0 as falsy and default to 10', async () => {
-    const res = await request(app).get('/api/tarot/shuffle?count=0');
-
-    expect(res.body.cards).toHaveLength(10);
-  });
-
-  it('should clamp negative count to 3 (?count=-5)', async () => {
-    const res = await request(app).get('/api/tarot/shuffle?count=-5');
-
-    expect(res.body.cards).toHaveLength(3);
-  });
-
-  it('should clamp above-maximum count to 20 (?count=50)', async () => {
-    const res = await request(app).get('/api/tarot/shuffle?count=50');
-
-    expect(res.body.cards).toHaveLength(20);
-  });
-
-  it('should default to 10 for non-numeric count (?count=abc)', async () => {
-    const res = await request(app).get('/api/tarot/shuffle?count=abc');
-
-    expect(res.body.cards).toHaveLength(10);
-  });
-
-  it('should default to 10 for empty count param (?count=)', async () => {
-    const res = await request(app).get('/api/tarot/shuffle?count=');
-
-    expect(res.body.cards).toHaveLength(10);
-  });
-
-  it('each card should have required fields with correct types', async () => {
-    const res = await request(app).get('/api/tarot/shuffle');
-
-    for (const card of res.body.cards) {
+    for (const card of cards) {
       expect(card).toHaveProperty('id');
       expect(typeof card.id).toBe('number');
+      expect(card.id).toBeGreaterThanOrEqual(0);
+      expect(card.id).toBeLessThanOrEqual(77);
       expect(card).toHaveProperty('name');
       expect(typeof card.name).toBe('string');
       expect(card).toHaveProperty('name_en');
@@ -414,35 +371,16 @@ describe('GET /api/tarot/shuffle', () => {
       expect(typeof card.is_upright).toBe('boolean');
       expect(card).toHaveProperty('position');
       expect(['정위치', '역위치']).toContain(card.position);
-    }
-  });
 
-  it('position should be consistent with is_upright', async () => {
-    const res = await request(app).get('/api/tarot/shuffle');
-
-    for (const card of res.body.cards) {
       if (card.is_upright) {
         expect(card.position).toBe('정위치');
       } else {
         expect(card.position).toBe('역위치');
       }
     }
-  });
 
-  it('all card IDs should be unique within a single shuffle', async () => {
-    const res = await request(app).get('/api/tarot/shuffle?count=20');
-
-    const ids = res.body.cards.map((c: { id: number }) => c.id);
+    const ids = cards.map((c: { id: number }) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  it('all card IDs should be valid (0–77)', async () => {
-    const res = await request(app).get('/api/tarot/shuffle');
-
-    for (const card of res.body.cards) {
-      expect(card.id).toBeGreaterThanOrEqual(0);
-      expect(card.id).toBeLessThanOrEqual(77);
-    }
   });
 });
 
