@@ -1,12 +1,11 @@
 import express, { Express } from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import { initDb, getDb, createUser } from '../database';
+import { initDb, getDb, createUser, User } from '../database';
 import { authMiddleware, adminMiddleware } from '../routes/auth';
 import { adminRouter } from '../routes/admin';
 import { readingsRouter, saveReading } from '../routes/readings';
-
-const TEST_SECRET = 'test-secret-key';
+import { config } from '../config';
 
 function createApp(): Express {
   const app = express();
@@ -17,7 +16,16 @@ function createApp(): Express {
 }
 
 function makeToken(userId: string): string {
-  return jwt.sign({ user_id: userId }, TEST_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ user_id: userId }, config.jwtSecret, { expiresIn: '7d' });
+}
+
+function createAdminUser(email: string, password: string): User | null {
+  const user = createUser(email, password);
+  if (user) {
+    getDb().prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(user.id);
+    user.is_admin = 1;
+  }
+  return user;
 }
 
 describe('admin routes', () => {
@@ -67,7 +75,7 @@ describe('admin routes', () => {
 
   describe('GET /admin/stats', () => {
     it('returns dashboard stats for admin', async () => {
-      const admin = createUser('admin-test@taronyang.com', 'pass123');
+      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
       createUser('normal1@test.com', 'pass123');
       createUser('normal2@test.com', 'pass123');
 
@@ -87,7 +95,7 @@ describe('admin routes', () => {
 
   describe('GET /admin/users', () => {
     it('returns paginated user list', async () => {
-      const admin = createUser('admin-test@taronyang.com', 'pass123');
+      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
       createUser('user1@test.com', 'pass123');
       createUser('user2@test.com', 'pass123');
 
@@ -102,7 +110,7 @@ describe('admin routes', () => {
     });
 
     it('respects limit param', async () => {
-      const admin = createUser('admin-test@taronyang.com', 'pass123');
+      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
       for (let i = 0; i < 5; i++) {
         createUser(`limit${i}@test.com`, 'pass123');
       }
@@ -122,7 +130,7 @@ describe('admin routes', () => {
 
   describe('GET /admin/readings', () => {
     it('returns paginated readings', async () => {
-      const admin = createUser('admin-test@taronyang.com', 'pass123');
+      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
       const author = createUser('author@test.com', 'pass123');
       saveReading(author!.id, 'love', '질문1', [], '해석1');
       saveReading(author!.id, 'career', '질문2', [], '해석2');
@@ -142,7 +150,7 @@ describe('admin routes', () => {
 
   describe('DELETE /admin/users/:id', () => {
     it('cascades delete user and related data', async () => {
-      const admin = createUser('admin-test@taronyang.com', 'pass123');
+      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
       const target = createUser('delete-me@test.com', 'pass123');
       saveReading(target!.id, 'love', '질문', [], '해석');
 
