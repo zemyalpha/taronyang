@@ -2,7 +2,7 @@ import express, { Express } from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { authRouter } from '../routes/auth';
-import { initDb, getDb, createUser } from '../database';
+import { initDb, getDb, createUser, User } from '../database';
 import { config } from '../config';
 
 function createApp(): Express {
@@ -14,6 +14,12 @@ function createApp(): Express {
 
 function makeToken(userId: string): string {
   return jwt.sign({ user_id: userId }, config.jwtSecret, { expiresIn: '7d' });
+}
+
+function createTestUser(email: string, password: string, nickname?: string): User {
+  const user = createUser(email, password, nickname);
+  if (!user) throw new Error(`Failed to create test user: ${email}`);
+  return user;
 }
 
 describe('auth routes', () => {
@@ -110,10 +116,10 @@ describe('auth routes', () => {
 
   describe('GET /api/auth/me', () => {
     it('returns user info when authenticated (200)', async () => {
-      const user = createUser('me@test.com', 'password123', 'meuser');
+      const user = createTestUser('me@test.com', 'password123', 'meuser');
       const res = await request(app)
         .get('/api/auth/me')
-        .set('Authorization', `Bearer ${makeToken(user!.id)}`);
+        .set('Authorization', `Bearer ${makeToken(user.id)}`);
 
       expect(res.status).toBe(200);
       expect(res.body.email).toBe('me@test.com');
@@ -130,10 +136,10 @@ describe('auth routes', () => {
 
   describe('PUT /api/auth/me', () => {
     it('updates nickname (200)', async () => {
-      const user = createUser('nick@test.com', 'password123');
+      const user = createTestUser('nick@test.com', 'password123');
       const res = await request(app)
         .put('/api/auth/me')
-        .set('Authorization', `Bearer ${makeToken(user!.id)}`)
+        .set('Authorization', `Bearer ${makeToken(user.id)}`)
         .send({ nickname: 'newnick' });
 
       expect(res.status).toBe(200);
@@ -141,23 +147,23 @@ describe('auth routes', () => {
     });
 
     it('updates birth_date and calculates zodiac sign (200)', async () => {
-      const user = createUser('birth@test.com', 'password123');
+      const user = createTestUser('birth@test.com', 'password123');
       const res = await request(app)
         .put('/api/auth/me')
-        .set('Authorization', `Bearer ${makeToken(user!.id)}`)
+        .set('Authorization', `Bearer ${makeToken(user.id)}`)
         .send({ birth_date: '1995-04-15' });
 
       expect(res.status).toBe(200);
       const db = getDb();
-      const row = db.prepare('SELECT zodiac_sign FROM users WHERE id = ?').get(user!.id) as { zodiac_sign: string };
+      const row = db.prepare('SELECT zodiac_sign FROM users WHERE id = ?').get(user.id) as { zodiac_sign: string };
       expect(row.zodiac_sign).toBe('양자리');
     });
 
     it('rejects invalid date format (400)', async () => {
-      const user = createUser('baddate@test.com', 'password123');
+      const user = createTestUser('baddate@test.com', 'password123');
       const res = await request(app)
         .put('/api/auth/me')
-        .set('Authorization', `Bearer ${makeToken(user!.id)}`)
+        .set('Authorization', `Bearer ${makeToken(user.id)}`)
         .send({ birth_date: 'not-a-date' });
 
       expect(res.status).toBe(400);
