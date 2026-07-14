@@ -40,7 +40,14 @@ function mockPortOne(opts: {
   } = opts;
 
   global.fetch = jest.fn(async (input: string | URL | Request, init?: RequestInit) => {
-    const url = typeof input === 'string' ? input : input.toString();
+    let url: string;
+    if (typeof input === 'string') {
+      url = input;
+    } else if (input instanceof URL) {
+      url = input.toString();
+    } else {
+      url = (input as Request).url;
+    }
 
     if (url.includes('/users/getToken')) {
       if (tokenOk) {
@@ -110,11 +117,14 @@ describe('POST /payment/verify — PortOne integration', () => {
     expect(res.body.ok).toBe(true);
 
     const db = getDb();
-    const updated = db.prepare('SELECT subscription_status FROM users WHERE id = ?').get(user.id) as { subscription_status: string };
-    expect(updated.subscription_status).toBe('premium');
+    const updated = db.prepare('SELECT subscription_status FROM users WHERE id = ?').get(user.id);
+    expect(updated).toBeDefined();
+    expect((updated as { subscription_status: string }).subscription_status).toBe('premium');
 
-    const processed = db.prepare('SELECT * FROM processed_payments WHERE imp_uid = ?').get('imp-success-001');
+    const processed = db.prepare('SELECT * FROM processed_payments WHERE imp_uid = ?').get('imp-success-001') as { user_id: string; amount: number } | undefined;
     expect(processed).toBeDefined();
+    expect(processed!.user_id).toBe(user.id);
+    expect(processed!.amount).toBe(config.premiumPrice);
   });
 
   it('should reject duplicate imp_uid (400)', async () => {
