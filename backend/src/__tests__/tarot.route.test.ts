@@ -328,7 +328,8 @@ describe('GET /api/tarot/shuffle', () => {
     const res = await request(app).get('/api/tarot/shuffle');
 
     expect(res.status).toBe(200);
-    expect(Array.isArray(res.body.cards)).toBe(true);
+    const cards = res.body.cards;
+    expect(Array.isArray(cards)).toBe(true);
   });
 
   it.each([
@@ -347,7 +348,9 @@ describe('GET /api/tarot/shuffle', () => {
     const res = await request(app).get(url);
 
     expect(res.status).toBe(200);
-    expect(res.body.cards).toHaveLength(expected);
+    const cards = res.body.cards;
+    expect(Array.isArray(cards)).toBe(true);
+    expect(cards).toHaveLength(expected);
   });
 
   it('should return valid cards with correct structure, unique IDs, and consistent position', async () => {
