@@ -2,12 +2,22 @@ import express from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
-jest.mock('../llm', () => ({
-  tarotReading: jest.fn().mockResolvedValue('테스트 타로 해석 결과입니다.'),
-  callLlm: jest.fn().mockResolvedValue('테스트 채팅 응답입니다.'),
-}));
+jest.mock('../llm', () => {
+  class RateLimitError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = 'RateLimitError';
+    }
+  }
+  return {
+    tarotReading: jest.fn().mockResolvedValue('테스트 타로 해석 결과입니다.'),
+    callLlm: jest.fn().mockResolvedValue('테스트 채팅 응답입니다.'),
+    RateLimitError,
+  };
+});
 
 import { tarotRouter } from '../routes/tarot';
+import { tarotReading, callLlm, RateLimitError } from '../llm';
 import { initDb, getDb, createUser, getUserById, User } from '../database';
 import { config } from '../config';
 
@@ -272,5 +282,301 @@ describe('POST /api/tarot/read — input validation', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ category: 'nonexistent', cards: VALID_CARDS });
     expect(res.status).toBe(400);
+  });
+});
+
+describe('GET /api/tarot/categories', () => {
+  let app: express.Application;
+
+  beforeAll(() => {
+    initDb();
+    app = createTestApp();
+  });
+
+  it('should return 200 with categories object (no auth required)', async () => {
+    const res = await request(app).get('/api/tarot/categories');
+
+    expect(res.status).toBe(200);
+    expect(res.body.categories).toBeDefined();
+    expect(typeof res.body.categories).toBe('object');
+  });
+
+  it('should return all 6 expected category keys', async () => {
+    const res = await request(app).get('/api/tarot/categories');
+
+    const keys = Object.keys(res.body.categories);
+    expect(keys).toHaveLength(6);
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        'love', 'money', 'career', 'general', 'newyear', 'compatibility',
+      ]),
+    );
+  });
+
+  it('should return non-empty display names for each category', async () => {
+    const res = await request(app).get('/api/tarot/categories');
+
+    for (const val of Object.values(res.body.categories)) {
+      expect(typeof val).toBe('string');
+      expect((val as string).length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('GET /api/tarot/shuffle', () => {
+  let app: express.Application;
+
+  beforeAll(() => {
+    initDb();
+    app = createTestApp();
+  });
+
+  it('should return 200 with cards array (no auth required)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle');
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.cards)).toBe(true);
+  });
+
+  it('should return 10 cards by default', async () => {
+    const res = await request(app).get('/api/tarot/shuffle');
+
+    expect(res.body.cards).toHaveLength(10);
+  });
+
+  it('should return the requested count (?count=5)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=5');
+
+    expect(res.body.cards).toHaveLength(5);
+  });
+
+  it('should return 3 cards at boundary minimum (?count=3)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=3');
+
+    expect(res.body.cards).toHaveLength(3);
+  });
+
+  it('should return 20 cards at boundary maximum (?count=20)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=20');
+
+    expect(res.body.cards).toHaveLength(20);
+  });
+
+  it('should clamp below-minimum count to 3 (?count=2)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=2');
+
+    expect(res.body.cards).toHaveLength(3);
+  });
+
+  it('should treat count=0 as falsy and default to 10', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=0');
+
+    expect(res.body.cards).toHaveLength(10);
+  });
+
+  it('should clamp negative count to 3 (?count=-5)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=-5');
+
+    expect(res.body.cards).toHaveLength(3);
+  });
+
+  it('should clamp above-maximum count to 20 (?count=50)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=50');
+
+    expect(res.body.cards).toHaveLength(20);
+  });
+
+  it('should default to 10 for non-numeric count (?count=abc)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=abc');
+
+    expect(res.body.cards).toHaveLength(10);
+  });
+
+  it('should default to 10 for empty count param (?count=)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=');
+
+    expect(res.body.cards).toHaveLength(10);
+  });
+
+  it('each card should have required fields with correct types', async () => {
+    const res = await request(app).get('/api/tarot/shuffle');
+
+    for (const card of res.body.cards) {
+      expect(card).toHaveProperty('id');
+      expect(typeof card.id).toBe('number');
+      expect(card).toHaveProperty('name');
+      expect(typeof card.name).toBe('string');
+      expect(card).toHaveProperty('name_en');
+      expect(typeof card.name_en).toBe('string');
+      expect(card).toHaveProperty('symbol');
+      expect(typeof card.symbol).toBe('string');
+      expect(card).toHaveProperty('is_upright');
+      expect(typeof card.is_upright).toBe('boolean');
+      expect(card).toHaveProperty('position');
+      expect(['정위치', '역위치']).toContain(card.position);
+    }
+  });
+
+  it('position should be consistent with is_upright', async () => {
+    const res = await request(app).get('/api/tarot/shuffle');
+
+    for (const card of res.body.cards) {
+      if (card.is_upright) {
+        expect(card.position).toBe('정위치');
+      } else {
+        expect(card.position).toBe('역위치');
+      }
+    }
+  });
+
+  it('all card IDs should be unique within a single shuffle', async () => {
+    const res = await request(app).get('/api/tarot/shuffle?count=20');
+
+    const ids = res.body.cards.map((c: { id: number }) => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('all card IDs should be valid (0–77)', async () => {
+    const res = await request(app).get('/api/tarot/shuffle');
+
+    for (const card of res.body.cards) {
+      expect(card.id).toBeGreaterThanOrEqual(0);
+      expect(card.id).toBeLessThanOrEqual(77);
+    }
+  });
+});
+
+describe('POST /api/tarot/read — card lookup error branches', () => {
+  let app: express.Application;
+  let token: string;
+
+  beforeAll(() => {
+    initDb();
+    app = createTestApp();
+    const user = createUser('readerr@test.com', 'password123')!;
+    const db = getDb();
+    db.prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run('premium', user.id);
+    token = makeToken(user.id);
+  });
+
+  it('non-existent card ID — should return 400 with detail', async () => {
+    const res = await request(app)
+      .post('/api/tarot/read')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        category: 'love',
+        cards: [
+          { id: 0, is_upright: true },
+          { id: 1, is_upright: false },
+          { id: 999, is_upright: true },
+        ],
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.detail).toContain('카드 없음');
+  });
+});
+
+describe('POST /api/tarot/read — AI error branches', () => {
+  let app: express.Application;
+  let token: string;
+
+  beforeAll(() => {
+    initDb();
+    app = createTestApp();
+    const user = createUser('readai@test.com', 'password123')!;
+    const db = getDb();
+    db.prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run('premium', user.id);
+    token = makeToken(user.id);
+  });
+
+  afterEach(() => {
+    (tarotReading as jest.Mock).mockResolvedValue('테스트 타로 해석 결과입니다.');
+  });
+
+  it('AI RateLimitError — should return 429 with friendly message', async () => {
+    (tarotReading as jest.Mock).mockRejectedValueOnce(new RateLimitError('429 Too Many Requests'));
+
+    const res = await request(app)
+      .post('/api/tarot/read')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ category: 'love', cards: VALID_CARDS });
+
+    expect(res.status).toBe(429);
+    expect(res.body.detail).toContain('AI 서버');
+  });
+
+  it('AI generic error — should return 500 with friendly message', async () => {
+    (tarotReading as jest.Mock).mockRejectedValueOnce(new Error('Internal Server Error'));
+
+    const res = await request(app)
+      .post('/api/tarot/read')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ category: 'love', cards: VALID_CARDS });
+
+    expect(res.status).toBe(500);
+    expect(res.body.detail).toContain('AI 해석');
+  });
+});
+
+describe('POST /api/tarot/chat — validation and AI error branches', () => {
+  let app: express.Application;
+  let token: string;
+
+  beforeAll(() => {
+    initDb();
+    app = createTestApp();
+    const user = createUser('chaterr@test.com', 'password123')!;
+    const db = getDb();
+    db.prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run('premium', user.id);
+    token = makeToken(user.id);
+  });
+
+  afterEach(() => {
+    (callLlm as jest.Mock).mockResolvedValue('테스트 채팅 응답입니다.');
+  });
+
+  it('empty question — should return 400', async () => {
+    const res = await request(app)
+      .post('/api/tarot/chat')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ question: '' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.detail).toBeDefined();
+  });
+
+  it('missing question field — should return 400', async () => {
+    const res = await request(app)
+      .post('/api/tarot/chat')
+      .set('Authorization', `Bearer ${token}`)
+      .send({});
+
+    expect(res.status).toBe(400);
+    expect(res.body.detail).toBeDefined();
+  });
+
+  it('AI RateLimitError — should return 429 with friendly message', async () => {
+    (callLlm as jest.Mock).mockRejectedValueOnce(new RateLimitError('429 Too Many Requests'));
+
+    const res = await request(app)
+      .post('/api/tarot/chat')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ question: '질문입니다' });
+
+    expect(res.status).toBe(429);
+    expect(res.body.detail).toContain('AI 서버');
+  });
+
+  it('AI generic error — should return 500 with friendly message', async () => {
+    (callLlm as jest.Mock).mockRejectedValueOnce(new Error('Connection refused'));
+
+    const res = await request(app)
+      .post('/api/tarot/chat')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ question: '질문입니다' });
+
+    expect(res.status).toBe(500);
+    expect(res.body.detail).toContain('AI 응답');
   });
 });
