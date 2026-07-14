@@ -21,6 +21,7 @@ describe('Payment routes', () => {
   });
 
   beforeEach(() => {
+    getDb().prepare('DELETE FROM processed_payments').run();
     getDb().prepare('DELETE FROM users').run();
   });
 
@@ -221,5 +222,141 @@ describe('Payment routes', () => {
       .set(authHeader(user.id))
       .send({});
     expect(res.status).toBe(400);
+  });
+
+  // --- POST /payment/verify — PortOne API mocking ---
+
+  describe('POST /payment/verify — PortOne API (mocked fetch)', () => {
+    let originalFetch: typeof global.fetch;
+
+    beforeAll(() => {
+      originalFetch = global.fetch;
+      config.portOneImpKey = 'test-imp-key';
+      config.portOneImpSecret = 'test-imp-secret';
+    });
+
+    afterAll(() => {
+      global.fetch = originalFetch;
+      config.portOneImpKey = '';
+      config.portOneImpSecret = '';
+    });
+
+    function mockFetch(tokenResponse: object, paymentResponse?: object): void {
+      global.fetch = jest.fn(async (input: string | URL | Request) => {
+        const urlStr = typeof input === 'string' ? input : input.toString();
+        if (urlStr.includes('/users/getToken')) {
+          return { json: async () => tokenResponse } as unknown as Response;
+        }
+        if (urlStr.includes('/payments/')) {
+          return { json: async () => paymentResponse } as unknown as Response;
+        }
+        return { json: async () => ({}) } as unknown as Response;
+      });
+    }
+
+    it('successful verification → premium activation (200)', async () => {
+      const user = createUser('verify-ok@example.com', 'password123', 'verifyok')!;
+      mockFetch(
+        { code: 0, response: { access_token: 'mock-access-token' } },
+        { code: 0, response: { status: 'paid', amount: config.premiumPrice } },
+      );
+
+      const res = await request(app)
+        .post('/payment/verify')
+        .set(authHeader(user.id))
+        .send({ imp_uid: 'imp_success_001' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+
+      const updated = getDb()
+        .prepare('SELECT subscription_status, subscription_expires_at FROM users WHERE id = ?')
+        .get(user.id) as { subscription_status: string; subscription_expires_at: string };
+      expect(updated.subscription_status).toBe('premium');
+      expect(updated.subscription_expires_at).not.toBeNull();
+
+      const payment = getDb()
+        .prepare('SELECT imp_uid, user_id, amount FROM processed_payments WHERE imp_uid = ?')
+        .get('imp_success_001') as { imp_uid: string; user_id: string; amount: number } | undefined;
+      expect(payment).toBeDefined();
+      expect(payment!.user_id).toBe(user.id);
+      expect(payment!.amount).toBe(config.premiumPrice);
+    });
+
+    it('duplicate imp_uid replay attack → 400', async () => {
+      const user = createUser('verify-dup@example.com', 'password123', 'verifydup')!;
+      getDb()
+        .prepare('INSERT INTO processed_payments (imp_uid, user_id, amount) VALUES (?, ?, ?)')
+        .run('imp_dup_001', user.id, config.premiumPrice);
+
+      const res = await request(app)
+        .post('/payment/verify')
+        .set(authHeader(user.id))
+        .send({ imp_uid: 'imp_dup_001' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.detail).toContain('이미 처리된');
+    });
+
+    it('PortOne payment not paid status → 400', async () => {
+      const user = createUser('verify-np@example.com', 'password123', 'verifynp')!;
+      mockFetch(
+        { code: 0, response: { access_token: 'mock-access-token' } },
+        { code: 0, response: { status: 'ready', amount: config.premiumPrice } },
+      );
+
+      const res = await request(app)
+        .post('/payment/verify')
+        .set(authHeader(user.id))
+        .send({ imp_uid: 'imp_notpaid_001' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.detail).toContain('완료되지 않았습니다');
+    });
+
+    it('amount mismatch → 400', async () => {
+      const user = createUser('verify-am@example.com', 'password123', 'verifyam')!;
+      mockFetch(
+        { code: 0, response: { access_token: 'mock-access-token' } },
+        { code: 0, response: { status: 'paid', amount: 1000 } },
+      );
+
+      const res = await request(app)
+        .post('/payment/verify')
+        .set(authHeader(user.id))
+        .send({ imp_uid: 'imp_mismatch_001' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.detail).toContain('금액이 일치하지 않습니다');
+    });
+
+    it('PortOne token fetch failure → 400', async () => {
+      const user = createUser('verify-tf@example.com', 'password123', 'verifytf')!;
+      mockFetch({ code: 1, message: '잘못된 API 키' });
+
+      const res = await request(app)
+        .post('/payment/verify')
+        .set(authHeader(user.id))
+        .send({ imp_uid: 'imp_tokenfail_001' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.detail).toContain('결제 검증에 실패했습니다');
+    });
+
+    it('PortOne API error code → 400', async () => {
+      const user = createUser('verify-ae@example.com', 'password123', 'verifyae')!;
+      mockFetch(
+        { code: 0, response: { access_token: 'mock-access-token' } },
+        { code: -1, message: '결제 내역을 찾을 수 없습니다' },
+      );
+
+      const res = await request(app)
+        .post('/payment/verify')
+        .set(authHeader(user.id))
+        .send({ imp_uid: 'imp_apierror_001' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.detail).toContain('결제 조회 실패');
+    });
   });
 });
