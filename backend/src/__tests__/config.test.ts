@@ -1,6 +1,36 @@
-import { config } from '../config';
-
 describe('config', () => {
+  let config: (typeof import('../config'))['config'];
+
+  const testEnv: Record<string, string> = {
+    NODE_ENV: 'test',
+    JWT_SECRET: 'test-secret-key',
+    ADMIN_EMAILS: 'admin-test@taronyang.com,root@taronyang.com',
+    FREE_DAILY_LIMIT: '1',
+    DATABASE_PATH: ':memory:',
+  };
+
+  const savedEnv: Record<string, string | undefined> = {};
+
+  beforeEach(() => {
+    Object.keys(testEnv).forEach((key) => {
+      savedEnv[key] = process.env[key];
+      process.env[key] = testEnv[key];
+    });
+    jest.isolateModules(() => {
+      ({ config } = require('../config'));
+    });
+  });
+
+  afterEach(() => {
+    Object.keys(testEnv).forEach((key) => {
+      if (savedEnv[key] === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = savedEnv[key] as string;
+      }
+    });
+  });
+
   it('should have port as number', () => {
     expect(typeof config.port).toBe('number');
   });

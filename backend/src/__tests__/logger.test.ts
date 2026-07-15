@@ -1,5 +1,11 @@
 import { logger } from '../logger';
 
+jest.mock('../config', () => ({
+  config: {
+    nodeEnv: 'development',
+  },
+}));
+
 describe('logger', () => {
   const originalConsoleDebug = console.debug;
   const originalConsoleLog = console.log;
