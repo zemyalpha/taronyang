@@ -7,6 +7,8 @@ describe('config', () => {
     ADMIN_EMAILS: 'admin-test@taronyang.com,root@taronyang.com',
     FREE_DAILY_LIMIT: '1',
     DATABASE_PATH: ':memory:',
+    SMTP_USER: '',
+    SMTP_PASSWORD: '',
   };
 
   const savedEnv: Record<string, string | undefined> = {};
@@ -74,7 +76,8 @@ describe('config', () => {
   });
 
   it('should have empty smtp credentials when not set', () => {
-    expect(typeof config.smtpUser).toBe('string');
+    expect(config.smtpUser).toBe('');
+    expect(config.smtpPassword).toBe('');
   });
 
   it('should have extraCorsOrigins as array', () => {

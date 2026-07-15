@@ -7,32 +7,32 @@ jest.mock('../config', () => ({
 }));
 
 describe('logger', () => {
-  const originalConsoleDebug = console.debug;
-  const originalConsoleLog = console.log;
-  const originalConsoleWarn = console.warn;
-  const originalConsoleError = console.error;
-
   let debugCalls: string[] = [];
   let logCalls: string[] = [];
   let warnCalls: string[] = [];
   let errorCalls: string[] = [];
+
+  let debugSpy: jest.SpyInstance;
+  let logSpy: jest.SpyInstance;
+  let warnSpy: jest.SpyInstance;
+  let errorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     debugCalls = [];
     logCalls = [];
     warnCalls = [];
     errorCalls = [];
-    console.debug = (msg: string) => { debugCalls.push(msg); };
-    console.log = (msg: string) => { logCalls.push(msg); };
-    console.warn = (msg: string) => { warnCalls.push(msg); };
-    console.error = (msg: string) => { errorCalls.push(msg); };
+    debugSpy = jest.spyOn(console, 'debug').mockImplementation((msg: string) => { debugCalls.push(msg); });
+    logSpy = jest.spyOn(console, 'log').mockImplementation((msg: string) => { logCalls.push(msg); });
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation((msg: string) => { warnCalls.push(msg); });
+    errorSpy = jest.spyOn(console, 'error').mockImplementation((msg: string) => { errorCalls.push(msg); });
   });
 
   afterEach(() => {
-    console.debug = originalConsoleDebug;
-    console.log = originalConsoleLog;
-    console.warn = originalConsoleWarn;
-    console.error = originalConsoleError;
+    debugSpy.mockRestore();
+    logSpy.mockRestore();
+    warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   it('debug — should output in development mode', () => {
