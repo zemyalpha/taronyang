@@ -6,6 +6,7 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.test.ts'],
   collectCoverageFrom: [
     'src/database.ts',
+    'src/validation.ts',
     'src/routes/tarot.ts',
     'src/routes/analytics.ts',
   ],
