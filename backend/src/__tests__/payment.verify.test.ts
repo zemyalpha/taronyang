@@ -39,7 +39,7 @@ function mockPortOne(opts: {
     paymentMessage = '',
   } = opts;
 
-  global.fetch = jest.fn(async (input: string | URL | Request, init?: RequestInit) => {
+  global.fetch = jest.fn(async (input: string | URL | Request, _init?: RequestInit) => {
     let url: string;
     if (typeof input === 'string') {
       url = input;
