@@ -117,9 +117,11 @@ describe('POST /payment/verify — PortOne integration', () => {
     expect(res.body.ok).toBe(true);
 
     const db = getDb();
-    const updated = db.prepare('SELECT subscription_status FROM users WHERE id = ?').get(user.id);
+    const updated = db.prepare('SELECT subscription_status, subscription_expires_at FROM users WHERE id = ?').get(user.id) as { subscription_status: string; subscription_expires_at: string } | undefined;
     expect(updated).toBeDefined();
-    expect((updated as { subscription_status: string }).subscription_status).toBe('premium');
+    expect(updated!.subscription_status).toBe('premium');
+    expect(updated!.subscription_expires_at).toBeDefined();
+    expect(new Date(updated!.subscription_expires_at).getTime()).toBeGreaterThan(Date.now());
 
     const processed = db.prepare('SELECT * FROM processed_payments WHERE imp_uid = ?').get('imp-success-001') as { user_id: string; amount: number } | undefined;
     expect(processed).toBeDefined();
