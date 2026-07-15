@@ -108,7 +108,7 @@ describe('updateMeSchema', () => {
   });
 
   it('non-existent date that Date.parse rejects — should fail', () => {
-    const result = updateMeSchema.safeParse({ birth_date: 'abcd-ef-gh' });
+    const result = updateMeSchema.safeParse({ birth_date: '2023-13-01' });
     expect(result.success).toBe(false);
   });
 

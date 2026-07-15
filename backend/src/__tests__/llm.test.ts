@@ -101,12 +101,11 @@ describe('callLlm', () => {
     });
     global.fetch = mockFetch as unknown as typeof fetch;
 
-    const promise = callLlm([{ role: 'user', content: 'test' }]);
-    promise.catch(() => {});
+    const assertionPromise = expect(callLlm([{ role: 'user', content: 'test' }])).rejects.toThrow(RateLimitError);
 
     await jest.runAllTimersAsync();
 
-    await expect(promise).rejects.toThrow(RateLimitError);
+    await assertionPromise;
     expect(mockFetch).toHaveBeenCalledTimes(3);
   });
 
@@ -121,12 +120,11 @@ describe('callLlm', () => {
     });
     global.fetch = mockFetch as unknown as typeof fetch;
 
-    const promise = callLlm([{ role: 'user', content: 'test' }]);
-    promise.catch(() => {});
+    const assertionPromise = expect(callLlm([{ role: 'user', content: 'test' }])).rejects.toThrow('Z.ai API 오류: 500');
 
     await jest.runAllTimersAsync();
 
-    await expect(promise).rejects.toThrow('Z.ai API 오류: 500');
+    await assertionPromise;
     expect(mockFetch).toHaveBeenCalledTimes(3);
   });
 
@@ -136,12 +134,11 @@ describe('callLlm', () => {
     const mockFetch = jest.fn().mockRejectedValue(new TypeError('fetch failed'));
     global.fetch = mockFetch as unknown as typeof fetch;
 
-    const promise = callLlm([{ role: 'user', content: 'test' }]);
-    promise.catch(() => {});
+    const assertionPromise = expect(callLlm([{ role: 'user', content: 'test' }])).rejects.toThrow('fetch failed');
 
     await jest.runAllTimersAsync();
 
-    await expect(promise).rejects.toThrow('fetch failed');
+    await assertionPromise;
     expect(mockFetch).toHaveBeenCalledTimes(3);
   });
 
@@ -165,7 +162,6 @@ describe('callLlm', () => {
     global.fetch = mockFetch as unknown as typeof fetch;
 
     const promise = callLlm([{ role: 'user', content: 'test' }]);
-    promise.catch(() => {});
 
     await jest.runAllTimersAsync();
 
@@ -200,12 +196,11 @@ describe('callLlm', () => {
       json: async () => ({ choices: [] }),
     }) as unknown as typeof fetch;
 
-    const promise = callLlm([{ role: 'user', content: 'test' }]);
-    promise.catch(() => {});
+    const assertionPromise = expect(callLlm([{ role: 'user', content: 'test' }])).rejects.toThrow('Z.ai API 응답 형식 오류');
 
     await jest.runAllTimersAsync();
 
-    await expect(promise).rejects.toThrow('Z.ai API 응답 형식 오류');
+    await assertionPromise;
   });
 
   it('response with null content and reasoning — should throw (after retries)', async () => {
@@ -219,12 +214,11 @@ describe('callLlm', () => {
       }),
     }) as unknown as typeof fetch;
 
-    const promise = callLlm([{ role: 'user', content: 'test' }]);
-    promise.catch(() => {});
+    const assertionPromise = expect(callLlm([{ role: 'user', content: 'test' }])).rejects.toThrow('Z.ai API 응답 형식 오류');
 
     await jest.runAllTimersAsync();
 
-    await expect(promise).rejects.toThrow('Z.ai API 응답 형식 오류');
+    await assertionPromise;
   });
 });
 
