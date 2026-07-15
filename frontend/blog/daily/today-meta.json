@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-15",
-  "weekday": "수요일",
+  "date": "2026-07-16",
+  "weekday": "목요일",
   "cards": [
+    {
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
+    },
     {
       "name": "절제",
       "symbol": "🏺",
       "slug": "14-temperance"
     },
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
-    },
-    {
-      "name": "여황제",
-      "symbol": "👑",
-      "slug": "3-empress"
+      "name": "탑",
+      "symbol": "🗼",
+      "slug": "16-tower"
     }
   ],
-  "summary": "오늘은 「균형」의 에너지가 흐르는 날이에요. 모든 것의 균형이 필요한 시기예요. 극단을 피하고 중용을 지키세요. 다만 「지연」과 관련된 부분은 조심하고, 여황제가 주는 「풍요…",
-  "luckyColor": "스카이 블루",
-  "luckyColorHex": "#38bdf8",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-07-15.html"
+  "summary": "오늘은 「공정」의 에너지가 흐르는 날이에요. 정의로운 결과가 따를 거예요. 정직하게 행동하면 좋은 결실이 있어요. 다만 「과잉」과 관련된 부분은 조심하고, 탑이 주는 「급변」…",
+  "luckyColor": "소프트 그린",
+  "luckyColorHex": "#86efac",
+  "luckyNumber": 5,
+  "url": "/blog/daily/2026-07-16.html"
 }
