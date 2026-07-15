@@ -1,4 +1,4 @@
-import { initDb, getDb, createUser, getUserById, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, User } from '../database';
+import { initDb, getDb, createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, User } from '../database';
 
 function makeFreeUser(overrides: Partial<User> = {}): User {
   return {
@@ -269,5 +269,181 @@ describe('findOrCreateOAuthUser — admin bootstrap', () => {
       nickname: 'RootUser',
     });
     expect(user.is_admin).toBe(1);
+  });
+});
+
+describe('createUser — error and edge cases', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('duplicate email — should return null', () => {
+    createUser('dup@test.com', 'password123');
+    const second = createUser('dup@test.com', 'different456');
+    expect(second).toBeNull();
+  });
+
+  it('with nickname — should use provided nickname', () => {
+    const user = createUser('nick@test.com', 'password123', 'MyNick');
+    expect(user).not.toBeNull();
+    expect(user!.nickname).toBe('MyNick');
+  });
+
+  it('without nickname — should use email prefix as nickname', () => {
+    const user = createUser('alice@example.com', 'password123');
+    expect(user).not.toBeNull();
+    expect(user!.nickname).toBe('alice');
+  });
+});
+
+describe('verifyUser', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('correct email and password — should return user', () => {
+    createUser('verify@test.com', 'mypassword');
+    const user = verifyUser('verify@test.com', 'mypassword');
+    expect(user).not.toBeNull();
+    expect(user!.email).toBe('verify@test.com');
+  });
+
+  it('correct email but wrong password — should return null', () => {
+    createUser('verify2@test.com', 'mypassword');
+    const user = verifyUser('verify2@test.com', 'wrongpassword');
+    expect(user).toBeNull();
+  });
+
+  it('non-existent email — should return null', () => {
+    const user = verifyUser('nobody@test.com', 'password123');
+    expect(user).toBeNull();
+  });
+
+  it('OAuth-only user — should not be found by verifyUser (queries email provider only)', () => {
+    findOrCreateOAuthUser({
+      provider: 'kakao',
+      provider_id: 'kakao-nopass',
+      email: 'oauth-only@test.com',
+      nickname: 'OAuthUser',
+    });
+    const user = verifyUser('oauth-only@test.com', 'anything');
+    expect(user).toBeNull();
+  });
+});
+
+describe('getUserById', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('existing user — should return user', () => {
+    const created = createUser('byid@test.com', 'password123');
+    const found = getUserById(created!.id);
+    expect(found).not.toBeNull();
+    expect(found!.email).toBe('byid@test.com');
+  });
+
+  it('non-existent ID — should return null', () => {
+    const found = getUserById('non-existent-uuid');
+    expect(found).toBeNull();
+  });
+});
+
+describe('getUserByEmail', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('existing email — should return user', () => {
+    createUser('byemail@test.com', 'password123');
+    const found = getUserByEmail('byemail@test.com');
+    expect(found).not.toBeNull();
+    expect(found!.email).toBe('byemail@test.com');
+  });
+
+  it('non-existent email — should return null', () => {
+    const found = getUserByEmail('notfound@test.com');
+    expect(found).toBeNull();
+  });
+});
+
+describe('findOrCreateOAuthUser — merge and existing-match paths', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('existing provider+provider_id — should return existing user without duplicate', () => {
+    const first = findOrCreateOAuthUser({
+      provider: 'google',
+      provider_id: 'google-merge-1',
+      email: 'merge1@test.com',
+      nickname: 'FirstUser',
+    });
+    const second = findOrCreateOAuthUser({
+      provider: 'google',
+      provider_id: 'google-merge-1',
+      email: 'different@test.com',
+      nickname: 'SecondUser',
+    });
+    expect(second.id).toBe(first.id);
+    expect(second.email).toBe('merge1@test.com');
+  });
+
+  it('existing email with different provider — should merge (update provider + provider_id)', () => {
+    createUser('merge2@test.com', 'password123');
+    const oauthUser = findOrCreateOAuthUser({
+      provider: 'kakao',
+      provider_id: 'kakao-merge-2',
+      email: 'merge2@test.com',
+      nickname: 'OAuthMerged',
+    });
+    const byEmail = getUserByEmail('merge2@test.com');
+    expect(byEmail!.id).toBe(oauthUser.id);
+    expect(byEmail!.provider).toBe('kakao');
+    expect(byEmail!.provider_id).toBe('kakao-merge-2');
+  });
+
+  it('no nickname, no email — should default nickname to "사용자"', () => {
+    const user = findOrCreateOAuthUser({
+      provider: 'naver',
+      provider_id: 'naver-noname',
+    });
+    expect(user.nickname).toBe('사용자');
+  });
+
+  it('no nickname but has email — should use email prefix as nickname', () => {
+    const user = findOrCreateOAuthUser({
+      provider: 'kakao',
+      provider_id: 'kakao-nickless',
+      email: 'bob@domain.com',
+    });
+    expect(user.nickname).toBe('bob');
+  });
+
+  it('new OAuth user — should be persisted and retrievable by ID', () => {
+    const user = findOrCreateOAuthUser({
+      provider: 'google',
+      provider_id: 'google-new-1',
+      email: 'newoauth@test.com',
+      nickname: 'NewOAuth',
+    });
+    const found = getUserById(user.id);
+    expect(found).not.toBeNull();
+    expect(found!.provider).toBe('google');
   });
 });
