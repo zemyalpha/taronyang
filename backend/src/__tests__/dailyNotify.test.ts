@@ -1,5 +1,7 @@
 import { initDb, getDb } from '../database';
 import { generateDailyHoroscope, generateAllHoroscopes } from '../dailyNotify';
+import { getKstDate } from '../routes/notify';
+import { callLlm as originalCallLlm } from '../llm';
 
 jest.mock('../llm', () => ({
   callLlm: jest.fn(),
@@ -8,7 +10,7 @@ jest.mock('../llm', () => ({
   },
 }));
 
-const { callLlm } = require('../llm');
+const callLlm = originalCallLlm as jest.MockedFunction<typeof originalCallLlm>;
 
 describe('generateDailyHoroscope', () => {
   beforeAll(() => initDb());
@@ -83,7 +85,6 @@ describe('generateAllHoroscopes', () => {
     callLlm.mockImplementation(() => Promise.resolve('운세 내용'));
 
     const promise = generateAllHoroscopes();
-    promise.catch(() => {});
 
     await jest.runAllTimersAsync();
 
@@ -103,7 +104,7 @@ describe('generateAllHoroscopes', () => {
 
   it('should use cache for signs that already have horoscopes', async () => {
     const db = getDb();
-    const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const today = getKstDate();
     db.prepare(
       'INSERT INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
     ).run('cached-1', '양자리', today, '캐시됨', '요약', '{}');
@@ -111,7 +112,6 @@ describe('generateAllHoroscopes', () => {
     callLlm.mockImplementation(() => Promise.resolve('새로 생성'));
 
     const promise = generateAllHoroscopes();
-    promise.catch(() => {});
 
     await jest.runAllTimersAsync();
 
