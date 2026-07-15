@@ -23,9 +23,11 @@ describe('callLlm', () => {
     const savedKey = config.zaiApiKey;
     (config as { zaiApiKey: string }).zaiApiKey = '';
 
-    await expect(callLlm([])).rejects.toThrow('ZAI_API_KEY');
-
-    (config as { zaiApiKey: string }).zaiApiKey = savedKey;
+    try {
+      await expect(callLlm([])).rejects.toThrow('ZAI_API_KEY');
+    } finally {
+      (config as { zaiApiKey: string }).zaiApiKey = savedKey;
+    }
   });
 
   it('successful response with content — should return content string', async () => {

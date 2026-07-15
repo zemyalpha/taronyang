@@ -325,7 +325,7 @@ describe('verifyUser', () => {
     expect(user).toBeNull();
   });
 
-  it('OAuth-only user (no password hash) — should return null on password check', () => {
+  it('OAuth-only user — should not be found by verifyUser (queries email provider only)', () => {
     findOrCreateOAuthUser({
       provider: 'kakao',
       provider_id: 'kakao-nopass',
