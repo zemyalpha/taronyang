@@ -152,6 +152,12 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
   }
   if (config.naverClientId) {
     const state = crypto.randomUUID();
+    res.cookie('naver_oauth_state', state, {
+      httpOnly: true,
+      secure: config.nodeEnv === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
     urls.naver = `https://nid.naver.com/oauth2.0/authorize?client_id=${config.naverClientId}&redirect_uri=${config.naverRedirectUri}&response_type=code&state=${state}`;
   }
   if (config.googleClientId) {
