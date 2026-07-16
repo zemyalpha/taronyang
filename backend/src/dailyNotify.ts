@@ -9,7 +9,7 @@ import { config } from './config';
 import { getDb } from './database';
 import { callLlm } from './llm';
 import { getKstDate } from './routes/notify';
-import { toKstDate } from './datetime';
+import { toKstDate, getKstDateStringKo } from './datetime';
 import { logger } from './logger';
 
 const ZODIAC_SIGNS = [
@@ -198,8 +198,7 @@ export async function sendDailyNotifications(): Promise<void> {
   }
 
   const horoscopes = await generateAllHoroscopes();
-  const kstNow = toKstDate();
-  const todayStr = kstNow.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+  const todayStr = getKstDateStringKo();
   let sent = 0;
 
   const results = await Promise.allSettled(enabled.map(async (sub) => {
