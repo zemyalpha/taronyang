@@ -82,7 +82,7 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
     res.json({ ok: true, message: '프리미엄이 활성화되었습니다! ✨' });
   } catch (err: unknown) {
     logger.error('결제 검증 실패', { error: String(err), imp_uid });
-    res.status(400).json({ detail: '결제 검증에 실패했습니다. 잠시 후 다시 시도해주세요.' });
+    res.status(502).json({ detail: '결제 검증에 실패했습니다. 잠시 후 다시 시도해주세요.' });
   }
 });
 

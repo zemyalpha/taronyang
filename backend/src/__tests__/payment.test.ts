@@ -222,4 +222,14 @@ describe('Payment routes', () => {
       .send({});
     expect(res.status).toBe(400);
   });
+
+  it('POST /payment/verify — server error returns 502 not 400', async () => {
+    const user = createUser('verify-err@example.com', 'password123', 'verifyerr')!;
+    const res = await request(app)
+      .post('/payment/verify')
+      .set(authHeader(user.id))
+      .send({ imp_uid: 'test-uid-123' });
+    expect(res.status).toBe(502);
+    expect(res.body.detail).toBeDefined();
+  });
 });
