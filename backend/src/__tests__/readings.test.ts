@@ -118,15 +118,24 @@ describe('readings routes', () => {
       expect(verify.status).toBe(404);
     });
 
-    it('cannot delete other user reading', async () => {
-      const user1 = createUser('reader10@test.com', 'pass123');
-      const user2 = createUser('reader11@test.com', 'pass123');
+    it('returns 404 when deleting non-existent reading', async () => {
+      const user = createUser('reader10@test.com', 'pass123');
+      const res = await request(app)
+        .delete('/readings/nonexistent-id')
+        .set('Authorization', `Bearer ${makeToken(user!.id)}`);
+      expect(res.status).toBe(404);
+      expect(res.body.detail).toBeDefined();
+    });
+
+    it('returns 404 when deleting other user reading', async () => {
+      const user1 = createUser('reader11@test.com', 'pass123');
+      const user2 = createUser('reader12@test.com', 'pass123');
       const id = saveReading(user1!.id, 'love', '비공개', [], '비공개 해석');
 
       const res = await request(app)
         .delete(`/readings/${id}`)
         .set('Authorization', `Bearer ${makeToken(user2!.id)}`);
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(404);
 
       const stillThere = await request(app)
         .get(`/readings/${id}`)
