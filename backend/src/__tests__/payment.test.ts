@@ -224,12 +224,28 @@ describe('Payment routes', () => {
   });
 
   it('POST /payment/verify — server error returns 502 not 400', async () => {
-    const user = createUser('verify-err@example.com', 'password123', 'verifyerr')!;
-    const res = await request(app)
-      .post('/payment/verify')
-      .set(authHeader(user.id))
-      .send({ imp_uid: 'test-uid-123' });
-    expect(res.status).toBe(502);
-    expect(res.body.detail).toBeDefined();
+    // Make the test environment-independent: ensure the route reaches the
+    // network layer (bypass the missing-API-key guard) and explicitly mock
+    // a PortOne API failure rather than relying on implicit env configuration.
+    const origKey = config.portOneImpKey;
+    const origSecret = config.portOneImpSecret;
+    config.portOneImpKey = 'test-key';
+    config.portOneImpSecret = 'test-secret';
+
+    const fetchSpy = jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Simulated API error'));
+
+    try {
+      const user = createUser('verify-err@example.com', 'password123', 'verifyerr')!;
+      const res = await request(app)
+        .post('/payment/verify')
+        .set(authHeader(user.id))
+        .send({ imp_uid: 'test-uid-123' });
+      expect(res.status).toBe(502);
+      expect(res.body.detail).toBeDefined();
+    } finally {
+      fetchSpy.mockRestore();
+      config.portOneImpKey = origKey;
+      config.portOneImpSecret = origSecret;
+    }
   });
 });
