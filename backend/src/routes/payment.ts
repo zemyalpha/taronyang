@@ -8,17 +8,20 @@ import { logger } from '../logger';
 
 export const paymentRouter = Router();
 
+/** 프리미엄 구독 기간 (30일, 밀리초) */
+const PREMIUM_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+
 /** 포트원 API 토큰 발급 (임시 구현) */
 async function getPortOneToken(): Promise<string> {
   if (!config.portOneImpKey || !config.portOneImpSecret) {
     throw new Error('포트원 API 키가 설정되지 않았습니다');
   }
-  const res = await fetch('https://api.iamport.kr/users/getToken', {
+  const tokenRes = await fetch('https://api.iamport.kr/users/getToken', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ imp_key: config.portOneImpKey, imp_secret: config.portOneImpSecret }),
   });
-  const data = await res.json() as { code: number; message?: string; response?: { access_token?: string } };
+  const data = await tokenRes.json() as { code: number; message?: string; response?: { access_token?: string } };
   if (data.code !== 0) throw new Error(`포트원 토큰 발급 실패: ${data.message}`);
   const tokenResponse = data.response;
   if (!tokenResponse?.access_token) {
@@ -71,7 +74,7 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
     }
 
     // 프리미엄 활성화 + 결제 기록 (트랜잭션)
-    const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const expires = new Date(Date.now() + PREMIUM_DURATION_MS).toISOString();
     db.transaction(() => {
       db.prepare("UPDATE users SET subscription_status = 'premium', subscription_expires_at = ? WHERE id = ?")
         .run(expires, req.user!.id);
