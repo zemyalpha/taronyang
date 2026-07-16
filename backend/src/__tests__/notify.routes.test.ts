@@ -122,8 +122,8 @@ describe('notify routes', () => {
       expect(res.body.ok).toBe(true);
 
       const db = getDb();
-      const row = db.prepare('SELECT zodiac_sign FROM users WHERE id = ?').get(user.id) as { zodiac_sign: string };
-      expect(row.zodiac_sign).toBe('양자리');
+      const row = db.prepare('SELECT zodiac_sign FROM users WHERE id = ?').get(user?.id || '') as { zodiac_sign: string } | undefined;
+      expect(row?.zodiac_sign).toBe('양자리');
     });
 
     it('rejects invalid zodiac sign (400)', async () => {

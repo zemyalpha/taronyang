@@ -155,8 +155,8 @@ describe('auth routes', () => {
 
       expect(res.status).toBe(200);
       const db = getDb();
-      const row = db.prepare('SELECT zodiac_sign FROM users WHERE id = ?').get(user.id) as { zodiac_sign: string };
-      expect(row.zodiac_sign).toBe('양자리');
+      const row = db.prepare('SELECT zodiac_sign FROM users WHERE id = ?').get(user?.id || '') as { zodiac_sign: string } | undefined;
+      expect(row?.zodiac_sign).toBe('양자리');
     });
 
     it('rejects invalid date format (400)', async () => {
