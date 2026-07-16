@@ -167,5 +167,33 @@ describe('admin routes', () => {
       expect(userRow).toBeUndefined();
       expect(readingRow).toBeUndefined();
     });
+
+    it('rolls back on failure — FK constraint prevents user deletion', async () => {
+      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
+      const target = createUser('rollback-user@test.com', 'pass123');
+      const readingId = saveReading(target!.id, 'love', '질문', [], '해석');
+
+      // processed_payments has FK to users(id) with no ON DELETE CASCADE,
+      // so deleting the user will fail — triggering transaction rollback
+      const db = getDb();
+      db.prepare(
+        'INSERT INTO processed_payments (imp_uid, user_id, amount) VALUES (?, ?, ?)'
+      ).run('imp_rollback_test', target!.id, 1000);
+
+      const res = await request(app)
+        .delete(`/admin/users/${target!.id}`)
+        .set('Authorization', `Bearer ${makeToken(admin!.id)}`);
+
+      expect(res.status).toBe(500);
+      expect(res.body.detail).toBe('사용자 삭제 중 오류가 발생했습니다');
+
+      // Transaction rolled back: user, reading, and payment all still present
+      const userRow = db.prepare('SELECT * FROM users WHERE id = ?').get(target!.id);
+      const readingRow = db.prepare('SELECT * FROM readings WHERE id = ?').get(readingId);
+      const paymentRow = db.prepare('SELECT * FROM processed_payments WHERE imp_uid = ?').get('imp_rollback_test');
+      expect(userRow).toBeDefined();
+      expect(readingRow).toBeDefined();
+      expect(paymentRow).toBeDefined();
+    });
   });
 });

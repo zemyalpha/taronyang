@@ -80,7 +80,7 @@ adminRouter.delete('/users/:id', authMiddleware, adminMiddleware, (req: Request,
 
   try {
     deleteUserCascade();
-  } catch (err) {
+  } catch {
     res.status(500).json({ detail: '사용자 삭제 중 오류가 발생했습니다' });
     return;
   }
