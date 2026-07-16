@@ -21,6 +21,9 @@ async function getPortOneToken(): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ imp_key: config.portOneImpKey, imp_secret: config.portOneImpSecret }),
   });
+  if (!tokenRes.ok) {
+    throw new Error(`포트원 토큰 발급 요청 실패 (상태 코드: ${tokenRes.status})`);
+  }
   const data = await tokenRes.json() as { code: number; message?: string; response?: { access_token?: string } };
   if (data.code !== 0) throw new Error(`포트원 토큰 발급 실패: ${data.message}`);
   const tokenResponse = data.response;
