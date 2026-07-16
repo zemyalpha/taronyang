@@ -82,22 +82,19 @@ describe('card structure', () => {
     'meaning_down',
   ];
 
-  it.each(ALL_CARDS)('card "$name_en" (id=$id) should have all required fields', (card) => {
-    requiredFields.forEach((field) => {
-      expect(card[field]).toBeDefined();
-      expect(card[field]).not.toBe('');
-    });
-  });
-
-  it.each(ALL_CARDS)('card "$name_en" should have non-empty keyword arrays', (card) => {
-    expect(card.keywords_up.length).toBeGreaterThan(0);
-    expect(card.keywords_down.length).toBeGreaterThan(0);
-  });
-
-  it.each(ALL_CARDS)('card "$name_en" should have meaningful meanings', (card) => {
-    expect(card.meaning_up.length).toBeGreaterThan(10);
-    expect(card.meaning_down.length).toBeGreaterThan(10);
-  });
+  it.each(ALL_CARDS)(
+    'card "$name_en" (id=$id) should have all required fields, non-empty keywords, and meaningful meanings',
+    (card) => {
+      requiredFields.forEach((field) => {
+        expect(card[field]).toBeDefined();
+        expect(card[field]).not.toBe('');
+      });
+      expect(card.keywords_up.length).toBeGreaterThan(0);
+      expect(card.keywords_down.length).toBeGreaterThan(0);
+      expect(card.meaning_up.length).toBeGreaterThan(10);
+      expect(card.meaning_down.length).toBeGreaterThan(10);
+    },
+  );
 });
 
 describe('getCard', () => {
