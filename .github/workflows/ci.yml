@@ -32,6 +32,11 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Run tests
+        run: npm test
+        env:
+          ZAI_API_KEY: test-api-key
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
