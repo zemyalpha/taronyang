@@ -227,18 +227,18 @@ export function startDailyScheduler(): void {
   let lastSentDate = '';
 
   setInterval(async () => {
-    const now = new Date();
-    const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    const today = kstNow.toISOString().split('T')[0];
-    const hour = kstNow.getUTCHours();
+    try {
+      const now = new Date();
+      const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      const today = kstNow.toISOString().split('T')[0];
+      const hour = kstNow.getUTCHours();
 
-    if (hour >= 7 && lastSentDate !== today) {
-      lastSentDate = today;
-      try {
+      if (hour >= 7 && lastSentDate !== today) {
+        lastSentDate = today;
         await sendDailyNotifications();
-      } catch (err) {
-        logger.error('일운 발송 오류', { error: String(err) });
       }
+    } catch (err) {
+      logger.error('일운 스케줄러 오류', { error: err instanceof Error ? err.stack : String(err) });
     }
   }, CHECK_INTERVAL);
 
