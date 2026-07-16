@@ -204,7 +204,9 @@
         async function selectZodiac(name, symbol, e) {
             selectedZodiac = name;
             document.querySelectorAll('.z-btn').forEach(b => b.classList.remove('border-gold', 'bg-lavender/10'));
-            e.currentTarget.classList.add('border-gold', 'bg-lavender/10');
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('border-gold', 'bg-lavender/10');
+            }
 
             document.getElementById('zodiac-select').classList.add('hidden');
             document.getElementById('loading').classList.remove('hidden');

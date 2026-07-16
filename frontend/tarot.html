@@ -238,7 +238,9 @@
             }
             // 선택 UI
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('border-gold', 'bg-lavender/10'));
-            e.currentTarget.classList.add('border-gold', 'bg-lavender/10');
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('border-gold', 'bg-lavender/10');
+            }
             showStep('question');
         }
 
