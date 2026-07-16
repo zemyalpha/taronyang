@@ -70,9 +70,20 @@ adminRouter.get('/readings', authMiddleware, adminMiddleware, (req: Request, res
 /** 사용자 삭제 */
 adminRouter.delete('/users/:id', authMiddleware, adminMiddleware, (req: Request, res: Response) => {
   const db = getDb();
-  db.prepare('DELETE FROM daily_horoscopes WHERE user_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM readings WHERE user_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
+  const userId = req.params.id;
+
+  const deleteUserCascade = db.transaction(() => {
+    db.prepare('DELETE FROM daily_horoscopes WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM readings WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+  });
+
+  try {
+    deleteUserCascade();
+  } catch (err) {
+    res.status(500).json({ detail: '사용자 삭제 중 오류가 발생했습니다' });
+    return;
+  }
 
   res.json({ ok: true });
 });
