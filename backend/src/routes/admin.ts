@@ -1,6 +1,7 @@
 /** 관리자 API 라우터 */
 import { Router, Request, Response } from 'express';
 import { getDb } from '../database';
+import { logger } from '../logger';
 import { authMiddleware, adminMiddleware } from './auth';
 
 export const adminRouter = Router();
@@ -72,15 +73,20 @@ adminRouter.delete('/users/:id', authMiddleware, adminMiddleware, (req: Request,
   const db = getDb();
   const userId = req.params.id;
 
-  const deleteUserCascade = db.transaction(() => {
-    db.prepare('DELETE FROM daily_horoscopes WHERE user_id = ?').run(userId);
-    db.prepare('DELETE FROM readings WHERE user_id = ?').run(userId);
-    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+  const deleteHoroscopes = db.prepare('DELETE FROM daily_horoscopes WHERE user_id = ?');
+  const deleteReadings = db.prepare('DELETE FROM readings WHERE user_id = ?');
+  const deleteUser = db.prepare('DELETE FROM users WHERE id = ?');
+
+  const deleteUserCascade = db.transaction((id: string) => {
+    deleteHoroscopes.run(id);
+    deleteReadings.run(id);
+    deleteUser.run(id);
   });
 
   try {
-    deleteUserCascade();
-  } catch {
+    deleteUserCascade(userId);
+  } catch (err) {
+    logger.error('사용자 삭제 중 오류 발생', { userId, error: String(err) });
     res.status(500).json({ detail: '사용자 삭제 중 오류가 발생했습니다' });
     return;
   }
