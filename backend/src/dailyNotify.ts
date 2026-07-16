@@ -97,7 +97,7 @@ export async function generateAllHoroscopes(): Promise<Record<string, string>> {
 
 /** 이메일 HTML 템플릿 */
 function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string): string {
-  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const today = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' });
   const horoscopeHtml = horoscope.replace(/\n/g, '<br>');
   return `<!DOCTYPE html>
 <html>
