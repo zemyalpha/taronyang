@@ -1,7 +1,7 @@
 /** 결제 API 라우터 */
 import { Router, Request, Response } from 'express';
 import { config } from '../config';
-import { getDb, getUserById } from '../database';
+import { getDb, getUserById, type User } from '../database';
 import { authMiddleware } from './auth';
 import { paymentVerifySchema } from '../validation';
 import { logger } from '../logger';
@@ -32,7 +32,7 @@ async function getPortOneToken(): Promise<string> {
  * If the subscription has expired, updates the DB and mutates the user object.
  * Returns true if the subscription was expired (and thus downgraded).
  */
-function expireIfNeeded(user: NonNullable<ReturnType<typeof getUserById>>): boolean {
+function expireIfNeeded(user: User): boolean {
   if ((user.subscription_status === 'premium' || user.subscription_status === 'cancelling') && user.subscription_expires_at) {
     if (new Date(user.subscription_expires_at) < new Date()) {
       const db = getDb();
@@ -113,9 +113,8 @@ paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {
     return;
   }
 
-  let status = user.subscription_status;
   expireIfNeeded(user);
-  status = user.subscription_status;
+  const status = user.subscription_status;
 
   res.json({ status, expires_at: user.subscription_expires_at });
 });
