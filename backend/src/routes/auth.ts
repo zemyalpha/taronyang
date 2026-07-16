@@ -163,8 +163,8 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
 function calcZodiac(birthDate: string): string | null {
   try {
     const parts = birthDate.split('-');
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
+    const month = parseInt(parts[1] || '', 10);
+    const day = parseInt(parts[2] || '', 10);
     if (isNaN(month) || isNaN(day)) return null;
     if ((month === 3 && day >= 21) || (month === 4 && day <= 19))
       return '양자리';
