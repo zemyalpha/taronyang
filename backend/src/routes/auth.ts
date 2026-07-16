@@ -1,6 +1,7 @@
 /** 인증 API 라우터 */
 import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { config } from '../config';
 import { createUser, verifyUser, getUserById, getUserByEmail, getDb, User } from '../database';
 import { signupSchema, loginSchema, updateMeSchema } from '../validation';
@@ -150,7 +151,8 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
     urls.kakao = `https://kauth.kakao.com/oauth/authorize?client_id=${config.kakaoClientId}&redirect_uri=${config.kakaoRedirectUri}&response_type=code&scope=profile_nickname,account_email`;
   }
   if (config.naverClientId) {
-    urls.naver = `https://nid.naver.com/oauth2.0/authorize?client_id=${config.naverClientId}&redirect_uri=${config.naverRedirectUri}&response_type=code&state=taronyang`;
+    const state = crypto.randomUUID();
+    urls.naver = `https://nid.naver.com/oauth2.0/authorize?client_id=${config.naverClientId}&redirect_uri=${config.naverRedirectUri}&response_type=code&state=${state}`;
   }
   if (config.googleClientId) {
     const scope = encodeURIComponent('openid email profile');
