@@ -64,3 +64,18 @@ export const zodiacSchema = z.object({
     '천칭자리', '전갈자리', '사수자리', '염소자리', '물병자리', '물고기자리',
   ]),
 });
+
+/** 분석 이벤트 단건 */
+export const analyticsEventSchema = z.object({
+  name: z.string().min(1).max(100),
+  props: z.record(z.unknown()).optional(),
+  path: z.string().max(500).optional(),
+  referrer: z.string().max(500).optional(),
+  session_id: z.string().max(100).optional(),
+  ts: z.string().max(50).optional(),
+});
+
+/** 분석 이벤트 배치 */
+export const analyticsBatchSchema = z.object({
+  events: z.array(analyticsEventSchema).min(1).max(50),
+});
