@@ -75,7 +75,7 @@ export const analyticsEventSchema = z.object({
   ts: z.string().max(50).optional(),
 });
 
-/** 분석 이벤트 배치 */
+/** 분석 이벤트 배치 — 처리 한도(20건)와 일치시켜 자동 잘림 방지 */
 export const analyticsBatchSchema = z.object({
-  events: z.array(analyticsEventSchema).min(1).max(50),
+  events: z.array(analyticsEventSchema).min(1).max(20),
 });
