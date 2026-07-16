@@ -28,8 +28,8 @@ adminRouter.get('/stats', authMiddleware, adminMiddleware, (_req: Request, res: 
 /** 사용자 목록 */
 adminRouter.get('/users', authMiddleware, adminMiddleware, (req: Request, res: Response) => {
   const db = getDb();
-  const limit = Math.min(parseInt(String(req.query.limit ?? '')) || 20, 100);
-  const page = Math.max(parseInt(String(req.query.page ?? '')) || 1, 1);
+  const limit = Math.min(parseInt(String(req.query.limit ?? ''), 10) || 20, 100);
+  const page = Math.max(parseInt(String(req.query.page ?? ''), 10) || 1, 1);
   const offset = (page - 1) * limit;
 
   const users = db.prepare(
@@ -49,8 +49,8 @@ adminRouter.get('/users', authMiddleware, adminMiddleware, (req: Request, res: R
 /** 전체 상담 기록 */
 adminRouter.get('/readings', authMiddleware, adminMiddleware, (req: Request, res: Response) => {
   const db = getDb();
-  const limit = Math.min(parseInt(String(req.query.limit ?? '')) || 20, 100);
-  const page = Math.max(parseInt(String(req.query.page ?? '')) || 1, 1);
+  const limit = Math.min(parseInt(String(req.query.limit ?? ''), 10) || 20, 100);
+  const page = Math.max(parseInt(String(req.query.page ?? ''), 10) || 1, 1);
   const offset = (page - 1) * limit;
 
   const readings = db.prepare(
