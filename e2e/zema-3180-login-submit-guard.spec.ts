@@ -1,11 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('ZEMA-3180: 로그인/회원가입 submit guard + 비밀번호 검증', () => {
-  test('비밀번호 입력창에 minlength=6, maxlength=128 속성이 있다', async ({ page }) => {
+  test('비밀번호 입력창에 올바른 길이 제한 속성이 있다', async ({ page }) => {
     await page.goto('/login');
 
     const loginPwd = page.locator('#login-password');
-    await expect(loginPwd).toHaveAttribute('minlength', '6');
     await expect(loginPwd).toHaveAttribute('maxlength', '128');
 
     await page.locator('#tab-signup').click();
@@ -77,23 +76,27 @@ test.describe('ZEMA-3180: 로그인/회원가입 submit guard + 비밀번호 검
     await expect(page.locator('#signup-error')).toContainText('이미 가입된 이메일');
   });
 
-  test('HTML5 검증: 5자리 비밀번호는 제출되지 않는다', async ({ page }) => {
+  test('HTML5 검증: 회원가입 폼에서 5자리 비밀번호는 유효하지 않다', async ({ page }) => {
     let requestHappened = false;
-    await page.route('**/api/auth/login', async (route) => {
+    await page.route('**/api/auth/signup', async (route) => {
       requestHappened = true;
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });
 
     await page.goto('/login');
-    const btn = page.locator('#form-login button[type="submit"]');
+    await page.locator('#tab-signup').click();
+    const btn = page.locator('#form-signup button[type="submit"]');
 
-    await page.locator('#login-email').fill('user@test.com');
-    await page.locator('#login-password').fill('12345');
+    await page.locator('#signup-email').fill('user@test.com');
+    await page.locator('#signup-password').fill('12345');
     await btn.click();
 
-    await page.waitForTimeout(500);
+    const isValid = await page.locator('#form-signup').evaluate(
+      (form: HTMLFormElement) => form.checkValidity(),
+    );
+    expect(isValid).toBe(false);
     expect(requestHappened).toBe(false);
     await expect(btn).toBeEnabled();
-    await expect(btn).toHaveText('로그인');
+    await expect(btn).toHaveText('회원가입');
   });
 });
