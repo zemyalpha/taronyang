@@ -32,7 +32,7 @@ test.describe('ZEMA-3188 소셜 로그인 버튼 가드', () => {
 
     await page.locator(`${SOCIAL_BUTTONS}`, { hasText: '카카오' }).click();
 
-    await expect(fetchStarted).resolves.toBeTruthy();
+    await fetchStarted;
     const buttons = page.locator(SOCIAL_BUTTONS);
     const count = await buttons.count();
     for (let i = 0; i < count; i++) {
@@ -51,7 +51,7 @@ test.describe('ZEMA-3188 소셜 로그인 버튼 가드', () => {
     const kakao = page.locator(SOCIAL_BUTTONS, { hasText: '카카오' });
     await kakao.click();
 
-    await expect(page.locator('#toast, [class*="toast"]')).toBeVisible({ timeout: 5000 }).catch(() => {});
+    await expect(page.locator('#toast, [class*="toast"]')).toBeVisible({ timeout: 5000 });
     const buttons = page.locator(SOCIAL_BUTTONS);
     const count = await buttons.count();
     for (let i = 0; i < count; i++) {
@@ -67,6 +67,9 @@ test.describe('ZEMA-3188 소셜 로그인 버튼 가드', () => {
 
     const kakao = page.locator(SOCIAL_BUTTONS, { hasText: '카카오' });
     await kakao.click();
+
+    await expect(page.locator('#toast, [class*="toast"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#toast, [class*="toast"]')).toContainText('아직 설정되지 않은 로그인 방식이에요');
 
     const buttons = page.locator(SOCIAL_BUTTONS);
     const count = await buttons.count();
@@ -88,9 +91,9 @@ test.describe('ZEMA-3188 소셜 로그인 버튼 가드', () => {
     await kakao.click();
     await expect(kakao).toBeDisabled();
 
-    await kakao.click({ force: true }).catch(() => {});
-    await page.locator(SOCIAL_BUTTONS, { hasText: '네이버' }).click({ force: true }).catch(() => {});
-    await page.locator(SOCIAL_BUTTONS, { hasText: 'Google' }).click({ force: true }).catch(() => {});
+    await kakao.click({ force: true });
+    await page.locator(SOCIAL_BUTTONS, { hasText: '네이버' }).click({ force: true });
+    await page.locator(SOCIAL_BUTTONS, { hasText: 'Google' }).click({ force: true });
 
     resolveFirst(undefined);
 
