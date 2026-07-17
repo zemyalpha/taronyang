@@ -336,19 +336,6 @@ body {
     text-decoration: none;
 }
 
-/* 통계 */
-.stats {
-    text-align: center;
-    padding: 16px;
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-.stats-count {
-    color: var(--accent-gold);
-    font-weight: 700;
-}
-
 /* 타로 카드 3D 애니메이션 */
 .tarot-card {
     width: 100px;
