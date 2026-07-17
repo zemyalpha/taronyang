@@ -67,8 +67,9 @@
         </div>
     </main>
 
+    <script src="/static/js/config.js"></script>
     <script>
-        const API =
+        const getApiBase = () =>
             (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
             (window.location.origin + '/api');
 
@@ -91,9 +92,10 @@
 
             document.getElementById('error-state').classList.add('hidden');
             document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('readings-list').innerHTML = '';
 
             try {
-                const res = await fetch(API + '/readings', {
+                const res = await fetch(getApiBase() + '/readings', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) {
@@ -133,7 +135,6 @@
         loadReadings();
     </script>
 
-    <script src="/static/js/config.js"></script>
     <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
