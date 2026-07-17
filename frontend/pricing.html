@@ -120,7 +120,14 @@
 
     <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
+    <script src="/static/js/config.js"></script>
     <script>
+        const getApiBase = () => {
+            const base = (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
+                (window.location.origin + '/api');
+            return base.replace(/\/+$/, '');
+        };
+
         let toastTimeout;
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -134,8 +141,8 @@
             const token = localStorage.getItem('token');
             if (!token) return;
             try {
-                const res = await fetch('/api/payment/status', { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!res.ok) return;
+                const res = await fetch(getApiBase() + '/payment/status', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error('API error');
                 const data = await res.json();
                 const badge = document.getElementById('status-badge');
                 const el = document.getElementById('current-status');
@@ -149,7 +156,9 @@
                     badge.textContent = '🆓 무료 플랜';
                     badge.className = 'inline-block px-4 py-2 rounded-full text-sm font-bold bg-gray-500/20 text-gray-400';
                 }
-            } catch (e) {}
+            } catch {
+                showToast('구독 상태를 불러오지 못했습니다.');
+            }
         }
 
         function subscribe() {
@@ -183,7 +192,7 @@
             }, async function(rsp) {
                 if (rsp.success) {
                     try {
-                        const res = await fetch('/api/payment/verify', {
+                        const res = await fetch(getApiBase() + '/payment/verify', {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
@@ -216,7 +225,6 @@
         checkStatus();
     </script>
 
-    <script src="/static/js/config.js"></script>
     <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
