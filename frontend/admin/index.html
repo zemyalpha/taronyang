@@ -93,7 +93,12 @@
 
     </main>
 
+    <script src="/static/js/config.js"></script>
     <script>
+        const getApiBase = () =>
+            (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
+            (window.location.origin + '/api');
+
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
@@ -109,7 +114,7 @@
 
         async function loadStats() {
             try {
-                const res = await fetch('/api/admin/stats', { headers });
+                const res = await fetch(getApiBase() + '/admin/stats', { headers });
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         window.location.href = '/';
@@ -126,12 +131,17 @@
                 document.getElementById('stat-premium').textContent = data.premium_users;
                 document.getElementById('stat-readings').textContent = data.total_readings;
                 document.getElementById('stat-today').textContent = data.today_new_users;
-            } catch (e) {}
+            } catch {
+                document.getElementById('stat-users').textContent = '오류';
+                document.getElementById('stat-premium').textContent = '오류';
+                document.getElementById('stat-readings').textContent = '오류';
+                document.getElementById('stat-today').textContent = '오류';
+            }
         }
 
         async function loadUsers() {
             try {
-                const res = await fetch('/api/admin/users?limit=50', { headers });
+                const res = await fetch(getApiBase() + '/admin/users?limit=50', { headers });
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         window.location.href = '/';
@@ -147,12 +157,11 @@
                         <td>${u.subscription_status === 'premium' ? '<span class="text-lavender">💎</span>' : '<span class="text-gray-500">무료</span>'}</td>
                     </tr>
                 `).join('');
-            } catch (e) {}
-        }
-
-        async function loadReadings() {
+            } catch {
+                document.getElementById('users-table').innerHTML = '<tr><td colspan="4" class="text-red-400 text-center py-4">사용자 목록을 불러오지 못했습니다</td></tr>';
+            }
             try {
-                const res = await fetch('/api/admin/readings?limit=50', { headers });
+                const res = await fetch(getApiBase() + '/admin/readings?limit=50', { headers });
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         window.location.href = '/';
@@ -169,7 +178,9 @@
                         <td class="text-gray-400">${r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '-'}</td>
                     </tr>
                 `).join('');
-            } catch (e) {}
+            } catch {
+                document.getElementById('readings-table').innerHTML = '<tr><td colspan="4" class="text-red-400 text-center py-4">상담 기록을 불러오지 못했습니다</td></tr>';
+            }
         }
 
         function showAdminTab(tab) {
@@ -184,7 +195,6 @@
         loadReadings();
     </script>
 
-    <script src="/static/js/config.js"></script>
     <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
