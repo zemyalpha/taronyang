@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-17",
-  "weekday": "금요일",
+  "date": "2026-07-18",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "여황제",
+      "symbol": "👑",
+      "slug": "3-empress"
     },
     {
-      "name": "별",
-      "symbol": "⭐",
-      "slug": "17-star"
+      "name": "은둔자",
+      "symbol": "🏔️",
+      "slug": "9-hermit"
     },
     {
-      "name": "달",
-      "symbol": "🌕",
-      "slug": "18-moon"
+      "name": "황제",
+      "symbol": "🏛️",
+      "slug": "4-emperor"
     }
   ],
-  "summary": "오늘은 「희생」의 에너지가 흐르는 날이에요. 다르게 바라볼 시간이에요. 기다림 속에서 새로운 깨달음을 얻을 거예요. 다만 「절망」과 관련된 부분은 조심하고, 달이 주는 「환상…",
+  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「성찰」과 관련된 부분은 조심하고, 황제가 주는 「권위…",
   "luckyColor": "딥 네이비",
   "luckyColorHex": "#6366f1",
-  "luckyNumber": 1,
-  "url": "/blog/daily/2026-07-17.html"
+  "luckyNumber": 3,
+  "url": "/blog/daily/2026-07-18.html"
 }
