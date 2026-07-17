@@ -231,11 +231,13 @@
                 const res = await fetch(getApiBase() + '/tarot/shuffle?count=1');
                 if (!res.ok) throw new Error('shuffle failed');
                 const shuffleData = await res.json();
-                const card = shuffleData.cards[0];
+                const card = shuffleData.cards && shuffleData.cards[0];
+                if (!card) throw new Error('No cards returned');
 
                 const readRes = await fetch(getApiBase() + '/tarot/read', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({
                         category: 'general',
                         question: `${name}의 오늘(${today}) 운세`,
