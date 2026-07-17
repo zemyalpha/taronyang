@@ -194,8 +194,9 @@
 
     </main>
 
+    <script src="/static/js/config.js"></script>
     <script>
-        const API =
+        const getApiBase = () =>
             (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
             (window.location.origin + '/api');
 
@@ -227,12 +228,12 @@
             document.getElementById('result-detail').textContent = '';
 
             try {
-                const res = await fetch(API + '/tarot/shuffle?count=1');
+                const res = await fetch(getApiBase() + '/tarot/shuffle?count=1');
                 if (!res.ok) throw new Error('shuffle failed');
                 const shuffleData = await res.json();
                 const card = shuffleData.cards[0];
 
-                const readRes = await fetch(API + '/tarot/read', {
+                const readRes = await fetch(getApiBase() + '/tarot/read', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -262,7 +263,6 @@
         }
     </script>
 
-    <script src="/static/js/config.js"></script>
     <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
