@@ -145,6 +145,8 @@
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         window.location.href = '/';
+                    } else {
+                        document.getElementById('users-table').innerHTML = '<tr><td colspan="4" class="text-red-400 text-center py-4">사용자 목록을 불러오지 못했습니다</td></tr>';
                     }
                     return;
                 }
@@ -168,6 +170,8 @@
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         window.location.href = '/';
+                    } else {
+                        document.getElementById('readings-table').innerHTML = '<tr><td colspan="4" class="text-red-400 text-center py-4">상담 기록을 불러오지 못했습니다</td></tr>';
                     }
                     return;
                 }

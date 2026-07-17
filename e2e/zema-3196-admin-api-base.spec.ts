@@ -20,7 +20,8 @@ test.describe('ZEMA-3196: Admin config.js load order + API base + error handling
 
     await page.addInitScript(() => localStorage.setItem('token', 'fake-admin-token'));
     await page.goto('/admin/index.html');
-    await page.waitForTimeout(1500);
+
+    await expect(page.locator('#stat-users')).toHaveText('0', { timeout: 5000 });
 
     expect(errors).toEqual([]);
   });
