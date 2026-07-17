@@ -186,7 +186,7 @@
             toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
         }
 
-        const API = (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) || window.location.origin;
+        const API = ((window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) || window.location.origin).replace(/\/api\/?$/, '');
         const token = localStorage.getItem('token');
         const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
         let category = '';
