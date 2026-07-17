@@ -29,8 +29,19 @@ test.describe('ZEMA-3198: Pricing config.js load order + API base + error handli
     await expect(page.locator('#btn-subscribe')).toHaveText('이미 구독 중입니다');
   });
 
-  test('결제 상태 API 실패 → 에러 토스트 표시', async ({ page }) => {
+  test('결제 상태 API 네트워크 실패 → 에러 토스트 표시', async ({ page }) => {
     await page.route('**/api/payment/status', (route) => route.abort('failed'));
+
+    await page.addInitScript(() => localStorage.setItem('token', 'fake-token'));
+    await page.goto('/pricing');
+
+    await expect(page.locator('#toast')).toContainText('구독 상태를 불러오지 못했습니다', { timeout: 5000 });
+  });
+
+  test('결제 상태 API HTTP 500 → 에러 토스트 표시', async ({ page }) => {
+    await page.route('**/api/payment/status', (route) =>
+      route.fulfill({ status: 500, body: JSON.stringify({ detail: 'server error' }) }),
+    );
 
     await page.addInitScript(() => localStorage.setItem('token', 'fake-token'));
     await page.goto('/pricing');

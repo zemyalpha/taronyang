@@ -122,9 +122,11 @@
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
     <script src="/static/js/config.js"></script>
     <script>
-        const getApiBase = () =>
-            (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
-            (window.location.origin + '/api');
+        const getApiBase = () => {
+            const base = (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
+                (window.location.origin + '/api');
+            return base.replace(/\/+$/, '');
+        };
 
         let toastTimeout;
         function showToast(msg) {
@@ -140,7 +142,7 @@
             if (!token) return;
             try {
                 const res = await fetch(getApiBase() + '/payment/status', { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!res.ok) return;
+                if (!res.ok) throw new Error('API error');
                 const data = await res.json();
                 const badge = document.getElementById('status-badge');
                 const el = document.getElementById('current-status');
