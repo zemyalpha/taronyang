@@ -143,11 +143,11 @@ export function verifyUser(email: string, password: string): User | null {
   const db = getDb();
   const row = db.prepare('SELECT * FROM users WHERE email = ? AND provider = ?').get(email, 'email') as User | undefined;
 
-  if (!row) {
+  if (!row || !row.password_hash) {
     bcrypt.compareSync(password, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
     return null;
   }
-  if (bcrypt.compareSync(password, row.password_hash || '')) return row;
+  if (bcrypt.compareSync(password, row.password_hash)) return row;
   return null;
 }
 
