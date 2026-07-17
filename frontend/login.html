@@ -196,17 +196,30 @@
         function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; }
 
         // 소셜 로그인
+        let socialLoginInProgress = false;
         async function socialLogin(provider) {
+            if (socialLoginInProgress) return;
+            socialLoginInProgress = true;
+
+            const buttons = document.querySelectorAll('#social-buttons button');
+            buttons.forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
+
             try {
-                const res = await fetch('/api/auth/oauth/urls');
+                const apiBase =
+                    (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
+                    (window.location.origin + '/api');
+                const res = await fetch(apiBase + '/auth/oauth/urls');
                 const urls = await res.json();
                 if (urls[provider]) {
                     window.location.href = urls[provider];
                 } else {
                     showToast('아직 설정되지 않은 로그인 방식이에요 😿');
                 }
-            } catch (e) {
+            } catch {
                 showToast('소셜 로그인 오류');
+            } finally {
+                socialLoginInProgress = false;
+                buttons.forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
             }
         }
 
