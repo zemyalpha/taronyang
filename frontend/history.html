@@ -58,9 +58,20 @@
             <p class="text-gray-400 mb-4">아직 상담 기록이 없어요</p>
             <a href="/tarot" class="inline-block bg-gradient-to-r from-purple-700 to-lavender text-white px-6 py-3 rounded-full font-bold">첫 상담하기 🃏</a>
         </div>
+
+        <!-- 오류 상태 -->
+        <div id="error-state" class="hidden text-center py-16">
+            <div class="text-4xl mb-4">😿</div>
+            <p class="text-gray-400 mb-4">상담 기록을 불러오지 못했어요</p>
+            <button onclick="loadReadings()" class="inline-block bg-gradient-to-r from-purple-700 to-lavender text-white px-6 py-3 rounded-full font-bold">다시 시도</button>
+        </div>
     </main>
 
     <script>
+        const API =
+            (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
+            (window.location.origin + '/api');
+
         function escapeHtml(str) {
             if (str == null) return '';
             return String(str)
@@ -78,8 +89,11 @@
                 return;
             }
 
+            document.getElementById('error-state').classList.add('hidden');
+            document.getElementById('empty-state').classList.add('hidden');
+
             try {
-                const res = await fetch('/api/readings', {
+                const res = await fetch(API + '/readings', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) {
@@ -88,7 +102,7 @@
                         localStorage.removeItem('user');
                         document.getElementById('need-login').classList.remove('hidden');
                     } else {
-                        document.getElementById('empty-state').classList.remove('hidden');
+                        document.getElementById('error-state').classList.remove('hidden');
                     }
                     return;
                 }
@@ -111,8 +125,8 @@
                         <p class="text-sm text-gray-200 line-clamp-3">${escapeHtml((r.interpretation || '').substring(0, 150))}...</p>
                     </div>
                 `).join('');
-            } catch (e) {
-                document.getElementById('empty-state').classList.remove('hidden');
+            } catch {
+                document.getElementById('error-state').classList.remove('hidden');
             }
         }
 
