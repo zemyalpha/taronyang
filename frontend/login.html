@@ -60,7 +60,7 @@
             </div>
             <div>
                 <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
-                <input type="password" id="login-password" required placeholder="6자 이상" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
+                <input type="password" id="login-password" required minlength="6" maxlength="128" placeholder="6자 이상" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div id="login-error" class="text-softred text-sm hidden"></div>
             <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">로그인</button>
@@ -74,7 +74,7 @@
             </div>
             <div>
                 <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
-                <input type="password" id="signup-password" required placeholder="6자 이상" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
+                <input type="password" id="signup-password" required minlength="6" maxlength="128" placeholder="6자 이상" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div>
                 <label class="block text-sm text-gray-400 mb-1">닉네임 (선택)</label>
@@ -134,7 +134,10 @@
         async function doLogin(e) {
             e.preventDefault();
             const errEl = document.getElementById('login-error');
+            const btn = e.target.querySelector('button[type="submit"]');
             errEl.classList.add('hidden');
+            btn.disabled = true;
+            btn.textContent = '로그인 중...';
             try {
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
@@ -152,16 +155,22 @@
                     TaronyangAnalytics.track('login_complete', { method: 'email' });
                 }
                 window.location.href = '/';
-            } catch (e) {
-                errEl.textContent = e.message;
+            } catch (err) {
+                errEl.textContent = err?.message || err || '로그인 중 오류가 발생했습니다.';
                 errEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '로그인';
             }
         }
 
         async function doSignup(e) {
             e.preventDefault();
             const errEl = document.getElementById('signup-error');
+            const btn = e.target.querySelector('button[type="submit"]');
             errEl.classList.add('hidden');
+            btn.disabled = true;
+            btn.textContent = '가입 중...';
             try {
                 const res = await fetch('/api/auth/signup', {
                     method: 'POST',
@@ -180,9 +189,12 @@
                     TaronyangAnalytics.track('signup_complete', { method: 'email' });
                 }
                 window.location.href = '/';
-            } catch (e) {
-                errEl.textContent = e.message;
+            } catch (err) {
+                errEl.textContent = err?.message || err || '회원가입 중 오류가 발생했습니다.';
                 errEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '회원가입';
             }
         }
 
