@@ -158,7 +158,6 @@
             } catch (err) {
                 errEl.textContent = err?.message || err || '로그인 중 오류가 발생했습니다.';
                 errEl.classList.remove('hidden');
-            } finally {
                 btn.disabled = false;
                 btn.textContent = '로그인';
             }
@@ -192,7 +191,6 @@
             } catch (err) {
                 errEl.textContent = err?.message || err || '회원가입 중 오류가 발생했습니다.';
                 errEl.classList.remove('hidden');
-            } finally {
                 btn.disabled = false;
                 btn.textContent = '회원가입';
             }
