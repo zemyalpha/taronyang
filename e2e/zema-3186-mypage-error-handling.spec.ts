@@ -12,6 +12,14 @@ test.describe('ZEMA-3186: 마이페이지 API base + 에러 처리', () => {
       }
     });
 
+    await page.route('**/api/**', async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ detail: 'Internal Server Error' }),
+      });
+    });
+
     await page.addInitScript(() => {
       localStorage.setItem('token', 'fake-token-for-testing');
     });
@@ -55,9 +63,32 @@ test.describe('ZEMA-3186: 마이페이지 API base + 에러 처리', () => {
   });
 
   test('API base가 config beacon 없을 때 window.location.origin 기반으로 동작', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('token', 'fake-token-for-testing');
+    });
+
+    await page.goto('/mypage', { waitUntil: 'domcontentloaded' });
+
     const apiBase = await page.evaluate(() => {
       return (window as any).__TARONYANG_CONFIG__?.apiBase ?? null;
     });
     expect(apiBase).toBeNull();
+  });
+
+  test('config beacon에 apiBase가 있을 때 해당 경로로 API 호출', async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as any).__TARONYANG_CONFIG__ = { apiBase: 'https://custom-api-test.com/api' };
+      localStorage.setItem('token', 'fake-token-for-testing');
+    });
+
+    let customApiCalled = false;
+    await page.route('https://custom-api-test.com/api/**', (route) => {
+      customApiCalled = true;
+      return route.abort('failed');
+    });
+
+    await page.goto('/mypage', { waitUntil: 'domcontentloaded' });
+
+    await expect.poll(() => customApiCalled, { timeout: 8000 }).toBe(true);
   });
 });
