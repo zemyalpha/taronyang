@@ -131,7 +131,9 @@
     </style>
 
     <script>
-        const API = window.location.origin + '/api';
+        const API =
+            (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
+            (window.location.origin + '/api');
         const token = localStorage.getItem('token');
         if (!token) { location.href = '/login'; }
         const headers = { 'Authorization': 'Bearer ' + token };
@@ -186,7 +188,7 @@
                 if (data.zodiac_sign) {
                     document.getElementById('zodiac_sign').value = data.zodiac_sign;
                 }
-            } catch(e) { console.error(e); }
+            } catch { showToast('알림 설정을 불러오지 못했습니다.'); }
         }
 
         async function loadSubscription() {
@@ -204,8 +206,7 @@
                     el.textContent = '🆓 무료 플랜';
                     document.getElementById('premium_btn').classList.remove('hidden');
                 }
-            } catch(e) {
-                console.error(e);
+            } catch {
                 el.textContent = '⚠️ 구독 정보를 불러올 수 없습니다';
             }
         }
@@ -238,8 +239,7 @@
                         <p class="text-gray-300 text-sm">${escapeHtml(r.question || '(질문 없음)')}</p>
                     </div>`;
                 }).join('');
-            } catch(e) {
-                console.error(e);
+            } catch {
                 list.innerHTML = '<p class="text-red-400 text-sm">상담 기록을 불러오지 못했습니다</p>';
             }
         }
