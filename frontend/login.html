@@ -205,13 +205,16 @@
             const buttons = document.querySelectorAll('#social-buttons button');
             buttons.forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
 
+            let shouldReset = true;
             try {
                 const getApiBase = () =>
                     (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
                     (window.location.origin + '/api');
                 const res = await fetch(getApiBase() + '/auth/oauth/urls');
+                if (!res.ok) throw new Error('API response was not ok');
                 const urls = await res.json();
                 if (urls[provider]) {
+                    shouldReset = false;
                     window.location.href = urls[provider];
                 } else {
                     showToast('아직 설정되지 않은 로그인 방식이에요 😿');
@@ -219,8 +222,10 @@
             } catch {
                 showToast('소셜 로그인 오류');
             } finally {
-                socialLoginInProgress = false;
-                buttons.forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
+                if (shouldReset) {
+                    socialLoginInProgress = false;
+                    buttons.forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
+                }
             }
         }
 
