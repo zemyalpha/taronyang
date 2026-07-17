@@ -3,6 +3,11 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { initDb, createUser, getDb } from '../database';
 import { config } from '../config';
+
+jest.mock('../dailyNotify', () => ({
+  generateDailyHoroscope: jest.fn().mockResolvedValue('오늘은 운수가 좋습니다'),
+}));
+
 import { notifyRouter } from '../routes/notify';
 
 function createTestApp() {
