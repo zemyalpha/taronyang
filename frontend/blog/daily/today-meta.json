@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-19",
-  "weekday": "일요일",
+  "date": "2026-07-20",
+  "weekday": "월요일",
   "cards": [
     {
-      "name": "운명의 수레바퀴",
-      "symbol": "🎡",
-      "slug": "10-wheel-of-fortune"
+      "name": "매달린 사람",
+      "symbol": "🔄",
+      "slug": "12-hanged-man"
     },
     {
-      "name": "태양",
-      "symbol": "☀️",
-      "slug": "19-sun"
+      "name": "달",
+      "symbol": "🌕",
+      "slug": "18-moon"
     },
     {
-      "name": "절제",
-      "symbol": "🏺",
-      "slug": "14-temperance"
+      "name": "마법사",
+      "symbol": "🧙",
+      "slug": "1-magician"
     }
   ],
-  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「성공」과 관련된 부분은 조심하고, 절제가 주는 「균형」의 …",
-  "luckyColor": "소프트 그린",
-  "luckyColorHex": "#86efac",
-  "luckyNumber": 1,
-  "url": "/blog/daily/2026-07-19.html"
+  "summary": "오늘은 「희생」의 에너지가 흐르는 날이에요. 다르게 바라볼 시간이에요. 기다림 속에서 새로운 깨달음을 얻을 거예요. 다만 「혼란해소」와 관련된 부분은 조심하고, 마법사가 주는…",
+  "luckyColor": "로즈 골드",
+  "luckyColorHex": "#f472b6",
+  "luckyNumber": 3,
+  "url": "/blog/daily/2026-07-20.html"
 }
