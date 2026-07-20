@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-20",
-  "weekday": "월요일",
+  "date": "2026-07-21",
+  "weekday": "화요일",
   "cards": [
+    {
+      "name": "죽음",
+      "symbol": "🦋",
+      "slug": "13-death"
+    },
+    {
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
+    },
     {
       "name": "매달린 사람",
       "symbol": "🔄",
       "slug": "12-hanged-man"
-    },
-    {
-      "name": "달",
-      "symbol": "🌕",
-      "slug": "18-moon"
-    },
-    {
-      "name": "마법사",
-      "symbol": "🧙",
-      "slug": "1-magician"
     }
   ],
-  "summary": "오늘은 「희생」의 에너지가 흐르는 날이에요. 다르게 바라볼 시간이에요. 기다림 속에서 새로운 깨달음을 얻을 거예요. 다만 「혼란해소」와 관련된 부분은 조심하고, 마법사가 주는…",
+  "summary": "오늘은 「끝과시작」의 에너지가 흐르는 날이에요. 하나의 장이 끝나고 새로운 장이 시작돼요. 과거를 내려놓고 변화를 받아들이세요. 다만 「부활」과 관련된 부분은 조심하고, 매달…",
   "luckyColor": "로즈 골드",
   "luckyColorHex": "#f472b6",
-  "luckyNumber": 3,
-  "url": "/blog/daily/2026-07-20.html"
+  "luckyNumber": 2,
+  "url": "/blog/daily/2026-07-21.html"
 }
