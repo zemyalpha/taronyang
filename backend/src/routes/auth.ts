@@ -2,7 +2,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
-import { createUser, verifyUser, getUserById, getUserByEmail, getDb, User } from '../database';
+import { createUser, verifyUser, getUserById, getUserByEmail, getDb, User, isAccountLocked, recordFailedLogin, clearLoginAttempts } from '../database';
 import { signupSchema, loginSchema, updateMeSchema } from '../validation';
 
 export const authRouter = Router();
@@ -94,11 +94,24 @@ authRouter.post('/login', (req: Request, res: Response) => {
     return;
   }
   const { email, password } = parsed.data;
+
+  const lockState = isAccountLocked(email);
+  if (lockState.locked) {
+    res.status(429).json({ detail: '로그인 시도 횟수가 초과되었습니다. 잠시 후 다시 시도해주세요.' });
+    return;
+  }
+
   const user = verifyUser(email, password);
   if (!user) {
+    const result = recordFailedLogin(email);
+    if (result.locked) {
+      res.status(429).json({ detail: '로그인 시도 횟수가 초과되었습니다. 15분 후 다시 시도해주세요.' });
+      return;
+    }
     res.status(401).json({ detail: '이메일 또는 비밀번호가 일치하지 않습니다' });
     return;
   }
+  clearLoginAttempts(email);
   res.json({ token: createToken(user.id), user: makeUserResponse(user) });
 });
 

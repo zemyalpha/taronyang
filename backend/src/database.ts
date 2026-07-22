@@ -97,7 +97,56 @@ export function initDb(): void {
     CREATE INDEX IF NOT EXISTS idx_analytics_name ON analytics_events(name);
     CREATE INDEX IF NOT EXISTS idx_analytics_created ON analytics_events(created_at);
     CREATE INDEX IF NOT EXISTS idx_analytics_session ON analytics_events(session_id);
+
+    CREATE TABLE IF NOT EXISTS login_attempts (
+      email TEXT PRIMARY KEY,
+      failed_count INTEGER NOT NULL DEFAULT 0,
+      last_failed_at TEXT,
+      locked_until TEXT
+    );
   `);
+}
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
+
+export function isAccountLocked(email: string): { locked: boolean; lockedUntil: string | null } {
+  const db = getDb();
+  const row = db.prepare('SELECT locked_until FROM login_attempts WHERE email = ?').get(email.toLowerCase()) as { locked_until: string | null } | undefined;
+  if (!row || !row.locked_until) return { locked: false, lockedUntil: null };
+  const lockedUntil = new Date(row.locked_until);
+  if (lockedUntil > new Date()) {
+    return { locked: true, lockedUntil: row.locked_until };
+  }
+  return { locked: false, lockedUntil: null };
+}
+
+export function recordFailedLogin(email: string): { locked: boolean; lockedUntil: string | null } {
+  const db = getDb();
+  const normalizedEmail = email.toLowerCase();
+  const now = new Date().toISOString();
+  const row = db.prepare('SELECT failed_count FROM login_attempts WHERE email = ?').get(normalizedEmail) as { failed_count: number } | undefined;
+  const newCount = (row?.failed_count ?? 0) + 1;
+
+  if (newCount >= MAX_LOGIN_ATTEMPTS) {
+    const lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS).toISOString();
+    db.prepare(
+      'INSERT INTO login_attempts (email, failed_count, last_failed_at, locked_until) VALUES (?, ?, ?, ?) ' +
+      'ON CONFLICT(email) DO UPDATE SET failed_count = excluded.failed_count, last_failed_at = excluded.last_failed_at, locked_until = excluded.locked_until'
+    ).run(normalizedEmail, newCount, now, lockedUntil);
+    return { locked: true, lockedUntil };
+  }
+
+  db.prepare(
+    'INSERT INTO login_attempts (email, failed_count, last_failed_at, locked_until) VALUES (?, ?, ?, NULL) ' +
+    'ON CONFLICT(email) DO UPDATE SET failed_count = excluded.failed_count, last_failed_at = excluded.last_failed_at'
+  ).run(normalizedEmail, newCount, now);
+  return { locked: false, lockedUntil: null };
+}
+
+export function clearLoginAttempts(email: string): void {
+  const db = getDb();
+  db.prepare('DELETE FROM login_attempts WHERE email = ?').run(email.toLowerCase());
 }
 
 // --- 사용자 타입 ---
