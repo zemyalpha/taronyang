@@ -173,13 +173,14 @@ export function createUser(email: string, password: string, nickname?: string): 
   const db = getDb();
   const userId = randomUUID();
   const hashed = bcrypt.hashSync(password, 10);
-  const nick = nickname || email.split('@')[0];
-  const isAdmin = isAdminEmail(email) ? 1 : 0;
+  const normalizedEmail = email.trim().toLowerCase();
+  const nick = nickname || normalizedEmail.split('@')[0];
+  const isAdmin = isAdminEmail(normalizedEmail) ? 1 : 0;
 
   try {
     db.prepare(
       'INSERT INTO users (id, provider, email, password_hash, nickname, is_admin) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run(userId, 'email', email, hashed, nick, isAdmin);
+    ).run(userId, 'email', normalizedEmail, hashed, nick, isAdmin);
     return getUserById(userId);
   } catch (err) {
     logger.error('사용자 생성 실패', { error: String(err) });
@@ -190,7 +191,8 @@ export function createUser(email: string, password: string, nickname?: string): 
 /** 이메일/비밀번호 확인 */
 export function verifyUser(email: string, password: string): User | null {
   const db = getDb();
-  const row = db.prepare('SELECT * FROM users WHERE email = ? AND provider = ?').get(email, 'email') as User | undefined;
+  const normalizedEmail = email.trim().toLowerCase();
+  const row = db.prepare('SELECT * FROM users WHERE email = ? AND provider = ?').get(normalizedEmail, 'email') as User | undefined;
   if (!row) return null;
   if (bcrypt.compareSync(password, row.password_hash || '')) return row;
   return null;
@@ -216,7 +218,8 @@ export function getUserByIdSafe(id: string): Omit<User, 'password_hash'> | null 
 /** 이메일로 사용자 조회 */
 export function getUserByEmail(email: string): User | null {
   const db = getDb();
-  return (db.prepare('SELECT * FROM users WHERE email = ?').get(email) as User) || null;
+  const normalizedEmail = email.trim().toLowerCase();
+  return (db.prepare('SELECT * FROM users WHERE email = ?').get(normalizedEmail) as User) || null;
 }
 
 /** 소셜 계정으로 찾기 또는 생성 */
