@@ -164,11 +164,18 @@ htmlPages.forEach(({ route, file }) => {
 app.use('/api/health', healthRouter);
 
 // 전역 에러 핸들러
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  logger.error('처리되지 않은 에러', { message: err.message, stack: err.stack });
-  res.status(500).json({
-    error: '서버 내부 오류가 발생했습니다.',
-    ...(config.nodeEnv !== 'production' && { detail: err.message }),
+app.use((err: Error & { status?: number; statusCode?: number; type?: string }, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (err instanceof SyntaxError && 'body' in err) {
+    res.status(400).json({ error: '잘못된 JSON 형식입니다.' });
+    return;
+  }
+  const status = err.status || err.statusCode || 500;
+  if (status >= 500) {
+    logger.error('처리되지 않은 에러', { message: err.message, stack: err.stack });
+  }
+  res.status(status).json({
+    error: status >= 500 ? '서버 내부 오류가 발생했습니다.' : err.message,
+    ...(config.nodeEnv !== 'production' && status >= 500 && { detail: err.message }),
   });
 });
 
