@@ -4,7 +4,7 @@ import { z } from 'zod';
 /** 회원가입 */
 export const signupSchema = z.object({
   email: z.string().email('올바른 이메일 형식이 아닙니다').max(254),
-  password: z.string().min(6, '비밀번호는 6자 이상이어야 합니다').max(128),
+  password: z.string().min(8, '비밀번호는 8자 이상이어야 합니다').max(128),
   nickname: z.string().max(30).optional(),
 });
 

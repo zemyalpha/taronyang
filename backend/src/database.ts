@@ -172,7 +172,7 @@ export interface User {
 export function createUser(email: string, password: string, nickname?: string): User | null {
   const db = getDb();
   const userId = randomUUID();
-  const hashed = bcrypt.hashSync(password, 10);
+  const hashed = bcrypt.hashSync(password, 12);
   const normalizedEmail = email.trim().toLowerCase();
   const nick = nickname || normalizedEmail.split('@')[0];
   const isAdmin = isAdminEmail(normalizedEmail) ? 1 : 0;
