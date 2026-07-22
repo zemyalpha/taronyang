@@ -2,7 +2,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
-import { createUser, verifyUser, getUserById, getUserByEmail, getDb, User, isAccountLocked, recordFailedLogin, clearLoginAttempts } from '../database';
+import { createUser, verifyUser, getUserById, getUserByIdSafe, getUserByEmail, getDb, User, isAccountLocked, recordFailedLogin, clearLoginAttempts } from '../database';
 import { signupSchema, loginSchema, updateMeSchema } from '../validation';
 
 export const authRouter = Router();
@@ -24,12 +24,12 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   }
   try {
     const payload = jwt.verify(auth.slice(7), config.jwtSecret) as TokenPayload;
-    const user = getUserById(payload.user_id);
+    const user = getUserByIdSafe(payload.user_id);
     if (!user) {
       res.status(401).json({ detail: '사용자를 찾을 수 없습니다' });
       return;
     }
-    req.user = user;
+    req.user = user as User;
     next();
   } catch {
     res.status(401).json({ detail: '토큰이 만료되었거나 유효하지 않습니다' });

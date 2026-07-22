@@ -202,6 +202,17 @@ export function getUserById(id: string): User | null {
   return (db.prepare('SELECT * FROM users WHERE id = ?').get(id) as User) || null;
 }
 
+/** ID로 사용자 조회 (password_hash 제외 — 미들웨어/응답용) */
+export function getUserByIdSafe(id: string): Omit<User, 'password_hash'> | null {
+  const db = getDb();
+  const row = db.prepare(
+    'SELECT id, provider, provider_id, email, nickname, birth_date, zodiac_sign, ' +
+    'created_at, free_count_today, free_reset_date, subscription_status, ' +
+    'subscription_expires_at, settings, is_admin FROM users WHERE id = ?'
+  ).get(id) as Omit<User, 'password_hash'> | undefined;
+  return row || null;
+}
+
 /** 이메일로 사용자 조회 */
 export function getUserByEmail(email: string): User | null {
   const db = getDb();
