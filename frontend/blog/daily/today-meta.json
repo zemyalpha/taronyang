@@ -1,6 +1,6 @@
 {
-  "date": "2026-07-22",
-  "weekday": "수요일",
+  "date": "2026-07-23",
+  "weekday": "목요일",
   "cards": [
     {
       "name": "여황제",
@@ -8,19 +8,19 @@
       "slug": "3-empress"
     },
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "달",
+      "symbol": "🌕",
+      "slug": "18-moon"
     },
     {
-      "name": "태양",
-      "symbol": "☀️",
-      "slug": "19-sun"
+      "name": "마법사",
+      "symbol": "🧙",
+      "slug": "1-magician"
     }
   ],
-  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「권위」와 관련된 부분은 조심하고, 태양이 주는 「성공…",
-  "luckyColor": "스카이 블루",
-  "luckyColorHex": "#38bdf8",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-07-22.html"
+  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「환상」과 관련된 부분은 조심하고, 마법사가 주는 「창…",
+  "luckyColor": "코랄 핑크",
+  "luckyColorHex": "#fb7185",
+  "luckyNumber": 9,
+  "url": "/blog/daily/2026-07-23.html"
 }
