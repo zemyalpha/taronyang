@@ -184,11 +184,11 @@ export async function sendDailyNotifications(): Promise<void> {
     return;
   }
 
-  // DB에서 알림 수신 동의한 사용자만 직접 조회
+  // DB에서 알림 수신 명시적 동의한 사용자만 조회 (PIPA 준수 — opt-in)
   const enabled = db.prepare(
     "SELECT id, email, nickname, zodiac_sign, settings FROM users " +
     "WHERE zodiac_sign IS NOT NULL AND zodiac_sign != '' AND email IS NOT NULL " +
-    "AND (json_extract(settings, '$.daily_email') IS NULL OR json_extract(settings, '$.daily_email') != 0)"
+    "AND json_extract(settings, '$.daily_email') = 1"
   ).all() as Array<{ id: string; email: string; nickname: string | null; zodiac_sign: string; settings: string }>;
 
   if (!enabled.length) {
