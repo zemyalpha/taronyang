@@ -70,9 +70,29 @@ adminRouter.get('/readings', authMiddleware, adminMiddleware, (req: Request, res
 /** 사용자 삭제 */
 adminRouter.delete('/users/:id', authMiddleware, adminMiddleware, (req: Request, res: Response) => {
   const db = getDb();
-  db.prepare('DELETE FROM daily_horoscopes WHERE user_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM readings WHERE user_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
+
+  if (req.params.id === req.user!.id) {
+    res.status(400).json({ error: '자기 자신을 삭제할 수 없습니다.' });
+    return;
+  }
+
+  const target = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(req.params.id) as { is_admin: number } | undefined;
+  if (!target) {
+    res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+    return;
+  }
+  if (target.is_admin) {
+    res.status(400).json({ error: '관리자 계정은 삭제할 수 없습니다.' });
+    return;
+  }
+
+  const deleteMany = db.transaction(() => {
+    db.prepare('DELETE FROM processed_payments WHERE user_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM daily_horoscopes WHERE user_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM readings WHERE user_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
+  });
+  deleteMany();
 
   res.json({ ok: true });
 });
