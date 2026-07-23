@@ -233,11 +233,11 @@ export function startDailyScheduler(): void {
     const hour = kstNow.getUTCHours();
 
     if (hour >= 7 && lastSentDate !== today) {
-      lastSentDate = today;
       try {
         await sendDailyNotifications();
+        lastSentDate = today;
       } catch (err) {
-        logger.error('일운 발송 오류', { error: String(err) });
+        logger.error('일운 발송 오류 — 재시도 대기', { error: String(err), date: today });
       }
     }
   }, CHECK_INTERVAL);
