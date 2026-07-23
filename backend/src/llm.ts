@@ -1,7 +1,7 @@
 /** Z.ai GLM API 클라이언트 */
 import { config } from './config';
 
-const LLM_TIMEOUT_MS = 60000;
+const LLM_TIMEOUT_MS = 30000;
 const MAX_RETRIES = 2;
 const RETRY_BASE_DELAY_MS = 2000;
 
@@ -66,7 +66,7 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
 
         if (isRetryableStatus(status) && attempt < MAX_RETRIES) {
           lastError = status === 429 ? new RateLimitError(errorMsg) : new Error(errorMsg);
-          const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+          const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt) * (0.5 + Math.random() * 0.5);
           await sleep(delay);
           continue;
         }
@@ -107,7 +107,7 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
 
       if (attempt < MAX_RETRIES) {
         lastError = error;
-        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt) * (0.5 + Math.random() * 0.5);
         await sleep(delay);
         continue;
       }
