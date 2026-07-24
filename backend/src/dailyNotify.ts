@@ -220,17 +220,42 @@ export async function sendDailyNotifications(): Promise<void> {
   db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
 }
 
+/** 일운 캐시 사전 생성 (이메일 구독자 유무와 무관하게 매일 12별자리 캐시를 채운다)
+ *  콜드 캐시에서 사용자 요청이 LLM을 동기 호출하면 Cloudflare 터널 타임아웃이
+ *  발생하므로(콜드 호출 ~20-50s), 사용자 트래픽 전에 미리 생성한다. */
+export async function prewarmDailyCache(): Promise<void> {
+  logger.info('일운 캐시 사전 생성 시작');
+  await generateAllHoroscopes();
+  logger.info('일운 캐시 사전 생성 완료');
+}
+
 /** 스케줄러 시작 — interval handle 반환 (graceful shutdown용) */
 export function startDailyScheduler(): NodeJS.Timeout {
-  // node-cron 대신 setInterval로 간단 구현 (매 분마다 체크, 07:00에 실행)
+  // node-cron 대신 setInterval로 간단 구현 (매 분마다 체크)
   const CHECK_INTERVAL = 60_000; // 1분
   let lastSentDate = '';
+  let lastPrewarmDate = '';
+
+  // 서버 시작 시 오늘 캐시 사전 생성 — 재시작해도 콜드 캐시로 인한 지연이 없음
+  prewarmDailyCache().catch((err) =>
+    logger.error('시작 시 캐시 사전 생성 오류', { error: String(err) })
+  );
 
   const interval = setInterval(async () => {
     const now = new Date();
     const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
     const today = kstNow.toISOString().split('T')[0];
     const hour = kstNow.getUTCHours();
+
+    // 매일 06:00(KST) 이후 캐시 사전 생성 — 이메일 구독자 유무와 무관
+    if (hour >= 6 && lastPrewarmDate !== today) {
+      lastPrewarmDate = today;
+      try {
+        await prewarmDailyCache();
+      } catch (err) {
+        logger.error('일운 캐시 사전 생성 오류', { error: String(err) });
+      }
+    }
 
     if (hour >= 7 && lastSentDate !== today) {
       try {
@@ -242,6 +267,6 @@ export function startDailyScheduler(): NodeJS.Timeout {
     }
   }, CHECK_INTERVAL);
 
-  logger.info('일운 스케줄러 시작 — 매일 07:00 발송');
+  logger.info('일운 스케줄러 시작 — 매일 06:00 캐시 생성, 07:00 발송');
   return interval;
 }
