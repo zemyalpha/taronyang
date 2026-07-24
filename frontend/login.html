@@ -196,12 +196,17 @@
         function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; }
 
         // 소셜 로그인
+        const OAUTH_ALLOW = /^https:\/\/(kauth\.kakao\.com|nid\.naver\.com|accounts\.google\.com)\//;
         async function socialLogin(provider) {
             try {
                 const res = await fetch('/api/auth/oauth/urls');
                 const urls = await res.json();
-                if (urls[provider]) {
-                    window.location.href = urls[provider];
+                const url = urls[provider];
+                if (url && OAUTH_ALLOW.test(url)) {
+                    window.location.href = url;
+                } else if (url) {
+                    console.warn('OAuth URL rejected — not in allowlist');
+                    showToast('소셜 로그인 설정 오류');
                 } else {
                     showToast('아직 설정되지 않은 로그인 방식이에요 😿');
                 }

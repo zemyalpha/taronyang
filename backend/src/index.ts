@@ -16,6 +16,7 @@ import { notifyRouter } from './routes/notify';
 import { analyticsRouter } from './routes/analytics';
 import { healthRouter } from './routes/health';
 import { startDailyScheduler } from './dailyNotify';
+import { closeDb } from './database';
 import { logger } from './logger';
 
 // DB 초기화
@@ -99,6 +100,16 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
+
+// 결제 검증 레이트 리미팅 — PortOne 외부 API 호출 방어
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { detail: '결제 검증 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/payment/verify', paymentLimiter);
 
 // 타로 API 레이트 리미팅 — LLM 비용 방어 (read/chat만)
 const tarotLimiter = rateLimit({
@@ -186,9 +197,45 @@ if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-produc
 }
 
 // 서버 시작
-app.listen(config.port, config.host, () => {
+let schedulerHandle: NodeJS.Timeout | undefined;
+const server = app.listen(config.port, config.host, () => {
   logger.info('타로냥 API 서버 시작', { host: config.host, port: config.port, env: config.nodeEnv });
-  startDailyScheduler();
+  schedulerHandle = startDailyScheduler();
 });
+
+// Graceful shutdown — SIGTERM/SIGINT 수신 시 안전하게 종료
+let shuttingDown = false;
+
+function gracefulShutdown(signal: string): void {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  logger.info('Graceful shutdown 시작', { signal });
+
+  if (schedulerHandle) {
+    clearInterval(schedulerHandle);
+  }
+
+  server.close((err) => {
+    if (err) {
+      logger.error('서버 종료 중 오류', { error: String(err) });
+    }
+    try {
+      closeDb();
+    } catch (dbErr) {
+      logger.error('DB 종료 중 오류', { error: String(dbErr) });
+    }
+    logger.info('Graceful shutdown 완료');
+    process.exit(err ? 1 : 0);
+  });
+
+  // 10초 내에 종료되지 않으면 강제 종료
+  setTimeout(() => {
+    logger.error('Graceful shutdown 타임아웃 — 강제 종료');
+    process.exit(1);
+  }, 10_000);
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 export default app;

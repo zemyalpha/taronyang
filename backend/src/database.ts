@@ -17,6 +17,14 @@ export function getDb(): Database.Database {
   return db;
 }
 
+/** DB 연결 안전하게 종료 (graceful shutdown) */
+export function closeDb(): void {
+  if (db) {
+    db.close();
+    db = undefined as unknown as Database.Database;
+  }
+}
+
 /** 테이블 생성 */
 export function initDb(): void {
   const db = getDb();
@@ -104,6 +112,15 @@ export function initDb(): void {
       last_failed_at TEXT,
       locked_until TEXT
     );
+  `);
+
+  db.exec(`
+    DELETE FROM daily_horoscopes
+    WHERE rowid NOT IN (
+      SELECT MIN(rowid) FROM daily_horoscopes GROUP BY date, zodiac_sign
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_unique_date_sign
+      ON daily_horoscopes(date, zodiac_sign);
   `);
 }
 

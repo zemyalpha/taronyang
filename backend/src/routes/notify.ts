@@ -4,6 +4,7 @@ import { getDb } from '../database';
 import { authMiddleware } from './auth';
 import { generateDailyHoroscope } from '../dailyNotify';
 import { notifySettingsSchema, zodiacSchema } from '../validation';
+import { logger } from '../logger';
 
 export const notifyRouter = Router();
 
@@ -91,7 +92,8 @@ notifyRouter.get('/horoscope/:sign', async (req: Request, res: Response) => {
   try {
     const horoscope = await generateDailyHoroscope(sign, today);
     res.json({ zodiac_sign: sign, date: today, horoscope });
-  } catch {
+  } catch (err) {
+    logger.error('운세 생성 실패', { sign, date: today, error: String(err) });
     res.status(500).json({ detail: '운세 생성에 실패했습니다' });
   }
 });

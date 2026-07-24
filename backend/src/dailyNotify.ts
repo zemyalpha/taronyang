@@ -220,13 +220,13 @@ export async function sendDailyNotifications(): Promise<void> {
   db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
 }
 
-/** 스케줄러 시작 */
-export function startDailyScheduler(): void {
+/** 스케줄러 시작 — interval handle 반환 (graceful shutdown용) */
+export function startDailyScheduler(): NodeJS.Timeout {
   // node-cron 대신 setInterval로 간단 구현 (매 분마다 체크, 07:00에 실행)
   const CHECK_INTERVAL = 60_000; // 1분
   let lastSentDate = '';
 
-  setInterval(async () => {
+  const interval = setInterval(async () => {
     const now = new Date();
     const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
     const today = kstNow.toISOString().split('T')[0];
@@ -243,4 +243,5 @@ export function startDailyScheduler(): void {
   }, CHECK_INTERVAL);
 
   logger.info('일운 스케줄러 시작 — 매일 07:00 발송');
+  return interval;
 }

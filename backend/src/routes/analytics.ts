@@ -1,5 +1,6 @@
 /** Analytics — 사용자 행동 이벤트 수집 및 요약 (ZEMA-2638) */
 import { Router, Request, Response } from 'express';
+import crypto from 'crypto';
 import { getDb } from '../database';
 import { logger } from '../logger';
 import { authMiddleware, adminMiddleware } from './auth';
@@ -40,7 +41,7 @@ analyticsRouter.post('/event', (req: Request, res: Response) => {
 
   const insertMany = db.transaction((rows: AnalyticsEvent[]) => {
     for (const ev of rows) {
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const id = crypto.randomUUID();
       const propsJson = (() => {
         try { return JSON.stringify(ev.props || {}); } catch { return '{}'; }
       })();
