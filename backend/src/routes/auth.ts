@@ -36,10 +36,10 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   }
 }
 
-/** 관리자 권한 확인 */
+/** 관리자 권한 확인 — ADMIN_EMAILS를 매 요청마다 실시간 재검증 (revocation 지원) */
 export function adminMiddleware(req: Request, res: Response, next: NextFunction): void {
   const user = req.user;
-  if (!user?.is_admin) {
+  if (!user?.email || !config.adminEmails.includes(user.email.toLowerCase())) {
     res.status(403).json({ detail: '관리자 권한이 필요합니다' });
     return;
   }

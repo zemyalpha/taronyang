@@ -2,6 +2,7 @@
 import { Router, Request, Response } from 'express';
 import { getDb } from '../database';
 import { authMiddleware, adminMiddleware } from './auth';
+import { logger } from '../logger';
 
 export const adminRouter = Router();
 
@@ -76,7 +77,7 @@ adminRouter.delete('/users/:id', authMiddleware, adminMiddleware, (req: Request,
     return;
   }
 
-  const target = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(req.params.id) as { is_admin: number } | undefined;
+  const target = db.prepare('SELECT email, is_admin FROM users WHERE id = ?').get(req.params.id) as { email: string | null; is_admin: number } | undefined;
   if (!target) {
     res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
     return;
@@ -93,6 +94,13 @@ adminRouter.delete('/users/:id', authMiddleware, adminMiddleware, (req: Request,
     db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
   });
   deleteMany();
+
+  logger.info('admin user delete', {
+    actor: req.user!.id,
+    actor_email: req.user!.email,
+    target_id: req.params.id,
+    target_email: target.email ?? 'unknown',
+  });
 
   res.json({ ok: true });
 });

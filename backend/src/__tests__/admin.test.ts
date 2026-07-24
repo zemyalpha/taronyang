@@ -24,12 +24,18 @@ function createAdminUser(email: string, password: string): User | null {
   if (user) {
     getDb().prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(user.id);
     user.is_admin = 1;
+    // adminMiddleware now checks config.adminEmails live — register the email
+    const normalized = email.trim().toLowerCase();
+    if (!config.adminEmails.includes(normalized)) {
+      config.adminEmails.push(normalized);
+    }
   }
   return user;
 }
 
 describe('admin routes', () => {
   let app: Express;
+  const originalAdminEmails = [...config.adminEmails];
 
   beforeEach(() => {
     initDb();
@@ -37,7 +43,13 @@ describe('admin routes', () => {
     db.prepare('DELETE FROM daily_horoscopes').run();
     db.prepare('DELETE FROM readings').run();
     db.prepare('DELETE FROM users').run();
+    // adminMiddleware reads config.adminEmails live — start each test clean
+    config.adminEmails = [];
     app = createApp();
+  });
+
+  afterAll(() => {
+    config.adminEmails = originalAdminEmails;
   });
 
   // --- AdminMiddleware ---
@@ -68,6 +80,26 @@ describe('admin routes', () => {
         .get('/admin-only')
         .set('Authorization', `Bearer ${makeToken(user!.id)}`);
       expect(res.status).toBe(403);
+    });
+
+    it('rejects user with is_admin=1 but email not in ADMIN_EMAILS (revocation)', async () => {
+      const mwApp = createMiddlewareApp();
+      const user = createUser('revoked@test.com', 'pass123');
+      getDb().prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(user!.id);
+      const res = await request(mwApp)
+        .get('/admin-only')
+        .set('Authorization', `Bearer ${makeToken(user!.id)}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('accepts user whose email is in ADMIN_EMAILS even if is_admin=0 (live grant)', async () => {
+      const mwApp = createMiddlewareApp();
+      const user = createUser('root@taronyang.com', 'pass123');
+      config.adminEmails.push('root@taronyang.com');
+      const res = await request(mwApp)
+        .get('/admin-only')
+        .set('Authorization', `Bearer ${makeToken(user!.id)}`);
+      expect(res.status).toBe(200);
     });
   });
 

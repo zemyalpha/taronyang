@@ -16,8 +16,8 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'change-me-in-production',
   jwtExpireDays: parseInt(process.env.JWT_EXPIRE_DAYS || '7', 10),
 
-  // 관리자
-  adminEmails: (process.env.ADMIN_EMAILS || '').split(',').filter(Boolean),
+  // 관리자 — 실시간 권한 재검증에 사용되므로 모두 소문자로 정규화 (casing-safe includes)
+  adminEmails: (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean),
 
   // OAuth - 카카오
   kakaoClientId: process.env.KAKAO_CLIENT_ID || '',
