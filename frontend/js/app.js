@@ -4,8 +4,6 @@ const API_BASE =
   (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
   (window.location.origin + '/api');
 
-console.log('🔮 타로냥 로딩 완료');
-
 // === PWA: Service Worker 등록 ===
 if ('serviceWorker' in navigator) {
   // 새로운 서비스 워커가 제어권을 잡으면 페이지를 새로고침하여 최신 에셋 반영

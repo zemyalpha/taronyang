@@ -2,6 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com cdn.iamport.kr; style-src 'self' 'unsafe-inline' cdn.tailwindcss.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.trycloudflare.com; frame-src cdn.iamport.kr; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>무료 AI 타로 상담 - 연애운·재물운·직장운 카드 해석 | 타로냥</title>
     <meta name="description" content="무료 AI 타로 상담. 연애운, 재물운, 직장운, 종합운, 궁합, 신년운을 카드 3장으로 해석. 24시간 언제든, 다운로드 없이 바로 받는 AI 타로 리딩.">
@@ -84,6 +87,7 @@
     </nav>
 
     <main class="pt-20 pb-10 px-4 max-w-3xl mx-auto" id="main-content" tabindex="-1">
+        <h1 class="sr-only">타로 상담</h1>
 
         <!-- Step 1: 카테고리 선택 -->
         <div id="step-category" class="step">
@@ -279,6 +283,10 @@
                 const div = document.createElement('div');
                 div.className = 'tarot-card';
                 div.style.animationDelay = (i * 0.05) + 's';
+                div.setAttribute('role', 'button');
+                div.setAttribute('tabindex', '0');
+                div.setAttribute('aria-label', `타로 카드 ${i + 1}: ${card.name} (${card.position})`);
+                div.setAttribute('aria-pressed', 'false');
                 div.innerHTML = `
                     <div class="tarot-card-inner">
                         <div class="tarot-card-front">
@@ -294,6 +302,12 @@
                     </div>
                 `;
                 div.onclick = () => toggleCard(i, div);
+                div.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleCard(i, div);
+                    }
+                };
                 area.appendChild(div);
             });
         }
@@ -304,10 +318,12 @@
             if (idx >= 0) {
                 selectedCards.splice(idx, 1);
                 el.classList.remove('selected');
+                el.setAttribute('aria-pressed', 'false');
             } else {
                 if (selectedCards.length >= 3) return;
                 selectedCards.push({ index, card: shuffledCards[index] });
                 el.classList.add('selected');
+                el.setAttribute('aria-pressed', 'true');
                 // 뒤집기 애니메이션
                 setTimeout(() => el.classList.add('flipped'), 100);
             }
