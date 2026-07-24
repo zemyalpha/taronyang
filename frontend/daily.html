@@ -198,40 +198,36 @@
             document.getElementById('result-symbol').textContent = symbol;
             document.getElementById('result-zodiac').textContent = name;
             document.getElementById('result-date').textContent = today;
-            document.getElementById('result-summary').textContent = '오늘도 좋은 하루가 될 거예요! ✨';
-
-            const scores = { love: Math.ceil(Math.random()*3)+2, money: Math.ceil(Math.random()*3)+2, career: Math.ceil(Math.random()*3)+2, health: Math.ceil(Math.random()*3)+2 };
-            document.getElementById('score-love').innerHTML = starsHtml(scores.love);
-            document.getElementById('score-money').innerHTML = starsHtml(scores.money);
-            document.getElementById('score-career').innerHTML = starsHtml(scores.career);
-            document.getElementById('score-health').innerHTML = starsHtml(scores.health);
-            document.getElementById('lucky-color').textContent = ['레드','블루','그린','옐로우','퍼플','핑크','화이트'][Math.floor(Math.random()*7)];
-            document.getElementById('lucky-number').textContent = Math.ceil(Math.random()*9);
 
             try {
-                // 백엔드 daily API가 아직 없으므로 LLM 직접 호출 (임시)
-                const res = await fetch('/api/tarot/shuffle?count=1');
-                const shuffleData = await res.json();
-                const card = shuffleData.cards[0];
+                const res = await fetch(`/api/notifications/horoscope/${encodeURIComponent(name)}`);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.detail || '운세를 불러오지 못했어요');
+                }
+                const data = await res.json();
 
-                // 프롬프트로 일운 생성
-                const prompt = `## 별자리: ${name}\n## 날짜: ${today}\n\n오늘의 운세를 작성해줘.\n\n구조:\n1. 오늘의 한 줄 요약 (1문장)\n2. 운세 지수 (연애/재물/직장/건강, 각각 1~5점)\n3. Lucky Color (하나)\n4. Lucky Number (1~9)\n5. 상세 운세 (3~4문장)\n\n타로냥 말투로 작성해. 따뜻하고 희망차게.`;
+                document.getElementById('result-summary').textContent = data.horoscope.substring(0, 60) + '...';
 
-                const readRes = await fetch('/api/tarot/read', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        category: 'general',
-                        question: `${name}의 오늘(${today}) 운세`,
-                        cards: [{ id: card.id, is_upright: card.is_upright }, { id: 0, is_upright: true }, { id: 1, is_upright: true }]
-                    })
-                });
-                const readData = await readRes.json();
+                const scores = { love: 3, money: 3, career: 3, health: 3 };
+                document.getElementById('score-love').innerHTML = starsHtml(scores.love);
+                document.getElementById('score-money').innerHTML = starsHtml(scores.money);
+                document.getElementById('score-career').innerHTML = starsHtml(scores.career);
+                document.getElementById('score-health').innerHTML = starsHtml(scores.health);
+                document.getElementById('lucky-color').textContent = '—';
+                document.getElementById('lucky-number').textContent = '—';
 
-                document.getElementById('result-detail').textContent = readData.interpretation;
+                document.getElementById('result-detail').textContent = data.horoscope;
 
             } catch (e) {
                 document.getElementById('result-detail').textContent = '운세를 불러오지 못했어요 😿 잠시 후 다시 시도해주세요.';
+                document.getElementById('result-summary').textContent = '잠시 후 다시 시도해주세요';
+                document.getElementById('score-love').innerHTML = '';
+                document.getElementById('score-money').innerHTML = '';
+                document.getElementById('score-career').innerHTML = '';
+                document.getElementById('score-health').innerHTML = '';
+                document.getElementById('lucky-color').textContent = '—';
+                document.getElementById('lucky-number').textContent = '—';
             }
 
             document.getElementById('loading').classList.add('hidden');
