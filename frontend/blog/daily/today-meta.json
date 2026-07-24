@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-24",
-  "weekday": "금요일",
+  "date": "2026-07-25",
+  "weekday": "토요일",
   "cards": [
-    {
-      "name": "여사제",
-      "symbol": "🌙",
-      "slug": "2-high-priestess"
-    },
     {
       "name": "매달린 사람",
       "symbol": "🔄",
       "slug": "12-hanged-man"
     },
     {
-      "name": "죽음",
-      "symbol": "🦋",
-      "slug": "13-death"
+      "name": "달",
+      "symbol": "🌕",
+      "slug": "18-moon"
+    },
+    {
+      "name": "절제",
+      "symbol": "🏺",
+      "slug": "14-temperance"
     }
   ],
-  "summary": "오늘은 「직관」의 에너지가 흐르는 날이에요. 내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요. 다만 「지연」과 관련된 부분은 조심하고, 죽음이 주는 「끝과시작」…",
-  "luckyColor": "소프트 그린",
-  "luckyColorHex": "#86efac",
-  "luckyNumber": 3,
-  "url": "/blog/daily/2026-07-24.html"
+  "summary": "오늘은 「희생」의 에너지가 흐르는 날이에요. 다르게 바라볼 시간이에요. 기다림 속에서 새로운 깨달음을 얻을 거예요. 다만 「환상」과 관련된 부분은 조심하고, 절제가 주는 「균…",
+  "luckyColor": "민트",
+  "luckyColorHex": "#34d399",
+  "luckyNumber": 5,
+  "url": "/blog/daily/2026-07-25.html"
 }
