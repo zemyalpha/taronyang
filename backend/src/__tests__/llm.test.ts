@@ -47,7 +47,7 @@ describe('callLlm', () => {
     expect(result).toBe('타로 해석 결과입니다');
   });
 
-  it('successful response with reasoning_content fallback — should return reasoning', async () => {
+  it('response with only reasoning_content (no content) — should NOT return reasoning (CoT leak prevention)', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -56,8 +56,7 @@ describe('callLlm', () => {
       }),
     }) as unknown as typeof fetch;
 
-    const result = await callLlm([{ role: 'user', content: 'test' }]);
-    expect(result).toBe('추론 내용');
+    await expect(callLlm([{ role: 'user', content: 'test' }])).rejects.toThrow();
   });
 
   it('non-retryable error (400) — should throw immediately without retry', async () => {

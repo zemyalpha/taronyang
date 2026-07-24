@@ -11,6 +11,18 @@ import { callLlm } from './llm';
 import { getKstDate } from './routes/notify';
 import { logger } from './logger';
 
+function stripChainOfThought(text: string): string {
+  if (typeof text !== 'string') return text;
+  return text
+    .replace(/<(?:think|reason|thought|analysis|reflection|scratchpad)[\s\S]*?<\/(?:think|reason|thought|analysis|reflection|scratchpad)>/gi, '')
+    .replace(/<(?:think|reason|thought|analysis|reflection|scratchpad)[^>]*>[\s\S]*$/gi, '')
+    .replace(/^\s*(?:think|reason|thought|analysis|reflection|scratchpad)\s*:\s*[\s\S]*$/gim, '')
+    .replace(/^\s*\*\*\s*(?:think|reason|thought|analysis|reflection|scratchpad)\s*\*\*\s*:\s*[\s\S]*$/gim, '')
+    .replace(/```(?:think|reason|thought|analysis|reflection|scratchpad)[\s\S]*?```/gi, '')
+    .replace(/^#{1,3}\s*(?:think|reason|thought|analysis|reflection|scratchpad)\s*$/gim, '')
+    .trim();
+}
+
 const ZODIAC_SIGNS = [
   '양자리', '황소자리', '쌍둥이자리', '게자리', '사자자리', '처녀자리',
   '천칭자리', '전갈자리', '사수자리', '염소자리', '물병자리', '물고기자리',
@@ -47,7 +59,8 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
   ];
 
   try {
-    const horoscope = await callLlm(messages, 800, 0.9);
+    const rawHoroscope = await callLlm(messages, 800, 0.9);
+    const horoscope = stripChainOfThought(rawHoroscope);
     // 캐시 저장
     db.prepare(
       'INSERT OR IGNORE INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
