@@ -205,6 +205,30 @@ describe('tarotReadSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('card ID over max bound (> 77) — should fail', () => {
+    const result = tarotReadSchema.safeParse({
+      category: 'love',
+      cards: [
+        { id: 78, is_upright: true },
+        { id: 1, is_upright: false },
+        { id: 2, is_upright: true },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('card ID at max boundary (77) — should parse successfully', () => {
+    const result = tarotReadSchema.safeParse({
+      category: 'love',
+      cards: [
+        { id: 77, is_upright: true },
+        { id: 1, is_upright: false },
+        { id: 2, is_upright: true },
+      ],
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('empty category — should fail', () => {
     const result = tarotReadSchema.safeParse({
       category: '',

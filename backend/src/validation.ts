@@ -27,7 +27,7 @@ export const tarotReadSchema = z.object({
   category: z.string().min(1).max(50),
   question: z.string().max(500).optional().default(''),
   cards: z.array(z.object({
-    id: z.number().int().min(0),
+    id: z.number().int().min(0).max(77, '카드 번호는 0~77 사이여야 합니다'),
     is_upright: z.boolean(),
   })).length(3, '카드를 3장 선택해주세요')
     .refine((cards) => new Set(cards.map((c) => c.id)).size === 3, '같은 카드를 중복으로 선택할 수 없습니다'),

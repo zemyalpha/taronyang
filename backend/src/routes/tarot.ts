@@ -73,8 +73,8 @@ tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) =>
       if (!card) throw new Error(`카드 없음: ${s.id}`);
       return { ...card, is_upright: s.is_upright };
     });
-  } catch (err) {
-    res.status(400).json({ detail: String(err) });
+  } catch {
+    res.status(400).json({ detail: '올바르지 않은 카드입니다' });
     return;
   }
 

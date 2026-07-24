@@ -273,4 +273,20 @@ describe('POST /api/tarot/read — input validation', () => {
       .send({ category: 'nonexistent', cards: VALID_CARDS });
     expect(res.status).toBe(400);
   });
+
+  it('card ID over max bound (78) — should return 400', async () => {
+    const res = await request(app)
+      .post('/api/tarot/read')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        category: 'love',
+        cards: [
+          { id: 78, is_upright: true },
+          { id: 1, is_upright: false },
+          { id: 2, is_upright: true },
+        ],
+      });
+    expect(res.status).toBe(400);
+    expect(res.body.detail).toBeDefined();
+  });
 });
