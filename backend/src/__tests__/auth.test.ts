@@ -244,3 +244,65 @@ describe('HttpOnly cookie auth (ZEMA-3283)', () => {
     expect(cookieStr).toMatch(/token=;/);
   });
 });
+
+describe('OAuth callback error handling (ZEMA-3416)', () => {
+  let app: express.Application;
+
+  beforeAll(() => {
+    initDb();
+    app = createAuthApp();
+  });
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('missing code parameter — redirects with error', async () => {
+    const res = await request(app).get('/api/auth/oauth/callback/kakao');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=missing_code');
+  });
+
+  it('invalid provider — redirects with error', async () => {
+    const res = await request(app).get('/api/auth/oauth/callback/facebook?code=test');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=invalid_provider');
+  });
+
+  it('kakao without configured credentials — redirects with not_configured', async () => {
+    const origKakaoId = config.kakaoClientId;
+    const origKakaoUri = config.kakaoRedirectUri;
+    config.kakaoClientId = '';
+    config.kakaoRedirectUri = '';
+
+    const res = await request(app).get('/api/auth/oauth/callback/kakao?code=test');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=not_configured');
+
+    config.kakaoClientId = origKakaoId;
+    config.kakaoRedirectUri = origKakaoUri;
+  });
+
+  it('naver state mismatch — redirects with state_mismatch', async () => {
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/naver?code=test&state=wrong-state')
+      .set('Cookie', 'naver_oauth_state=correct-state');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=state_mismatch');
+  });
+
+  it('google without configured credentials — redirects with not_configured', async () => {
+    const origGoogleId = config.googleClientId;
+    const origGoogleUri = config.googleRedirectUri;
+    config.googleClientId = '';
+    config.googleRedirectUri = '';
+
+    const res = await request(app).get('/api/auth/oauth/callback/google?code=test');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=not_configured');
+
+    config.googleClientId = origGoogleId;
+    config.googleRedirectUri = origGoogleUri;
+  });
+});
