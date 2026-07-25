@@ -13,18 +13,25 @@ async function getPortOneToken(): Promise<string> {
   if (!config.portOneImpKey || !config.portOneImpSecret) {
     throw new Error('포트원 API 키가 설정되지 않았습니다');
   }
-  const res = await fetch('https://api.iamport.kr/users/getToken', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imp_key: config.portOneImpKey, imp_secret: config.portOneImpSecret }),
-  });
-  const data = await res.json() as { code: number; message?: string; response?: { access_token?: string } };
-  if (data.code !== 0) throw new Error(`포트원 토큰 발급 실패: ${data.message}`);
-  const tokenResponse = data.response;
-  if (!tokenResponse?.access_token) {
-    throw new Error('포트원 토큰이 응답에 없습니다');
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const res = await fetch('https://api.iamport.kr/users/getToken', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imp_key: config.portOneImpKey, imp_secret: config.portOneImpSecret }),
+      signal: controller.signal,
+    });
+    const data = await res.json() as { code: number; message?: string; response?: { access_token?: string } };
+    if (data.code !== 0) throw new Error(`포트원 토큰 발급 실패: ${data.message}`);
+    const tokenResponse = data.response;
+    if (!tokenResponse?.access_token) {
+      throw new Error('포트원 토큰이 응답에 없습니다');
+    }
+    return tokenResponse.access_token;
+  } finally {
+    clearTimeout(timeout);
   }
-  return tokenResponse.access_token;
 }
 
 /**
@@ -71,9 +78,17 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
   try {
     // 포트원 결제 검증
     const token = await getPortOneToken();
-    const payRes = await fetch(`https://api.iamport.kr/payments/${imp_uid}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const payController = new AbortController();
+    const payTimeout = setTimeout(() => payController.abort(), 10000);
+    let payRes: globalThis.Response;
+    try {
+      payRes = await fetch(`https://api.iamport.kr/payments/${imp_uid}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: payController.signal,
+      });
+    } finally {
+      clearTimeout(payTimeout);
+    }
     const payData = await payRes.json() as { code: number; message?: string; response?: { status: string; amount: number } };
     if (payData.code !== 0) {
       res.status(400).json({ detail: `결제 조회 실패: ${payData.message}` });

@@ -108,9 +108,19 @@ export async function generateAllHoroscopes(): Promise<Record<string, string>> {
 }
 
 /** 이메일 HTML 템플릿 */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string): string {
   const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-  const horoscopeHtml = horoscope.replace(/\n/g, '<br>');
+  const safeNickname = escapeHtml(nickname);
+  const safeHoroscope = escapeHtml(horoscope).replace(/\n/g, '<br>');
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
@@ -124,10 +134,10 @@ function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string)
   </tr>
   <tr>
     <td style="padding:30px; color:#eee;">
-      <p style="font-size:18px; margin:0 0 5px;">${nickname}님, 안녕하세요! 🐱</p>
+      <p style="font-size:18px; margin:0 0 5px;">${safeNickname}님, 안녕하세요! 🐱</p>
       <p style="color:#aaa; font-size:13px; margin:0 0 20px;">${today} · ${zodiacSign}</p>
       <div style="background:#0f3460; border-radius:8px; padding:20px; line-height:1.8; font-size:15px;">
-        ${horoscopeHtml}
+        ${safeHoroscope}
       </div>
       <p style="text-align:center; margin-top:25px;">
         <a href="${config.frontendUrl}" style="background:#e94560; color:#fff; padding:12px 30px; border-radius:8px; text-decoration:none; font-size:14px; display:inline-block;">
@@ -154,6 +164,7 @@ function getTransporter(): nodemailer.Transporter {
       host: config.smtpHost,
       port: config.smtpPort,
       secure: false,
+      requireTLS: true,
       auth: { user: config.smtpUser, pass: config.smtpPassword },
     });
   }

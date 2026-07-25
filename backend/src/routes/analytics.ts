@@ -69,6 +69,18 @@ analyticsRouter.post('/event', (req: Request, res: Response) => {
   return res.status(201).json({ stored: batch.length });
 });
 
+/** 오래된 분석 이벤트 정리 (90일 이상) */
+export function cleanupOldAnalyticsEvents(): number {
+  const db = getDb();
+  const result = db.prepare(
+    "DELETE FROM analytics_events WHERE created_at < datetime('now', '-90 days')"
+  ).run();
+  if (result.changes > 0) {
+    logger.info('Analytics events cleaned up', { deleted: result.changes });
+  }
+  return result.changes;
+}
+
 /**
  * GET /api/analytics/summary
  * Admin-only summary of collected events.

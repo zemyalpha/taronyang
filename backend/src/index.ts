@@ -13,7 +13,7 @@ import { readingsRouter } from './routes/readings';
 import { paymentRouter } from './routes/payment';
 import { adminRouter } from './routes/admin';
 import { notifyRouter } from './routes/notify';
-import { analyticsRouter } from './routes/analytics';
+import { analyticsRouter, cleanupOldAnalyticsEvents } from './routes/analytics';
 import { healthRouter } from './routes/health';
 import { startDailyScheduler } from './dailyNotify';
 import { closeDb } from './database';
@@ -21,6 +21,12 @@ import { logger } from './logger';
 
 // DB 초기화
 initDb();
+// 오래된 분석 이벤트 정리 (시작 시 1회)
+try {
+  cleanupOldAnalyticsEvents();
+} catch (e) {
+  logger.warn('Analytics cleanup failed on startup', { error: String(e) });
+}
 
 const app = express();
 
