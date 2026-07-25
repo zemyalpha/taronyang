@@ -1,6 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
 import { authMiddleware, authRouter } from '../routes/auth';
 import { initDb, createUser, getDb } from '../database';
 import { config } from '../config';
@@ -8,6 +9,7 @@ import { config } from '../config';
 function createTestApp() {
   const app = express();
   app.use(express.json());
+  app.use(cookieParser());
   app.get('/protected', authMiddleware, (req, res) => {
     res.json({ ok: true, user_id: req.user!.id });
   });
@@ -17,6 +19,7 @@ function createTestApp() {
 function createAuthApp() {
   const app = express();
   app.use(express.json());
+  app.use(cookieParser());
   app.use('/api/auth', authRouter);
   return app;
 }
@@ -185,5 +188,59 @@ describe('login brute force protection', () => {
       .post('/api/auth/login')
       .send({ email: 'user-b@example.com', password: 'passB' });
     expect(res.status).toBe(200);
+  });
+});
+
+describe('HttpOnly cookie auth (ZEMA-3283)', () => {
+  let protectedApp: express.Application;
+  let authApp: express.Application;
+
+  beforeAll(() => {
+    initDb();
+    protectedApp = createTestApp();
+    authApp = createAuthApp();
+  });
+
+  beforeEach(() => {
+    getDb().prepare('DELETE FROM users').run();
+    getDb().prepare('DELETE FROM login_attempts').run();
+  });
+
+  it('authMiddleware accepts a valid token sent via HttpOnly cookie (200)', async () => {
+    const user = createUser('cookie@example.com', 'password123', 'cookieuser')!;
+    const token = jwt.sign({ user_id: user.id }, config.jwtSecret, { expiresIn: '7d' });
+    const res = await request(protectedApp)
+      .get('/protected')
+      .set('Cookie', [`token=${token}`]);
+    expect(res.status).toBe(200);
+    expect(res.body.user_id).toBe(user.id);
+  });
+
+  it('login sets an HttpOnly auth cookie containing a valid token', async () => {
+    createUser('cookielogin@example.com', 'correctpass', 'cookielogin');
+    const res = await request(authApp)
+      .post('/api/auth/login')
+      .send({ email: 'cookielogin@example.com', password: 'correctpass' });
+    expect(res.status).toBe(200);
+    const setCookie = res.headers['set-cookie'];
+    expect(setCookie).toBeDefined();
+    const cookieStr = Array.isArray(setCookie) ? setCookie.join('; ') : String(setCookie);
+    expect(cookieStr).toMatch(/token=/);
+    expect(cookieStr.toLowerCase()).toContain('httponly');
+    expect(cookieStr.toLowerCase()).toContain('samesite=strict');
+    const tokenMatch = cookieStr.match(/token=([^;]+)/);
+    expect(tokenMatch).not.toBeNull();
+    const decoded = jwt.verify(tokenMatch![1], config.jwtSecret) as { user_id: string };
+    expect(decoded.user_id).toBeDefined();
+  });
+
+  it('logout clears the auth cookie', async () => {
+    const res = await request(authApp).post('/api/auth/logout');
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+    const setCookie = res.headers['set-cookie'];
+    expect(setCookie).toBeDefined();
+    const cookieStr = Array.isArray(setCookie) ? setCookie.join('; ') : String(setCookie);
+    expect(cookieStr).toMatch(/token=;/);
   });
 });
