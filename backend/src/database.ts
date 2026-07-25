@@ -301,7 +301,7 @@ function todayString(): string {
 
 /** Check if user has active premium (status + not expired). Lazily downgrades expired. */
 export function isPremiumUser(user: User): boolean {
-  if (user.subscription_status !== 'premium') return false;
+  if (user.subscription_status !== 'premium' && user.subscription_status !== 'cancelling') return false;
   if (!user.subscription_expires_at) return true;
   if (new Date(user.subscription_expires_at) > new Date()) return true;
   const db = getDb();
