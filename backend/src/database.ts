@@ -105,6 +105,8 @@ export function initDb(): void {
     CREATE INDEX IF NOT EXISTS idx_analytics_name ON analytics_events(name);
     CREATE INDEX IF NOT EXISTS idx_analytics_created ON analytics_events(created_at);
     CREATE INDEX IF NOT EXISTS idx_analytics_session ON analytics_events(session_id);
+    CREATE INDEX IF NOT EXISTS idx_analytics_name_created ON analytics_events(name, created_at);
+    CREATE INDEX IF NOT EXISTS idx_readings_user_created ON readings(user_id, created_at);
 
     CREATE TABLE IF NOT EXISTS login_attempts (
       email TEXT PRIMARY KEY,
@@ -122,6 +124,12 @@ export function initDb(): void {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_unique_date_sign
       ON daily_horoscopes(date, zodiac_sign);
   `);
+
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0`);
+  } catch {
+    // Column already exists — expected on subsequent inits
+  }
 }
 
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -183,6 +191,7 @@ export interface User {
   subscription_expires_at: string | null;
   settings: string;
   is_admin: number;
+  token_version: number;
 }
 
 /** 이메일 사용자 생성 */
@@ -247,20 +256,26 @@ export function findOrCreateOAuthUser(info: { provider: string; provider_id: str
   const existing = db.prepare('SELECT * FROM users WHERE provider = ? AND provider_id = ?').get(info.provider, info.provider_id) as User | undefined;
   if (existing) return existing;
 
-  // 이메일로 기존 계정 찾기 (병합)
+  // 이메일로 기존 계정 찾기 (병합) — 보안: password_hash가 있는 계정은 병합하지 않음
+  // 사전 계정 탈취 공격 방지: 공격자가 피해자 이메일로 가입 후 OAuth 병합 시 비밀번호 접근 유지
+  let emailConflict = false;
   if (info.email) {
     const byEmail = db.prepare('SELECT * FROM users WHERE email = ?').get(info.email) as User | undefined;
-    if (byEmail) {
+    if (byEmail && !byEmail.password_hash) {
       db.prepare('UPDATE users SET provider = ?, provider_id = ? WHERE id = ?').run(info.provider, info.provider_id, byEmail.id);
       return getUserById(byEmail.id)!;
     }
+    if (byEmail) {
+      emailConflict = true;
+    }
   }
 
-  // 새 사용자 생성
+  // 새 사용자 생성 — 이메일 충돌 시 null 처리
   const userId = randomUUID();
   const nickname = info.nickname || info.email?.split('@')[0] || '사용자';
+  const email = emailConflict ? null : (info.email || null);
   const isAdmin = info.email ? (isAdminEmail(info.email) ? 1 : 0) : 0;
-  db.prepare('INSERT INTO users (id, provider, provider_id, email, nickname, is_admin) VALUES (?, ?, ?, ?, ?, ?)').run(userId, info.provider, info.provider_id, info.email || null, nickname, isAdmin);
+  db.prepare('INSERT INTO users (id, provider, provider_id, email, nickname, is_admin) VALUES (?, ?, ?, ?, ?, ?)').run(userId, info.provider, info.provider_id, email, nickname, isAdmin);
   return getUserById(userId)!;
 }
 
@@ -323,4 +338,9 @@ export function rollbackFreeQuota(user: User): void {
   if (updated) {
     user.free_count_today = updated.free_count_today;
   }
+}
+
+export function invalidateUserTokens(userId: string): void {
+  const db = getDb();
+  db.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(userId);
 }

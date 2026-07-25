@@ -11,6 +11,7 @@ export const authRouter = Router();
 
 interface TokenPayload {
   user_id: string;
+  v?: number;
 }
 
 // --- 미들웨어 ---
@@ -23,10 +24,14 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     return;
   }
   try {
-    const payload = jwt.verify(auth.slice(7), config.jwtSecret) as TokenPayload;
+    const payload = jwt.verify(auth.slice(7), config.jwtSecret, { algorithms: ['HS256'] }) as TokenPayload;
     const user = getUserByIdSafe(payload.user_id);
     if (!user) {
       res.status(401).json({ detail: '사용자를 찾을 수 없습니다' });
+      return;
+    }
+    if (payload.v !== undefined && payload.v !== (user as User).token_version) {
+      res.status(401).json({ detail: '토큰이 무효화되었습니다' });
       return;
     }
     req.user = user as User;
@@ -46,8 +51,10 @@ export function adminMiddleware(req: Request, res: Response, next: NextFunction)
   next();
 }
 
-function createToken(userId: string): string {
-  return jwt.sign({ user_id: userId } as TokenPayload, config.jwtSecret, { expiresIn: `${config.jwtExpireDays}d` });
+function createToken(userId: string, tokenVersion?: number): string {
+  const payload: TokenPayload = { user_id: userId };
+  if (tokenVersion !== undefined) payload.v = tokenVersion;
+  return jwt.sign(payload, config.jwtSecret, { expiresIn: `${config.jwtExpireDays}d` });
 }
 
 function makeUserResponse(user: User) {
@@ -83,7 +90,8 @@ authRouter.post('/signup', (req: Request, res: Response) => {
     return;
   }
 
-  res.json({ token: createToken(user.id), user: makeUserResponse(user) });
+  res.json({ token: createToken(user.id, user.token_version), user: makeUserResponse(user) });
+  return;
 });
 
 /** 로그인 */
@@ -112,7 +120,7 @@ authRouter.post('/login', (req: Request, res: Response) => {
     return;
   }
   clearLoginAttempts(email);
-  res.json({ token: createToken(user.id), user: makeUserResponse(user) });
+  res.json({ token: createToken(user.id, user.token_version), user: makeUserResponse(user) });
 });
 
 /** 내 정보 조회 */

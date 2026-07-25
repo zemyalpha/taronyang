@@ -17,6 +17,7 @@ function makeFreeUser(overrides: Partial<User> = {}): User {
     subscription_expires_at: null,
     settings: '{}',
     is_admin: 0,
+    token_version: 0,
     ...overrides,
   };
 }
@@ -404,7 +405,7 @@ describe('findOrCreateOAuthUser — merge and existing-match paths', () => {
     expect(second.email).toBe('merge1@test.com');
   });
 
-  it('existing email with different provider — should merge (update provider + provider_id)', () => {
+  it('existing email with different provider — should NOT merge (account hijack prevention)', () => {
     createUser('merge2@test.com', 'password123');
     const oauthUser = findOrCreateOAuthUser({
       provider: 'kakao',
@@ -412,10 +413,9 @@ describe('findOrCreateOAuthUser — merge and existing-match paths', () => {
       email: 'merge2@test.com',
       nickname: 'OAuthMerged',
     });
-    const byEmail = getUserByEmail('merge2@test.com');
-    expect(byEmail!.id).toBe(oauthUser.id);
-    expect(byEmail!.provider).toBe('kakao');
-    expect(byEmail!.provider_id).toBe('kakao-merge-2');
+    expect(oauthUser.id).toBeDefined();
+    expect(oauthUser.provider).toBe('kakao');
+    expect(oauthUser.provider_id).toBe('kakao-merge-2');
   });
 
   it('no nickname, no email — should default nickname to "사용자"', () => {

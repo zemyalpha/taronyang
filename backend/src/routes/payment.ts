@@ -27,6 +27,25 @@ async function getPortOneToken(): Promise<string> {
   return tokenResponse.access_token;
 }
 
+/**
+ * Expired premium subscription auto-downgrade.
+ * If the subscription has expired, updates the DB and mutates the user object.
+ * Returns true if the subscription was expired (and thus downgraded).
+ */
+function expireIfNeeded(user: NonNullable<ReturnType<typeof getUserById>>): boolean {
+  if ((user.subscription_status === 'premium' || user.subscription_status === 'cancelling') && user.subscription_expires_at) {
+    if (new Date(user.subscription_expires_at) < new Date()) {
+      const db = getDb();
+      db.prepare("UPDATE users SET subscription_status = 'free', subscription_expires_at = NULL WHERE id = ?")
+        .run(user.id);
+      user.subscription_status = 'free';
+      user.subscription_expires_at = null;
+      return true;
+    }
+  }
+  return false;
+}
+
 /** 요금 정보 */
 paymentRouter.get('/price', (_req: Request, res: Response) => {
   res.json({ premium_price: config.premiumPrice, currency: 'KRW', interval: 'monthly' });
@@ -95,16 +114,8 @@ paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {
   }
 
   let status = user.subscription_status;
-  if ((status === 'premium' || status === 'cancelling') && user.subscription_expires_at) {
-    if (new Date(user.subscription_expires_at) < new Date()) {
-      const db = getDb();
-      db.prepare("UPDATE users SET subscription_status = 'free', subscription_expires_at = NULL WHERE id = ?")
-        .run(user.id);
-      user.subscription_status = 'free';
-      user.subscription_expires_at = null;
-      status = 'free';
-    }
-  }
+  expireIfNeeded(user);
+  status = user.subscription_status;
 
   res.json({ status, expires_at: user.subscription_expires_at });
 });
@@ -113,15 +124,7 @@ paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {
 paymentRouter.post('/cancel', authMiddleware, (req: Request, res: Response) => {
   const user = req.user!;
 
-  if ((user.subscription_status === 'premium' || user.subscription_status === 'cancelling') && user.subscription_expires_at) {
-    if (new Date(user.subscription_expires_at) < new Date()) {
-      const db = getDb();
-      db.prepare("UPDATE users SET subscription_status = 'free', subscription_expires_at = NULL WHERE id = ?")
-        .run(user.id);
-      user.subscription_status = 'free';
-      user.subscription_expires_at = null;
-    }
-  }
+  expireIfNeeded(user);
 
   if (user.subscription_status !== 'premium') {
     res.status(400).json({ detail: '활성 프리미엄 구독이 없습니다.' });
