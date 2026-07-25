@@ -32,7 +32,7 @@ tarotRouter.get('/categories', (_req: Request, res: Response) => {
 
 /** 카드 셔플 */
 tarotRouter.get('/shuffle', (req: Request, res: Response) => {
-  const count = Math.min(Math.max(parseInt(req.query.count as string) || 10, 3), 20);
+  const count = Math.min(Math.max(parseInt(String(req.query.count), 10) || 10, 3), 20);
   // Fisher-Yates 셔플 (편향 없는 무작위)
   const deck = [...ALL_CARDS];
   for (let i = deck.length - 1; i > 0; i--) {
@@ -69,7 +69,7 @@ tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) =>
   }
 
   // 무료 할당량 검사 (프리미엄 제외)
-  const user = (req as any).user as User;
+  const user = req.user as User;
   if (!checkAndIncrementFreeQuota(user)) {
     res.status(429).json({
       detail: '오늘의 무료 타로 횟수를 모두 사용했어요. 내일 다시 이용하거나 프리미엄으로 업그레이드해주세요.',
@@ -137,7 +137,7 @@ tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) =>
   }
   const { question, chat_history, category, cards_summary, previous_reading, reading_id } = parsed.data;
 
-  const user = (req as any).user as User;
+  const user = req.user as User;
 
   // 추가 질문 수 제한 (프리미엄 제외)
   if (!isPremiumUser(user)) {
