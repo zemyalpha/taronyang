@@ -3,7 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { config } from '../config';
-import { createUser, verifyUser, getUserById, getUserByIdSafe, getUserByEmail, getDb, User, isAccountLocked, recordFailedLogin, clearLoginAttempts } from '../database';
+import { createUser, verifyUser, getUserById, getUserByIdSafe, getUserByEmail, findOrCreateOAuthUser, getDb, User, isAccountLocked, recordFailedLogin, clearLoginAttempts } from '../database';
 import { signupSchema, loginSchema, updateMeSchema } from '../validation';
 
 export const authRouter = Router();
@@ -196,7 +196,14 @@ authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
 authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
   const urls: Record<string, string> = {};
   if (config.kakaoClientId) {
-    urls.kakao = `https://kauth.kakao.com/oauth/authorize?client_id=${config.kakaoClientId}&redirect_uri=${config.kakaoRedirectUri}&response_type=code&scope=profile_nickname,account_email`;
+    const state = crypto.randomUUID();
+    res.cookie('oauth_state', state, {
+      httpOnly: true,
+      secure: config.nodeEnv === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
+    urls.kakao = `https://kauth.kakao.com/oauth/authorize?client_id=${config.kakaoClientId}&redirect_uri=${config.kakaoRedirectUri}&response_type=code&scope=profile_nickname,account_email&state=${state}`;
   }
   if (config.naverClientId) {
     const state = crypto.randomUUID();
@@ -209,10 +216,165 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
     urls.naver = `https://nid.naver.com/oauth2.0/authorize?client_id=${config.naverClientId}&redirect_uri=${config.naverRedirectUri}&response_type=code&state=${state}`;
   }
   if (config.googleClientId) {
+    const state = crypto.randomUUID();
+    res.cookie('oauth_state', state, {
+      httpOnly: true,
+      secure: config.nodeEnv === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
     const scope = encodeURIComponent('openid email profile');
-    urls.google = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.googleClientId}&redirect_uri=${config.googleRedirectUri}&response_type=code&scope=${scope}&access_type=offline`;
+    urls.google = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.googleClientId}&redirect_uri=${config.googleRedirectUri}&response_type=code&scope=${scope}&access_type=offline&state=${state}`;
   }
   res.json(urls);
+});
+
+/** 소셜 로그인 콜백 — 인증 코드를 토큰으로 교환하고 사용자 생성/조회 (ZEMA-3416) */
+authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) => {
+  const { provider } = req.params;
+  const { code, state } = req.query;
+
+  if (!code || typeof code !== 'string') {
+    res.redirect('/login?oauth_error=missing_code');
+    return;
+  }
+
+  const validProviders = ['kakao', 'naver', 'google'];
+  if (!validProviders.includes(provider)) {
+    res.redirect('/login?oauth_error=invalid_provider');
+    return;
+  }
+
+  let tokenUrl: string;
+  let tokenBody: Record<string, string>;
+  let userInfoUrl: string;
+  let clientId: string;
+  let clientSecret: string;
+  let redirectUri: string;
+
+  if (provider === 'kakao') {
+    tokenUrl = 'https://kauth.kakao.com/oauth/token';
+    tokenBody = {
+      grant_type: 'authorization_code',
+      client_id: config.kakaoClientId,
+      client_secret: config.kakaoClientSecret,
+      redirect_uri: config.kakaoRedirectUri,
+      code,
+    };
+    userInfoUrl = 'https://kapi.kakao.com/v2/user/me';
+    clientId = config.kakaoClientId;
+    clientSecret = config.kakaoClientSecret;
+    redirectUri = config.kakaoRedirectUri;
+  } else if (provider === 'naver') {
+    if (!state || state !== req.cookies?.naver_oauth_state) {
+      res.redirect('/login?oauth_error=state_mismatch');
+      return;
+    }
+    tokenUrl = 'https://nid.naver.com/oauth2.0/token';
+    tokenBody = {
+      grant_type: 'authorization_code',
+      client_id: config.naverClientId,
+      client_secret: config.naverClientSecret,
+      redirect_uri: config.naverRedirectUri,
+      code,
+      state: state as string,
+    };
+    userInfoUrl = 'https://openapi.naver.com/v1/nid/me';
+    clientId = config.naverClientId;
+    clientSecret = config.naverClientSecret;
+    redirectUri = config.naverRedirectUri;
+  } else {
+    tokenUrl = 'https://oauth2.googleapis.com/token';
+    tokenBody = {
+      grant_type: 'authorization_code',
+      client_id: config.googleClientId,
+      client_secret: config.googleClientSecret,
+      redirect_uri: config.googleRedirectUri,
+      code,
+    };
+    userInfoUrl = 'https://www.googleapis.com/oauth2/v2/userinfo';
+    clientId = config.googleClientId;
+    clientSecret = config.googleClientSecret;
+    redirectUri = config.googleRedirectUri;
+  }
+
+  if (!clientId || !redirectUri) {
+    res.redirect('/login?oauth_error=not_configured');
+    return;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    let accessToken: string;
+    try {
+      const tokenRes = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(tokenBody).toString(),
+        signal: controller.signal,
+      });
+      const tokenData = await tokenRes.json() as { access_token?: string; error?: string };
+      if (!tokenData.access_token) {
+        throw new Error(`Token exchange failed: ${tokenData.error || 'unknown'}`);
+      }
+      accessToken = tokenData.access_token;
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    const userController = new AbortController();
+    const userTimeout = setTimeout(() => userController.abort(), 10000);
+    let email: string | undefined;
+    let nickname: string | undefined;
+    let providerId: string | undefined;
+    try {
+      const profileRes = await fetch(userInfoUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal: userController.signal,
+      });
+      const profile = await profileRes.json() as Record<string, unknown>;
+
+      if (provider === 'kakao') {
+        const kakaoAccount = profile.kakao_account as { email?: string; profile?: { nickname?: string } } | undefined;
+        email = kakaoAccount?.email;
+        nickname = kakaoAccount?.profile?.nickname;
+        providerId = String(profile.id || '');
+      } else if (provider === 'naver') {
+        const response = profile.response as { email?: string; nickname?: string; name?: string; id?: string } | undefined;
+        email = response?.email;
+        nickname = response?.nickname || response?.name;
+        providerId = String(response?.id || '');
+      } else {
+        email = profile.email as string | undefined;
+        nickname = profile.name as string | undefined;
+        providerId = String(profile.id || '');
+      }
+    } finally {
+      clearTimeout(userTimeout);
+    }
+
+    if (!email || !providerId) {
+      res.redirect('/login?oauth_error=incomplete_profile');
+      return;
+    }
+
+    const user = findOrCreateOAuthUser({
+      provider,
+      provider_id: providerId,
+      email,
+      nickname,
+    });
+
+    const jwtToken = createToken(user.id, user.token_version);
+    setAuthCookie(res, jwtToken);
+
+    const redirectUrl = `/login?oauth=1&user_id=${encodeURIComponent(user.id)}&nickname=${encodeURIComponent(user.nickname || '')}`;
+    res.redirect(redirectUrl);
+  } catch (err) {
+    res.redirect(`/login?oauth_error=server_error&detail=${encodeURIComponent(String(err).slice(0, 200))}`);
+  }
 });
 
 /** 생일로 별자리 계산 */
