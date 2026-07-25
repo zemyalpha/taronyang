@@ -39,12 +39,20 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-// 프로덕션 환경 HTTPS 강제
+// 프로덕션 환경 HTTPS 강제 (host 헤더 검증으로 오픈 리다이렉트 방지)
 if (config.nodeEnv === 'production') {
+  const allowedHosts = [
+    ...(config.frontendUrl ? [(() => { try { return new URL(config.frontendUrl).host; } catch { return ''; } })()] : []),
+    ...config.extraCorsOrigins.map(o => { try { return new URL(o).host; } catch { return ''; } }).filter(Boolean),
+  ].filter(Boolean);
   app.use((req, res, next) => {
     const proto = req.headers['x-forwarded-proto'];
     if (proto && proto !== 'https') {
-      return res.redirect(301, `https://${req.headers.host}${req.url}`);
+      const host = req.hostname;
+      if (allowedHosts.length > 0 && !allowedHosts.includes(host)) {
+        return res.status(403).json({ error: 'Host not allowed' });
+      }
+      return res.redirect(301, `https://${host}${req.url}`);
     }
     next();
   });
