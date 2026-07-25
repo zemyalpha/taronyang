@@ -345,13 +345,17 @@
                     } catch (e) { /* fallback failed — use stale meta data as-is */ }
                 }
 
-                linkEl.href = data.url;
+                if (typeof data.url === 'string' && (data.url.startsWith('/') || data.url.startsWith('https://'))) {
+                    linkEl.href = data.url;
+                }
                 cardsEl.textContent = data.cards.map(function(c) { return c.symbol; }).join(' ');
                 cardsEl.setAttribute('aria-label', data.cards.map(function(c) { return c.name; }).join(', '));
                 summaryEl.textContent = data.summary;
                 colorEl.textContent = '🎨 행운의 색: ';
                 var colorNameSpan = document.createElement('span');
-                colorNameSpan.style.color = data.luckyColorHex;
+                if (typeof data.luckyColorHex === 'string' && /^#[0-9a-fA-F]{6}$/.test(data.luckyColorHex)) {
+                    colorNameSpan.style.color = data.luckyColorHex;
+                }
                 colorNameSpan.style.fontWeight = '700';
                 colorNameSpan.textContent = data.luckyColor;
                 colorEl.appendChild(colorNameSpan);

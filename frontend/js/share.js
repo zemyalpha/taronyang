@@ -43,7 +43,7 @@
               }
             });
           } else {
-            window.open('https://sharer.kakao.com/talk/friends/picker/link?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(title), '_blank', 'noopener');
+            window.open('https://sharer.kakao.com/talk/friends/picker/link?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(title), '_blank', 'noopener,noreferrer');
           }
         });
       }
