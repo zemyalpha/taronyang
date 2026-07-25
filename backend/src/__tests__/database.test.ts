@@ -1,4 +1,4 @@
-import { initDb, getDb, createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, User } from '../database';
+import { initDb, getDb, createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, isPremiumUser, User } from '../database';
 
 function makeFreeUser(overrides: Partial<User> = {}): User {
   return {
@@ -445,5 +445,74 @@ describe('findOrCreateOAuthUser — merge and existing-match paths', () => {
     const found = getUserById(user.id);
     expect(found).not.toBeNull();
     expect(found!.provider).toBe('google');
+  });
+});
+
+describe('isPremiumUser — subscription enforcement', () => {
+  beforeEach(() => {
+    initDb();
+  });
+
+  function insertUser(user: User): void {
+    const db = getDb();
+    db.prepare(
+      'INSERT INTO users (id, provider, provider_id, email, password_hash, nickname, birth_date, zodiac_sign, created_at, free_count_today, free_reset_date, subscription_status, subscription_expires_at, settings, is_admin, token_version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).run(user.id, user.provider, user.provider_id, user.email, user.password_hash, user.nickname, user.birth_date, user.zodiac_sign, user.created_at, user.free_count_today, user.free_reset_date, user.subscription_status, user.subscription_expires_at, user.settings || '{}', user.is_admin ? 1 : 0, user.token_version || 0);
+  }
+
+  it('returns true for active premium with future expiry', () => {
+    const user = makeFreeUser({
+      subscription_status: 'premium',
+      subscription_expires_at: new Date(Date.now() + 86400000).toISOString(),
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(true);
+  });
+
+  it('returns true for premium with null expiry (lifetime)', () => {
+    const user = makeFreeUser({
+      subscription_status: 'premium',
+      subscription_expires_at: null,
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(true);
+  });
+
+  it('returns true for cancelling status with future expiry', () => {
+    const user = makeFreeUser({
+      subscription_status: 'cancelling',
+      subscription_expires_at: new Date(Date.now() + 86400000).toISOString(),
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(true);
+  });
+
+  it('returns false and lazily downgrades expired premium', () => {
+    const user = makeFreeUser({
+      subscription_status: 'premium',
+      subscription_expires_at: new Date(Date.now() - 86400000).toISOString(),
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(false);
+    expect(user.subscription_status).toBe('free');
+    expect(user.subscription_expires_at).toBeNull();
+    const dbUser = getUserById(user.id);
+    expect(dbUser!.subscription_status).toBe('free');
+  });
+
+  it('returns false and downgrades expired cancelling', () => {
+    const user = makeFreeUser({
+      subscription_status: 'cancelling',
+      subscription_expires_at: new Date(Date.now() - 86400000).toISOString(),
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(false);
+    expect(user.subscription_status).toBe('free');
+  });
+
+  it('returns false for free user', () => {
+    const user = makeFreeUser();
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(false);
   });
 });

@@ -303,6 +303,41 @@ describe('paymentVerifySchema', () => {
     const result = paymentVerifySchema.safeParse({ imp_uid: 'a'.repeat(101) });
     expect(result.success).toBe(false);
   });
+
+  it('path traversal attempt (../users/getToken) — should fail', () => {
+    const result = paymentVerifySchema.safeParse({ imp_uid: '../users/getToken' });
+    expect(result.success).toBe(false);
+  });
+
+  it('path traversal with imp_ prefix — should fail', () => {
+    const result = paymentVerifySchema.safeParse({ imp_uid: 'imp_../users/getToken' });
+    expect(result.success).toBe(false);
+  });
+
+  it('query injection attempt — should fail', () => {
+    const result = paymentVerifySchema.safeParse({ imp_uid: 'imp_?steal=1' });
+    expect(result.success).toBe(false);
+  });
+
+  it('fragment injection attempt — should fail', () => {
+    const result = paymentVerifySchema.safeParse({ imp_uid: 'imp_#fragment' });
+    expect(result.success).toBe(false);
+  });
+
+  it('slash injection attempt — should fail', () => {
+    const result = paymentVerifySchema.safeParse({ imp_uid: 'imp_slash/secret' });
+    expect(result.success).toBe(false);
+  });
+
+  it('no imp_ prefix — should fail', () => {
+    const result = paymentVerifySchema.safeParse({ imp_uid: 'foobar123' });
+    expect(result.success).toBe(false);
+  });
+
+  it('valid imp_uid with underscores and hyphens — should parse', () => {
+    const result = paymentVerifySchema.safeParse({ imp_uid: 'imp_abc-123_XYZ' });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('notifySettingsSchema', () => {
