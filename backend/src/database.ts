@@ -311,3 +311,16 @@ export function getRemainingFreeCount(user: User): number {
   if (user.free_reset_date !== today) return config.freeDailyLimit;
   return Math.max(0, config.freeDailyLimit - user.free_count_today);
 }
+
+/** LLM 호출 실패 시 무료 할당량 롤백 (사용자가 서버 오류로 인해 할당량을 잃지 않도록) */
+export function rollbackFreeQuota(user: User): void {
+  if (user.subscription_status === 'premium') return;
+  const db = getDb();
+  db.prepare(
+    'UPDATE users SET free_count_today = MAX(0, free_count_today - 1) WHERE id = ? AND free_count_today > 0'
+  ).run(user.id);
+  const updated = getUserById(user.id);
+  if (updated) {
+    user.free_count_today = updated.free_count_today;
+  }
+}

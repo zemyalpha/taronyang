@@ -86,6 +86,7 @@ const apiLimiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path === '/api/health' || req.path === '/api/health/detail',
   message: { detail: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 });
 app.use('/api/', apiLimiter);
@@ -131,9 +132,14 @@ app.use('/api/admin', adminRouter);
 app.use('/api/notifications', notifyRouter);
 app.use('/api/analytics', analyticsRouter);
 
-// 정적 파일 (프론트엔드)
+// 정적 파일 (프론트엔드 자산만 — js/css/icons 하위 디렉토리만 노출)
 const frontendPath = path.join(__dirname, '../../frontend');
-app.use('/static', express.static(frontendPath));
+app.use('/static/js', express.static(path.join(frontendPath, 'js')));
+app.use('/static/css', express.static(path.join(frontendPath, 'css')));
+app.use('/static/icons', express.static(path.join(frontendPath, 'icons'), {
+  maxAge: '1y',
+  immutable: true,
+}));
 
 // PWA 자산 — Service Worker, Web App Manifest, 아이콘
 // SW는 항상 최신 버전을 제공하기 위해 no-cache
@@ -202,6 +208,11 @@ const server = app.listen(config.port, config.host, () => {
   logger.info('타로냥 API 서버 시작', { host: config.host, port: config.port, env: config.nodeEnv });
   schedulerHandle = startDailyScheduler();
 });
+
+server.timeout = 30000;
+server.headersTimeout = 35000;
+server.requestTimeout = 40000;
+server.keepAliveTimeout = 5000;
 
 // Graceful shutdown — SIGTERM/SIGINT 수신 시 안전하게 종료
 let shuttingDown = false;

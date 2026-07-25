@@ -38,11 +38,12 @@ export const tarotChatSchema = z.object({
   question: z.string().min(1, '질문을 입력해주세요').max(500, '질문은 500자 이내로 입력해주세요'),
   chat_history: z.array(z.object({
     role: z.enum(['user', 'assistant']),
-    content: z.string().max(2000),
+    content: z.string().max(1000),
   })).max(9).optional(),
   category: z.string().max(50).optional(),
-  cards_summary: z.string().max(500).optional(),
-  previous_reading: z.string().max(5000).optional(),
+  cards_summary: z.string().max(300).optional(),
+  previous_reading: z.string().max(2000).optional(),
+  reading_id: z.string().uuid().optional(),
 });
 
 /** 결제 검증 */
