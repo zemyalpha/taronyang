@@ -90,6 +90,7 @@
 
     <script>
         const token = localStorage.getItem('token');
+        if (!token) { window.location.href = '/'; }
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
         function escapeHtml(str) {

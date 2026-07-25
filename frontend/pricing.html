@@ -114,7 +114,6 @@
         </div>
     </main>
 
-    <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js" crossorigin="anonymous"></script>
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
     <script src="/static/js/utils.js"></script>
     <script>
@@ -140,7 +139,25 @@
             } catch (e) {}
         }
 
-        function subscribe() {
+        let iamportLoaded = false;
+        async function ensureIamportLoaded() {
+            if (iamportLoaded || window.IMP) {
+                iamportLoaded = true;
+                return window.IMP;
+            }
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.iamport.kr/js/iamport.payment-1.2.0.js';
+                script.crossOrigin = 'anonymous';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('Iamport load failed'));
+                document.head.appendChild(script);
+            });
+            iamportLoaded = true;
+            return window.IMP;
+        }
+
+        async function subscribe() {
             const btn = document.getElementById('btn-subscribe');
             if (btn.disabled) return;
 
@@ -151,7 +168,13 @@
                 return;
             }
 
-            const IMP = window.IMP;
+            let IMP;
+            try {
+                IMP = await ensureIamportLoaded();
+            } catch (_e) {
+                showToast('결제 모듈을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
             if (!IMP) {
                 showToast('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');
                 return;
