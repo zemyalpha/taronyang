@@ -126,7 +126,7 @@ describe('readings routes', () => {
       const res = await request(app)
         .delete(`/readings/${id}`)
         .set('Authorization', `Bearer ${makeToken(user2!.id)}`);
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(404);
 
       const stillThere = await request(app)
         .get(`/readings/${id}`)

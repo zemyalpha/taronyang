@@ -43,7 +43,7 @@ analyticsRouter.post('/event', (req: Request, res: Response) => {
     for (const ev of rows) {
       const id = crypto.randomUUID();
       const propsJson = (() => {
-        try { return JSON.stringify(ev.props || {}); } catch { return '{}'; }
+        try { return JSON.stringify(ev.props || {}).slice(0, 4096); } catch { return '{}'; }
       })();
       insert.run(
         id,

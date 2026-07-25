@@ -97,6 +97,7 @@ export function initDb(): void {
     );
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_provider_id ON users(provider, provider_id) WHERE provider_id IS NOT NULL;
     CREATE INDEX IF NOT EXISTS idx_readings_user ON readings(user_id);
     CREATE INDEX IF NOT EXISTS idx_readings_created ON readings(created_at);
     CREATE INDEX IF NOT EXISTS idx_daily_date ON daily_horoscopes(date, zodiac_sign);
