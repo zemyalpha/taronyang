@@ -49,6 +49,7 @@ export const config = {
   // 타로 설정
   freeDailyLimit: safeParseInt(process.env.FREE_DAILY_LIMIT, 1),
   maxChatPerReading: safeParseInt(process.env.MAX_CHAT_PER_READING, 5),
+  maxDailyChats: safeParseInt(process.env.MAX_DAILY_CHATS, 5),
 
   // 결제 (포트원)
   portOneImpKey: process.env.PORTONE_IMP_KEY || '',

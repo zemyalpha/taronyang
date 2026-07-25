@@ -18,6 +18,8 @@ function makeFreeUser(overrides: Partial<User> = {}): User {
     settings: '{}',
     is_admin: 0,
     token_version: 0,
+    chat_count_today: 0,
+    chat_reset_date: null,
     ...overrides,
   };
 }

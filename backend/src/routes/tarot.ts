@@ -7,7 +7,7 @@ import { saveReading } from './readings';
 import { tarotReadSchema, tarotChatSchema } from '../validation';
 import { logger } from '../logger';
 import { config } from '../config';
-import { checkAndIncrementFreeQuota, getRemainingFreeCount, rollbackFreeQuota, isPremiumUser, getDb, getUserById, User } from '../database';
+import { checkAndIncrementFreeQuota, getRemainingFreeCount, rollbackFreeQuota, checkAndIncrementChatQuota, rollbackChatQuota, isPremiumUser, getDb, getUserById, User } from '../database';
 import jwt from 'jsonwebtoken';
 import { authMiddleware } from './auth';
 
@@ -139,12 +139,11 @@ tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) =>
 
   const user = req.user as User;
 
-  // 추가 질문 수 제한 (프리미엄 제외)
+  // 추가 질문 수 제한 (프리미엄 제외) — server-side daily tracking (ZEMA-3343 fix)
   if (!isPremiumUser(user)) {
-    const chatCount = chat_history ? Math.ceil(chat_history.length / 2) : 0;
-    if (chatCount >= config.maxChatPerReading) {
+    if (!checkAndIncrementChatQuota(user)) {
       res.status(429).json({
-        detail: `추가 질문은 최대 ${config.maxChatPerReading}회까지 가능해요. 프리미엄으로 업그레이드하면 무제한입니다.`,
+        detail: `오늘 추가 질문 횟수(${config.maxDailyChats}회)를 모두 사용했어요. 프리미엄으로 업그레이드하면 무제한입니다.`,
       });
       return;
     }
@@ -182,6 +181,7 @@ tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) =>
     const reply = await callLlm(messages, 1000, 0.8);
     res.json({ reply });
   } catch (err) {
+    rollbackChatQuota(user);
     if (err instanceof RateLimitError) {
       logger.warn('AI 응답 429 — 재시도 후에도 레이트 리밋', { error: String(err) });
       res.status(429).json({ detail: 'AI 서버가 혼잡합니다. 잠시 후 다시 시도해주세요.' });

@@ -131,6 +131,18 @@ export function initDb(): void {
   } catch {
     // Column already exists — expected on subsequent inits
   }
+
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN chat_count_today INTEGER NOT NULL DEFAULT 0`);
+  } catch {
+    // Column already exists — expected on subsequent inits
+  }
+
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN chat_reset_date TEXT`);
+  } catch {
+    // Column already exists — expected on subsequent inits
+  }
 }
 
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -193,6 +205,8 @@ export interface User {
   settings: string;
   is_admin: number;
   token_version: number;
+  chat_count_today: number;
+  chat_reset_date: string | null;
 }
 
 /** 이메일 사용자 생성 */
@@ -360,4 +374,39 @@ export function rollbackFreeQuota(user: User): void {
 export function invalidateUserTokens(userId: string): void {
   const db = getDb();
   db.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(userId);
+}
+
+export function checkAndIncrementChatQuota(user: User): boolean {
+  const db = getDb();
+  const today = todayString();
+
+  if (isPremiumUser(user)) return true;
+
+  const result = db.prepare(
+    'UPDATE users ' +
+    'SET chat_count_today = CASE WHEN chat_reset_date = ? THEN chat_count_today + 1 ELSE 1 END, ' +
+    '    chat_reset_date = ? ' +
+    'WHERE id = ? AND (chat_reset_date IS NULL OR chat_reset_date != ? OR chat_count_today < ?)'
+  ).run(today, today, user.id, today, config.maxDailyChats);
+
+  if (result.changes === 0) return false;
+
+  const updated = getUserById(user.id);
+  if (updated) {
+    user.chat_count_today = updated.chat_count_today;
+    user.chat_reset_date = updated.chat_reset_date;
+  }
+  return true;
+}
+
+export function rollbackChatQuota(user: User): void {
+  if (user.subscription_status === 'premium') return;
+  const db = getDb();
+  db.prepare(
+    'UPDATE users SET chat_count_today = MAX(0, chat_count_today - 1) WHERE id = ? AND chat_count_today > 0'
+  ).run(user.id);
+  const updated = getUserById(user.id);
+  if (updated) {
+    user.chat_count_today = updated.chat_count_today;
+  }
 }

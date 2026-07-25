@@ -187,23 +187,24 @@ describe('POST /api/tarot/chat — auth + chat limit', () => {
     expect(res.status).toBe(200);
   });
 
-  it('free user exceeding maxChatPerReading — should return 429', async () => {
+  it('free user exceeding maxDailyChats — should return 429', async () => {
     const user = createUser('chatlimit@test.com', 'password123')!;
     const token = makeToken(user.id);
 
-    const maxItems = 9;
-    const fakeHistory: { role: 'user' | 'assistant'; content: string }[] = [];
-    for (let i = 0; i < maxItems; i++) {
-      fakeHistory.push({
-        role: i % 2 === 0 ? 'user' : 'assistant',
-        content: `메시지 ${i}`,
-      });
+    // Exhaust daily chat quota (server-side tracking, ZEMA-3343 fix)
+    for (let i = 0; i < config.maxDailyChats; i++) {
+      const res = await request(app)
+        .post('/api/tarot/chat')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ question: `질문 ${i}` });
+      expect(res.status).toBe(200);
     }
 
+    // Next call should be rate-limited
     const res = await request(app)
       .post('/api/tarot/chat')
       .set('Authorization', `Bearer ${token}`)
-      .send({ question: '초과 질문', chat_history: fakeHistory });
+      .send({ question: '초과 질문' });
 
     expect(res.status).toBe(429);
     expect(res.body.detail).toContain('추가 질문');
