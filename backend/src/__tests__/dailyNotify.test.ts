@@ -56,14 +56,28 @@ describe('generateDailyHoroscope', () => {
     expect(callLlm).toHaveBeenCalledTimes(1);
   });
 
-  it('should cache fallback message on LLM failure', async () => {
+  it('should NOT cache fallback message on LLM failure (allows retry)', async () => {
     callLlm.mockRejectedValue(new Error('API unavailable'));
 
     await generateDailyHoroscope('게자리', '2026-07-15');
 
     const db = getDb();
-    const cached = db.prepare('SELECT full_reading FROM daily_horoscopes WHERE zodiac_sign = ? AND date = ?').get('게자리', '2026-07-15') as { full_reading?: string };
-    expect(cached.full_reading).toContain('가져오지 못했어요');
+    const cached = db.prepare('SELECT full_reading FROM daily_horoscopes WHERE zodiac_sign = ? AND date = ?').get('게자리', '2026-07-15') as { full_reading?: string } | undefined;
+    expect(cached).toBeUndefined();
+  });
+
+  it('should retry LLM when cache contains stale fallback', async () => {
+    const db = getDb();
+    db.prepare(
+      'INSERT INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run('fallback-id', '사자자리', '2026-07-15', '🐹 오늘 사자자리의 운세를 가져오지 못했어요.', '요약', '{}');
+
+    callLlm.mockResolvedValue('재시도 성공 운세');
+
+    const result = await generateDailyHoroscope('사자자리', '2026-07-15');
+
+    expect(result).toBe('재시도 성공 운세');
+    expect(callLlm).toHaveBeenCalledTimes(1);
   });
 });
 
