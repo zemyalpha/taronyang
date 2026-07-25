@@ -115,14 +115,24 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
       return;
     }
 
-    // 프리미엄 활성화 + 결제 기록 (트랜잭션)
+    // 프리미엄 활성화 + 결제 기록 (원자적 트랜잭션 — TOCTOU 방지)
     const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-    db.transaction(() => {
+    const result = db.transaction(() => {
+      const insertResult = db.prepare(
+        'INSERT OR IGNORE INTO processed_payments (imp_uid, user_id, amount) VALUES (?, ?, ?)'
+      ).run(imp_uid, req.user!.id, payment.amount);
+      if (insertResult.changes === 0) {
+        return null;
+      }
       db.prepare("UPDATE users SET subscription_status = 'premium', subscription_expires_at = ? WHERE id = ?")
         .run(expires, req.user!.id);
-      db.prepare('INSERT INTO processed_payments (imp_uid, user_id, amount) VALUES (?, ?, ?)')
-        .run(imp_uid, req.user!.id, payment.amount);
+      return insertResult;
     })();
+
+    if (!result) {
+      res.status(400).json({ detail: '이미 처리된 결제 건입니다.' });
+      return;
+    }
 
     res.json({ ok: true, message: '프리미엄이 활성화되었습니다! ✨' });
   } catch (err: unknown) {
