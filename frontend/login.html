@@ -124,7 +124,6 @@
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || '로그인 실패');
-                localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 if (window.TaronyangAnalytics) {
                     TaronyangAnalytics.track('login_complete', { method: 'email' });
@@ -152,7 +151,6 @@
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || '회원가입 실패');
-                localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 if (window.TaronyangAnalytics) {
                     TaronyangAnalytics.track('signup_complete', { method: 'email' });
@@ -164,14 +162,11 @@
             }
         }
 
-        // 공통 인증 헬퍼
-        function authHeaders() {
-            const token = localStorage.getItem('token');
-            return token ? { 'Authorization': `Bearer ${token}` } : {};
-        }
-        function isLoggedIn() { return !!localStorage.getItem('token'); }
+        // 공통 인증 헬퍼 — HttpOnly 쿠키 기반 (ZEMA-3283)
+        function authHeaders() { return {}; }
+        function isLoggedIn() { return !!localStorage.getItem('user'); }
         function getUser() { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } }
-        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; }
+        async function logout() { try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {} localStorage.removeItem('user'); window.location.href = '/login'; }
 
         // 소셜 로그인
         const OAUTH_ALLOW = /^https:\/\/(kauth\.kakao\.com|nid\.naver\.com|accounts\.google\.com)\//;
@@ -193,13 +188,11 @@
             }
         }
 
-        // OAuth 콜백 처리
+        // OAuth 콜백 처리 — 쿠키는 백엔드에서 설정 (ZEMA-3283)
         const params = new URLSearchParams(window.location.search);
         if (params.get('oauth') === '1') {
-            const token = params.get('token');
             const user = { id: params.get('user_id'), nickname: params.get('nickname') };
-            if (token) {
-                localStorage.setItem('token', token);
+            if (user.id) {
                 localStorage.setItem('user', JSON.stringify(user));
                 window.location.href = '/';
             }

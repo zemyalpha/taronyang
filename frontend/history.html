@@ -68,19 +68,15 @@
         }
 
         async function loadReadings() {
-            const token = localStorage.getItem('token');
-            if (!token) {
+            if (!localStorage.getItem('user')) {
                 document.getElementById('need-login').classList.remove('hidden');
                 return;
             }
 
             try {
-                const res = await fetch('/api/readings', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await fetch('/api/readings');
                 if (!res.ok) {
                     if (res.status === 401) {
-                        localStorage.removeItem('token');
                         localStorage.removeItem('user');
                         document.getElementById('need-login').classList.remove('hidden');
                     } else {

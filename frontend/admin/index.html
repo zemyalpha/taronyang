@@ -89,9 +89,8 @@
     </main>
 
     <script>
-        const token = localStorage.getItem('token');
-        if (!token) { window.location.href = '/'; }
-        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        if (!localStorage.getItem('user')) { window.location.href = '/'; }
+        const headers = { 'Content-Type': 'application/json' };
 
         function escapeHtml(str) {
             if (str == null) return '';

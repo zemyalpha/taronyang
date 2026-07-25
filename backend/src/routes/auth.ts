@@ -17,15 +17,21 @@ interface TokenPayload {
 
 // --- 미들웨어 ---
 
-/** JWT에서 현재 사용자 추출 */
+/** JWT에서 현재 사용자 추출 — Authorization header OR HttpOnly cookie (ZEMA-3283) */
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
   const auth = req.headers.authorization;
-  if (!auth?.startsWith('Bearer ')) {
+  let token: string | undefined;
+  if (auth?.startsWith('Bearer ')) {
+    token = auth.slice(7);
+  } else if (req.cookies?.token) {
+    token = req.cookies.token;
+  }
+  if (!token) {
     res.status(401).json({ detail: '로그인이 필요합니다' });
     return;
   }
   try {
-    const payload = jwt.verify(auth.slice(7), config.jwtSecret, { algorithms: ['HS256'] }) as TokenPayload;
+    const payload = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] }) as TokenPayload;
     const user = getUserByIdSafe(payload.user_id);
     if (!user) {
       res.status(401).json({ detail: '사용자를 찾을 수 없습니다' });
@@ -56,6 +62,17 @@ function createToken(userId: string, tokenVersion?: number): string {
   const payload: TokenPayload = { user_id: userId };
   if (tokenVersion !== undefined) payload.v = tokenVersion;
   return jwt.sign(payload, config.jwtSecret, { expiresIn: `${config.jwtExpireDays}d` });
+}
+
+/** JWT를 HttpOnly 쿠키로 설정 (ZEMA-3283 — localStorage XSS 방지) */
+function setAuthCookie(res: Response, token: string): void {
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: config.nodeEnv === 'production',
+    sameSite: 'strict',
+    maxAge: config.jwtExpireDays * 24 * 60 * 60 * 1000,
+    path: '/',
+  });
 }
 
 function makeUserResponse(user: User) {
@@ -91,7 +108,9 @@ authRouter.post('/signup', (req: Request, res: Response) => {
     return;
   }
 
-  res.json({ token: createToken(user.id, user.token_version), user: makeUserResponse(user) });
+  const token = createToken(user.id, user.token_version);
+  setAuthCookie(res, token);
+  res.json({ token, user: makeUserResponse(user) });
   return;
 });
 
@@ -121,7 +140,15 @@ authRouter.post('/login', (req: Request, res: Response) => {
     return;
   }
   clearLoginAttempts(email);
-  res.json({ token: createToken(user.id, user.token_version), user: makeUserResponse(user) });
+  const token = createToken(user.id, user.token_version);
+  setAuthCookie(res, token);
+  res.json({ token, user: makeUserResponse(user) });
+});
+
+/** 로그아웃 — HttpOnly 쿠키 삭제 (ZEMA-3283) */
+authRouter.post('/logout', (_req: Request, res: Response) => {
+  res.clearCookie('token', { path: '/' });
+  res.json({ ok: true });
 });
 
 /** 내 정보 조회 */
