@@ -89,7 +89,7 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
     } finally {
       clearTimeout(payTimeout);
     }
-    const payData = await payRes.json() as { code: number; message?: string; response?: { status: string; amount: number } };
+    const payData = await payRes.json() as { code: number; message?: string; response?: { status: string; amount: number; buyer_email?: string | null; merchant_uid?: string | null; custom_data?: { user_id?: string } | null } };
     if (payData.code !== 0) {
       res.status(400).json({ detail: `결제 조회 실패: ${payData.message}` });
       return;
@@ -101,6 +101,17 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
     }
     if (payment.amount !== config.premiumPrice) {
       res.status(400).json({ detail: '결제 금액이 일치하지 않습니다' });
+      return;
+    }
+    // 결제 소유권 검증 — 요청한 사용자가 실제 결제자인지 확인 (결제 탈취/리플레이 방지)
+    const paymentUserId = payment.custom_data?.user_id;
+    const paymentEmail = payment.buyer_email?.toLowerCase() ?? null;
+    const userEmail = req.user!.email?.toLowerCase() ?? null;
+    const ownsByUserId = paymentUserId && paymentUserId === req.user!.id;
+    const ownsByEmail = paymentEmail && userEmail && paymentEmail === userEmail;
+    if (!ownsByUserId && !ownsByEmail) {
+      logger.warn('결제 소유권 불일치', { imp_uid, user_id: req.user!.id });
+      res.status(403).json({ detail: '결제 정보가 현재 사용자와 일치하지 않습니다.' });
       return;
     }
 

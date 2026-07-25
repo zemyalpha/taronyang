@@ -46,9 +46,9 @@ export const tarotChatSchema = z.object({
   reading_id: z.string().uuid().optional(),
 });
 
-/** 결제 검증 */
+/** 결제 검증 — imp_uid는 PortOne 형식(imp_ + 영숫자)만 허용, 경로 조작 방지 */
 export const paymentVerifySchema = z.object({
-  imp_uid: z.string().min(1, 'imp_uid가 필요합니다').max(100),
+  imp_uid: z.string().regex(/^imp_[A-Za-z0-9_-]+$/, '올바르지 않은 imp_uid 형식입니다').max(100),
 });
 
 /** 알림 설정 변경 */

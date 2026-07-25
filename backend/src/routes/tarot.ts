@@ -7,7 +7,7 @@ import { saveReading } from './readings';
 import { tarotReadSchema, tarotChatSchema } from '../validation';
 import { logger } from '../logger';
 import { config } from '../config';
-import { checkAndIncrementFreeQuota, getRemainingFreeCount, rollbackFreeQuota, getDb, getUserById, User } from '../database';
+import { checkAndIncrementFreeQuota, getRemainingFreeCount, rollbackFreeQuota, isPremiumUser, getDb, getUserById, User } from '../database';
 import jwt from 'jsonwebtoken';
 import { authMiddleware } from './auth';
 
@@ -140,7 +140,7 @@ tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) =>
   const user = (req as any).user as User;
 
   // 추가 질문 수 제한 (프리미엄 제외)
-  if (user.subscription_status !== 'premium') {
+  if (!isPremiumUser(user)) {
     const chatCount = chat_history ? Math.ceil(chat_history.length / 2) : 0;
     if (chatCount >= config.maxChatPerReading) {
       res.status(429).json({

@@ -299,12 +299,24 @@ function todayString(): string {
   return kst.toISOString().slice(0, 10);
 }
 
+/** Check if user has active premium (status + not expired). Lazily downgrades expired. */
+export function isPremiumUser(user: User): boolean {
+  if (user.subscription_status !== 'premium') return false;
+  if (!user.subscription_expires_at) return true;
+  if (new Date(user.subscription_expires_at) > new Date()) return true;
+  const db = getDb();
+  db.prepare("UPDATE users SET subscription_status = 'free', subscription_expires_at = NULL WHERE id = ?").run(user.id);
+  user.subscription_status = 'free';
+  user.subscription_expires_at = null;
+  return false;
+}
+
 /** 무료 월터 사용량 확인 및 증가 — true면 허용, false면 초과 */
 export function checkAndIncrementFreeQuota(user: User): boolean {
   const db = getDb();
   const today = todayString();
 
-  if (user.subscription_status === 'premium') return true;
+  if (isPremiumUser(user)) return true;
 
   const result = db.prepare(
     "UPDATE users " +
@@ -325,7 +337,7 @@ export function checkAndIncrementFreeQuota(user: User): boolean {
 
 /** 사용자의 남은 무료 월터 횟수 */
 export function getRemainingFreeCount(user: User): number {
-  if (user.subscription_status === 'premium') return -1;
+  if (isPremiumUser(user)) return -1;
   const today = todayString();
   if (user.free_reset_date !== today) return config.freeDailyLimit;
   return Math.max(0, config.freeDailyLimit - user.free_count_today);

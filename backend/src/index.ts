@@ -129,6 +129,25 @@ const tarotLimiter = rateLimit({
 app.use('/api/tarot/read', tarotLimiter);
 app.use('/api/tarot/chat', tarotLimiter);
 
+// 운세 API 레이트 리미팅 — LLM 비용 방어 (cold cache 시 LLM 호출 유발)
+const horoscopeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { detail: '운세 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/notifications/horoscope', horoscopeLimiter);
+
+// 분석 엔드포인트 전용 레이트 리미팅 (무기한 DB 증식 방지)
+const analyticsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { detail: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+
 // API 라우터
 app.use('/api/tarot', tarotRouter);
 app.use('/api/auth', authRouter);
@@ -136,6 +155,7 @@ app.use('/api/readings', readingsRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/notifications', notifyRouter);
+app.use('/api/analytics', analyticsLimiter);
 app.use('/api/analytics', analyticsRouter);
 
 // 정적 파일 (프론트엔드 자산만 — js/css/icons 하위 디렉토리만 노출)

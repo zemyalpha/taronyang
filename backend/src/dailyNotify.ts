@@ -118,7 +118,7 @@ export function escapeHtml(str: string): string {
 }
 
 function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string): string {
-  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
   const safeNickname = escapeHtml(nickname);
   const safeHoroscope = escapeHtml(horoscope).replace(/\n/g, '<br>');
   return `<!DOCTYPE html>
@@ -222,19 +222,25 @@ export async function sendDailyNotifications(): Promise<void> {
 
   const horoscopes = await generateAllHoroscopes();
   const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
-  const todayStr = kstNow.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+  const todayStr = kstNow.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', timeZone: 'UTC' });
+  const EMAIL_BATCH_SIZE = 5;
   let sent = 0;
+  const results: PromiseSettledResult<boolean>[] = [];
 
-  const results = await Promise.allSettled(enabled.map(async (sub) => {
-    const horoscope = horoscopes[sub.zodiac_sign];
-    if (!horoscope) return;
+  for (let i = 0; i < enabled.length; i += EMAIL_BATCH_SIZE) {
+    const batch = enabled.slice(i, i + EMAIL_BATCH_SIZE);
+    const batchResults = await Promise.allSettled(batch.map(async (sub) => {
+      const horoscope = horoscopes[sub.zodiac_sign];
+      if (!horoscope) return false;
 
-    const nickname = sub.nickname || '회원';
-    const html = buildEmailHtml(nickname, sub.zodiac_sign, horoscope);
-    const subject = `🔮 ${nickname}님의 ${todayStr} 운세 — ${sub.zodiac_sign}`;
+      const nickname = sub.nickname || '회원';
+      const html = buildEmailHtml(nickname, sub.zodiac_sign, horoscope);
+      const subject = `🔮 ${nickname}님의 ${todayStr} 운세 — ${sub.zodiac_sign}`;
 
-    return sendEmail(sub.email, subject, html);
-  }));
+      return sendEmail(sub.email, subject, html);
+    }));
+    results.push(...batchResults);
+  }
 
   sent = results.filter(r => r.status === 'fulfilled' && r.value).length;
 
