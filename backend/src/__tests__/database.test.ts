@@ -1,4 +1,4 @@
-import { initDb, getDb, createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, isPremiumUser, User } from '../database';
+import { initDb, getDb, createUser, verifyUser, getUserById, getUserByIdSafe, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, isPremiumUser, User } from '../database';
 
 function makeFreeUser(overrides: Partial<User> = {}): User {
   return {
@@ -516,5 +516,27 @@ describe('isPremiumUser — subscription enforcement', () => {
     const user = makeFreeUser();
     insertUser(user);
     expect(isPremiumUser(user)).toBe(false);
+  });
+});
+
+describe('getUserByIdSafe (ZEMA-3412)', () => {
+  beforeEach(() => {
+    initDb();
+    getDb().prepare('DELETE FROM users').run();
+  });
+
+  it('returns token_version so middleware can validate versioned tokens', () => {
+    const user = createUser('safe-tv@example.com', 'password123', 'safeuser')!;
+    const safe = getUserByIdSafe(user.id);
+    expect(safe).not.toBeNull();
+    expect(safe!.token_version).toBe(user.token_version);
+    expect(safe!.chat_count_today).toBe(0);
+    expect(safe!.chat_reset_date).toBeNull();
+  });
+
+  it('never leaks password_hash', () => {
+    const user = createUser('safe-hash@example.com', 'password123', 'hashuser')!;
+    const safe = getUserByIdSafe(user.id)!;
+    expect((safe as Record<string, unknown>).password_hash).toBeUndefined();
   });
 });

@@ -255,7 +255,8 @@ export function getUserByIdSafe(id: string): Omit<User, 'password_hash'> | null 
   const row = db.prepare(
     'SELECT id, provider, provider_id, email, nickname, birth_date, zodiac_sign, ' +
     'created_at, free_count_today, free_reset_date, subscription_status, ' +
-    'subscription_expires_at, settings, is_admin FROM users WHERE id = ?'
+    'subscription_expires_at, settings, is_admin, token_version, ' +
+    'chat_count_today, chat_reset_date FROM users WHERE id = ?'
   ).get(id) as Omit<User, 'password_hash'> | undefined;
   return row || null;
 }

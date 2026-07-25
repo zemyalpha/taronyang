@@ -70,6 +70,43 @@ describe('authMiddleware', () => {
   });
 });
 
+describe('authMiddleware token_version (ZEMA-3412)', () => {
+  let app: express.Application;
+
+  beforeAll(() => {
+    initDb();
+    app = createTestApp();
+  });
+
+  beforeEach(() => {
+    getDb().prepare('DELETE FROM users').run();
+  });
+
+  function makeVersionedToken(userId: string, tokenVersion: number): string {
+    return jwt.sign({ user_id: userId, v: tokenVersion }, config.jwtSecret, { expiresIn: '7d' });
+  }
+
+  it('accepts a token whose v matches user token_version (200) — regression for 401 on new login/signup', async () => {
+    const user = createUser('versioned@example.com', 'password123', 'versioned')!;
+    const token = makeVersionedToken(user.id, user.token_version);
+    const res = await request(app)
+      .get('/protected')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.user_id).toBe(user.id);
+  });
+
+  it('still rejects a stale token after token_version bump (401) — revocation intact', async () => {
+    const user = createUser('revoked@example.com', 'password123', 'revoked')!;
+    const staleToken = makeVersionedToken(user.id, user.token_version);
+    getDb().prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(user.id);
+    const res = await request(app)
+      .get('/protected')
+      .set('Authorization', `Bearer ${staleToken}`);
+    expect(res.status).toBe(401);
+  });
+});
+
 describe('login brute force protection', () => {
   let app: express.Application;
 
