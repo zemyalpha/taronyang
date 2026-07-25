@@ -197,7 +197,7 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
   const urls: Record<string, string> = {};
   if (config.kakaoClientId) {
     const state = crypto.randomUUID();
-    res.cookie('oauth_state', state, {
+    res.cookie('oauth_state_kakao', state, {
       httpOnly: true,
       secure: config.nodeEnv === 'production',
       sameSite: 'lax',
@@ -207,7 +207,7 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
   }
   if (config.naverClientId) {
     const state = crypto.randomUUID();
-    res.cookie('naver_oauth_state', state, {
+    res.cookie('oauth_state_naver', state, {
       httpOnly: true,
       secure: config.nodeEnv === 'production',
       sameSite: 'lax',
@@ -217,7 +217,7 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
   }
   if (config.googleClientId) {
     const state = crypto.randomUUID();
-    res.cookie('oauth_state', state, {
+    res.cookie('oauth_state_google', state, {
       httpOnly: true,
       secure: config.nodeEnv === 'production',
       sameSite: 'lax',
@@ -245,6 +245,13 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     return;
   }
 
+  // CSRF: verify state matches the per-provider cookie set in /oauth/urls (all providers)
+  const stateCookieName = `oauth_state_${provider}`;
+  if (!state || typeof state !== 'string' || state !== req.cookies?.[stateCookieName]) {
+    res.redirect('/login?oauth_error=state_mismatch');
+    return;
+  }
+
   let tokenUrl: string;
   let tokenBody: Record<string, string>;
   let userInfoUrl: string;
@@ -266,10 +273,6 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     clientSecret = config.kakaoClientSecret;
     redirectUri = config.kakaoRedirectUri;
   } else if (provider === 'naver') {
-    if (!state || state !== req.cookies?.naver_oauth_state) {
-      res.redirect('/login?oauth_error=state_mismatch');
-      return;
-    }
     tokenUrl = 'https://nid.naver.com/oauth2.0/token';
     tokenBody = {
       grant_type: 'authorization_code',
@@ -298,7 +301,7 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     redirectUri = config.googleRedirectUri;
   }
 
-  if (!clientId || !redirectUri) {
+  if (!clientId || !clientSecret || !redirectUri) {
     res.redirect('/login?oauth_error=not_configured');
     return;
   }

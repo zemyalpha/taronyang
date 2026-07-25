@@ -244,3 +244,187 @@ describe('HttpOnly cookie auth (ZEMA-3283)', () => {
     expect(cookieStr).toMatch(/token=;/);
   });
 });
+
+describe('OAuth callback handler (ZEMA-3416)', () => {
+  let app: express.Application;
+  const originalFetch = global.fetch;
+  const savedConfig = {
+    kakaoClientId: config.kakaoClientId,
+    kakaoClientSecret: config.kakaoClientSecret,
+    kakaoRedirectUri: config.kakaoRedirectUri,
+    naverClientId: config.naverClientId,
+    naverClientSecret: config.naverClientSecret,
+    naverRedirectUri: config.naverRedirectUri,
+    googleClientId: config.googleClientId,
+    googleClientSecret: config.googleClientSecret,
+    googleRedirectUri: config.googleRedirectUri,
+  };
+
+  beforeAll(() => {
+    initDb();
+    app = createAuthApp();
+    config.kakaoClientId = 'kakao-test-id';
+    config.kakaoClientSecret = 'kakao-test-secret';
+    config.kakaoRedirectUri = 'https://example.com/api/auth/oauth/callback/kakao';
+    config.naverClientId = 'naver-test-id';
+    config.naverClientSecret = 'naver-test-secret';
+    config.naverRedirectUri = 'https://example.com/api/auth/oauth/callback/naver';
+    config.googleClientId = 'google-test-id';
+    config.googleClientSecret = 'google-test-secret';
+    config.googleRedirectUri = 'https://example.com/api/auth/oauth/callback/google';
+  });
+
+  beforeEach(() => {
+    getDb().prepare('DELETE FROM users').run();
+    global.fetch = originalFetch;
+  });
+
+  afterAll(() => {
+    Object.assign(config, savedConfig);
+    global.fetch = originalFetch;
+  });
+
+  it('rejects callback with missing code (redirect oauth_error=missing_code)', async () => {
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/kakao?state=anything')
+      .redirects(0);
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=missing_code');
+  });
+
+  it('rejects callback with invalid provider (redirect oauth_error=invalid_provider)', async () => {
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/facebook?code=abc&state=anything')
+      .redirects(0);
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=invalid_provider');
+  });
+
+  it('rejects callback with mismatched state — CSRF protection (redirect oauth_error=state_mismatch)', async () => {
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/kakao?code=abc&state=wrong-state')
+      .set('Cookie', ['oauth_state_kakao=correct-state'])
+      .redirects(0);
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=state_mismatch');
+  });
+
+  it('rejects callback when state cookie is absent (redirect oauth_error=state_mismatch)', async () => {
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/kakao?code=abc&state=some-state')
+      .redirects(0);
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=state_mismatch');
+  });
+
+  it('completes Kakao login flow: exchanges code, sets cookie, redirects without token in URL', async () => {
+    global.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.includes('kauth.kakao.com/oauth/token')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ access_token: 'kakao-access-token' }),
+        } as unknown as Response);
+      }
+      if (url.includes('kapi.kakao.com/v2/user/me')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 12345,
+            kakao_account: { email: 'kakao-user@example.com', profile: { nickname: '카카오닉' } },
+          }),
+        } as unknown as Response);
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${url}`));
+    });
+
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/kakao?code=valid-code&state=csrf-state')
+      .set('Cookie', ['oauth_state_kakao=csrf-state'])
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    const location = res.headers.location as string;
+    expect(location).toMatch(/oauth=1/);
+    expect(location).toContain('user_id=');
+    expect(location).not.toMatch(/token=/);
+    const setCookie = res.headers['set-cookie'];
+    expect(setCookie).toBeDefined();
+    const cookieStr = Array.isArray(setCookie) ? setCookie.join('; ') : String(setCookie);
+    expect(cookieStr.toLowerCase()).toContain('httponly');
+  });
+
+  it('completes Naver login flow and redirects without token in URL', async () => {
+    global.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.includes('nid.naver.com/oauth2.0/token')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ access_token: 'naver-access-token' }),
+        } as unknown as Response);
+      }
+      if (url.includes('openapi.naver.com/v1/nid/me')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            response: { id: 'naver-67890', email: 'naver-user@example.com', nickname: '네이버닉' },
+          }),
+        } as unknown as Response);
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${url}`));
+    });
+
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/naver?code=valid-code&state=csrf-state')
+      .set('Cookie', ['oauth_state_naver=csrf-state'])
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toMatch(/oauth=1/);
+    expect(res.headers.location).not.toMatch(/token=/);
+  });
+
+  it('completes Google login flow and redirects without token in URL', async () => {
+    global.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.includes('oauth2.googleapis.com/token')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ access_token: 'google-access-token' }),
+        } as unknown as Response);
+      }
+      if (url.includes('googleapis.com/oauth2/v2/userinfo')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 'google-99999',
+            email: 'google-user@example.com',
+            name: 'Google User',
+          }),
+        } as unknown as Response);
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${url}`));
+    });
+
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/google?code=valid-code&state=csrf-state')
+      .set('Cookie', ['oauth_state_google=csrf-state'])
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toMatch(/oauth=1/);
+    expect(res.headers.location).not.toMatch(/token=/);
+  });
+
+  it('redirects with oauth_error when provider token exchange fails', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({ error: 'invalid_grant' }),
+    } as unknown as Response);
+
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/kakao?code=bad-code&state=csrf-state')
+      .set('Cookie', ['oauth_state_kakao=csrf-state'])
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=');
+  });
+});
