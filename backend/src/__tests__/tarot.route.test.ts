@@ -80,7 +80,7 @@ describe('POST /api/tarot/read — auth required', () => {
   });
 
   it('authenticated free user — first read should succeed (200)', async () => {
-    const user = createUser('free1@test.com', 'password123')!;
+    const user = (await createUser('free1@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const res = await request(app)
@@ -95,7 +95,7 @@ describe('POST /api/tarot/read — auth required', () => {
   });
 
   it('authenticated free user — second read should be blocked (429)', async () => {
-    const user = createUser('free2@test.com', 'password123')!;
+    const user = (await createUser('free2@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const first = await request(app)
@@ -114,7 +114,7 @@ describe('POST /api/tarot/read — auth required', () => {
   });
 
   it('authenticated premium user — should bypass quota (multiple reads OK)', async () => {
-    const user = createUser('premium1@test.com', 'password123')!;
+    const user = (await createUser('premium1@test.com', 'password123'))!;
     const db = getDb();
     db.prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run('premium', user.id);
 
@@ -131,7 +131,7 @@ describe('POST /api/tarot/read — auth required', () => {
   });
 
   it('authenticated user — reading saved with user_id', async () => {
-    const user = createUser('saved@test.com', 'password123')!;
+    const user = (await createUser('saved@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     await request(app)
@@ -171,7 +171,7 @@ describe('POST /api/tarot/chat — auth + chat limit', () => {
   });
 
   it('authenticated free user — should succeed (200)', async () => {
-    const user = createUser('chat-free@test.com', 'password123')!;
+    const user = (await createUser('chat-free@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const res = await request(app)
@@ -184,7 +184,7 @@ describe('POST /api/tarot/chat — auth + chat limit', () => {
   });
 
   it('authenticated premium user — should succeed (200)', async () => {
-    const user = createUser('chat-premium@test.com', 'password123')!;
+    const user = (await createUser('chat-premium@test.com', 'password123'))!;
     const db = getDb();
     db.prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run('premium', user.id);
     const token = makeToken(user.id);
@@ -198,7 +198,7 @@ describe('POST /api/tarot/chat — auth + chat limit', () => {
   });
 
   it('free user exceeding maxDailyChats — should return 429', async () => {
-    const user = createUser('chatlimit@test.com', 'password123')!;
+    const user = (await createUser('chatlimit@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     // Exhaust daily chat quota (server-side tracking, ZEMA-3343 fix)
@@ -221,7 +221,7 @@ describe('POST /api/tarot/chat — auth + chat limit', () => {
   });
 
   it('premium user — should bypass chat limit', async () => {
-    const user = createUser('chatprem@test.com', 'password123')!;
+    const user = (await createUser('chatprem@test.com', 'password123'))!;
     const db = getDb();
     db.prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run('premium', user.id);
     const token = makeToken(user.id);
@@ -247,10 +247,10 @@ describe('POST /api/tarot/read — input validation', () => {
   let app: express.Application;
   let token: string;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     initDb();
     app = createTestApp();
-    const user = createUser('valuser@test.com', 'password123')!;
+    const user = (await createUser('valuser@test.com', 'password123'))!;
     token = makeToken(user.id);
   });
 
@@ -385,7 +385,7 @@ describe('POST /api/tarot/read — error handling', () => {
   });
 
   it('should return 400 when card ID is not in database (getCard returns null)', async () => {
-    const user = createUser('carderr@test.com', 'password123')!;
+    const user = (await createUser('carderr@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const res = await request(app)
@@ -406,7 +406,7 @@ describe('POST /api/tarot/read — error handling', () => {
   it('should return 500 when LLM throws a generic error', async () => {
     (tarotReading as jest.Mock).mockRejectedValueOnce(new Error('LLM connection failed'));
 
-    const user = createUser('llmerr@test.com', 'password123')!;
+    const user = (await createUser('llmerr@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const res = await request(app)
@@ -421,7 +421,7 @@ describe('POST /api/tarot/read — error handling', () => {
   it('should return 429 when LLM throws RateLimitError', async () => {
     (tarotReading as jest.Mock).mockRejectedValueOnce(new RateLimitError('rate limited'));
 
-    const user = createUser('rlerr@test.com', 'password123')!;
+    const user = (await createUser('rlerr@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const res = await request(app)
@@ -449,7 +449,7 @@ describe('POST /api/tarot/chat — error handling and edge cases', () => {
   });
 
   it('should return 400 for invalid chat input (missing question)', async () => {
-    const user = createUser('chatval@test.com', 'password123')!;
+    const user = (await createUser('chatval@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const res = await request(app)
@@ -462,7 +462,7 @@ describe('POST /api/tarot/chat — error handling and edge cases', () => {
   });
 
   it('should look up reading_id and use its interpretation', async () => {
-    const user = createUser('chatrid@test.com', 'password123')!;
+    const user = (await createUser('chatrid@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const db = getDb();
@@ -486,7 +486,7 @@ describe('POST /api/tarot/chat — error handling and edge cases', () => {
   it('should return 500 when LLM throws a generic error', async () => {
     (callLlm as jest.Mock).mockRejectedValueOnce(new Error('LLM connection failed'));
 
-    const user = createUser('chaterr@test.com', 'password123')!;
+    const user = (await createUser('chaterr@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const res = await request(app)
@@ -501,7 +501,7 @@ describe('POST /api/tarot/chat — error handling and edge cases', () => {
   it('should return 429 when LLM throws RateLimitError', async () => {
     (callLlm as jest.Mock).mockRejectedValueOnce(new RateLimitError('rate limited'));
 
-    const user = createUser('chatrl@test.com', 'password123')!;
+    const user = (await createUser('chatrl@test.com', 'password123'))!;
     const token = makeToken(user.id);
 
     const res = await request(app)

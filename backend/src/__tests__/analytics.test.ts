@@ -16,8 +16,8 @@ function makeToken(userId: string): string {
   return jwt.sign({ user_id: userId }, config.jwtSecret, { expiresIn: '7d' });
 }
 
-function createAdminUser(email: string, password: string): User | null {
-  const user = createUser(email, password);
+async function createAdminUser(email: string, password: string): Promise<User | null> {
+  const user = await createUser(email, password);
   if (user) {
     getDb().prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(user.id);
     user.is_admin = 1;
@@ -136,7 +136,7 @@ describe('analytics routes', () => {
     });
 
     it('rejects non-admin user (403)', async () => {
-      const user = createUser('regular@test.com', 'pass123');
+      const user = await createUser('regular@test.com', 'pass123');
       expect(user).not.toBeNull();
       const res = await request(app)
         .get('/api/analytics/summary')
@@ -146,7 +146,7 @@ describe('analytics routes', () => {
     });
 
     it('returns summary data for admin', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
+      const admin = await createAdminUser('admin-test@taronyang.com', 'pass123');
       expect(admin).not.toBeNull();
 
       const db = getDb();
@@ -176,7 +176,7 @@ describe('analytics routes', () => {
     });
 
     it('accepts custom days parameter (clamped to 90)', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123')!;
+      const admin = (await createAdminUser('admin-test@taronyang.com', 'pass123'))!;
       const res = await request(app)
         .get('/api/analytics/summary?days=30')
         .set('Authorization', `Bearer ${makeToken(admin.id)}`);
@@ -186,7 +186,7 @@ describe('analytics routes', () => {
     });
 
     it('clamps days parameter above 90', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123')!;
+      const admin = (await createAdminUser('admin-test@taronyang.com', 'pass123'))!;
       const res = await request(app)
         .get('/api/analytics/summary?days=500')
         .set('Authorization', `Bearer ${makeToken(admin.id)}`);
@@ -196,7 +196,7 @@ describe('analytics routes', () => {
     });
 
     it('defaults days to 7 for invalid input', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123')!;
+      const admin = (await createAdminUser('admin-test@taronyang.com', 'pass123'))!;
       const res = await request(app)
         .get('/api/analytics/summary?days=abc')
         .set('Authorization', `Bearer ${makeToken(admin.id)}`);

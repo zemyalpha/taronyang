@@ -195,32 +195,32 @@ describe('createUser — admin bootstrap', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('regular email — should create user with is_admin=0', () => {
-    const user = createUser('normal@test.com', 'password123');
+  it('regular email — should create user with is_admin=0', async () => {
+    const user = await createUser('normal@test.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(0);
   });
 
-  it('configured admin email — should create user with is_admin=1', () => {
-    const user = createUser('admin-test@taronyang.com', 'password123');
+  it('configured admin email — should create user with is_admin=1', async () => {
+    const user = await createUser('admin-test@taronyang.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(1);
   });
 
-  it('second configured admin email — should also get is_admin=1', () => {
-    const user = createUser('root@taronyang.com', 'password123');
+  it('second configured admin email — should also get is_admin=1', async () => {
+    const user = await createUser('root@taronyang.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(1);
   });
 
-  it('email with different case — should still match (case-insensitive check)', () => {
-    const user = createUser('Admin-Test@taronyang.com', 'password123');
+  it('email with different case — should still match (case-insensitive check)', async () => {
+    const user = await createUser('Admin-Test@taronyang.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(1);
   });
 
-  it('email that partially matches admin — should NOT get admin', () => {
-    const user = createUser('notadmin-test@taronyang.com', 'password123');
+  it('email that partially matches admin — should NOT get admin', async () => {
+    const user = await createUser('notadmin-test@taronyang.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(0);
   });
@@ -283,20 +283,20 @@ describe('createUser — error and edge cases', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('duplicate email — should return null', () => {
-    createUser('dup@test.com', 'password123');
-    const second = createUser('dup@test.com', 'different456');
+  it('duplicate email — should return null', async () => {
+    await createUser('dup@test.com', 'password123');
+    const second = await createUser('dup@test.com', 'different456');
     expect(second).toBeNull();
   });
 
-  it('with nickname — should use provided nickname', () => {
-    const user = createUser('nick@test.com', 'password123', 'MyNick');
+  it('with nickname — should use provided nickname', async () => {
+    const user = await createUser('nick@test.com', 'password123', 'MyNick');
     expect(user).not.toBeNull();
     expect(user!.nickname).toBe('MyNick');
   });
 
-  it('without nickname — should use email prefix as nickname', () => {
-    const user = createUser('alice@example.com', 'password123');
+  it('without nickname — should use email prefix as nickname', async () => {
+    const user = await createUser('alice@example.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.nickname).toBe('alice');
   });
@@ -310,32 +310,32 @@ describe('verifyUser', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('correct email and password — should return user', () => {
-    createUser('verify@test.com', 'mypassword');
-    const user = verifyUser('verify@test.com', 'mypassword');
+  it('correct email and password — should return user', async () => {
+    await createUser('verify@test.com', 'mypassword');
+    const user = await verifyUser('verify@test.com', 'mypassword');
     expect(user).not.toBeNull();
     expect(user!.email).toBe('verify@test.com');
   });
 
-  it('correct email but wrong password — should return null', () => {
-    createUser('verify2@test.com', 'mypassword');
-    const user = verifyUser('verify2@test.com', 'wrongpassword');
+  it('correct email but wrong password — should return null', async () => {
+    await createUser('verify2@test.com', 'mypassword');
+    const user = await verifyUser('verify2@test.com', 'wrongpassword');
     expect(user).toBeNull();
   });
 
-  it('non-existent email — should return null', () => {
-    const user = verifyUser('nobody@test.com', 'password123');
+  it('non-existent email — should return null', async () => {
+    const user = await verifyUser('nobody@test.com', 'password123');
     expect(user).toBeNull();
   });
 
-  it('OAuth-only user — should not be found by verifyUser (queries email provider only)', () => {
+  it('OAuth-only user — should not be found by verifyUser (queries email provider only)', async () => {
     findOrCreateOAuthUser({
       provider: 'kakao',
       provider_id: 'kakao-nopass',
       email: 'oauth-only@test.com',
       nickname: 'OAuthUser',
     });
-    const user = verifyUser('oauth-only@test.com', 'anything');
+    const user = await verifyUser('oauth-only@test.com', 'anything');
     expect(user).toBeNull();
   });
 });
@@ -348,8 +348,8 @@ describe('getUserById', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('existing user — should return user', () => {
-    const created = createUser('byid@test.com', 'password123');
+  it('existing user — should return user', async () => {
+    const created = await createUser('byid@test.com', 'password123');
     const found = getUserById(created!.id);
     expect(found).not.toBeNull();
     expect(found!.email).toBe('byid@test.com');
@@ -369,8 +369,8 @@ describe('getUserByEmail', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('existing email — should return user', () => {
-    createUser('byemail@test.com', 'password123');
+  it('existing email — should return user', async () => {
+    await createUser('byemail@test.com', 'password123');
     const found = getUserByEmail('byemail@test.com');
     expect(found).not.toBeNull();
     expect(found!.email).toBe('byemail@test.com');
@@ -407,8 +407,8 @@ describe('findOrCreateOAuthUser — merge and existing-match paths', () => {
     expect(second.email).toBe('merge1@test.com');
   });
 
-  it('existing email with different provider — should NOT merge (account hijack prevention)', () => {
-    createUser('merge2@test.com', 'password123');
+  it('existing email with different provider — should NOT merge (account hijack prevention)', async () => {
+    await createUser('merge2@test.com', 'password123');
     const oauthUser = findOrCreateOAuthUser({
       provider: 'kakao',
       provider_id: 'kakao-merge-2',
@@ -525,8 +525,8 @@ describe('getUserByIdSafe (ZEMA-3412)', () => {
     getDb().prepare('DELETE FROM users').run();
   });
 
-  it('returns token_version so middleware can validate versioned tokens', () => {
-    const user = createUser('safe-tv@example.com', 'password123', 'safeuser')!;
+  it('returns token_version so middleware can validate versioned tokens', async () => {
+    const user = (await createUser('safe-tv@example.com', 'password123', 'safeuser'))!;
     const safe = getUserByIdSafe(user.id);
     expect(safe).not.toBeNull();
     expect(safe!.token_version).toBe(user.token_version);
@@ -534,8 +534,8 @@ describe('getUserByIdSafe (ZEMA-3412)', () => {
     expect(safe!.chat_reset_date).toBeNull();
   });
 
-  it('never leaks password_hash', () => {
-    const user = createUser('safe-hash@example.com', 'password123', 'hashuser')!;
+  it('never leaks password_hash', async () => {
+    const user = (await createUser('safe-hash@example.com', 'password123', 'hashuser'))!;
     const safe = getUserByIdSafe(user.id)!;
     expect((safe as Record<string, unknown>).password_hash).toBeUndefined();
   });

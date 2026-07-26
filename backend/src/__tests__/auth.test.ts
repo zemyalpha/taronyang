@@ -54,7 +54,7 @@ describe('authMiddleware', () => {
   });
 
   it('rejects request signed with wrong secret (401)', async () => {
-    const user = createUser('wrong-secret@example.com', 'password123', 'wrongsecret')!;
+    const user = (await createUser('wrong-secret@example.com', 'password123', 'wrongsecret'))!;
     const token = makeToken(user.id, 'a-completely-different-secret');
     const res = await request(app)
       .get('/protected')
@@ -63,7 +63,7 @@ describe('authMiddleware', () => {
   });
 
   it('accepts a valid token and populates req.user (200)', async () => {
-    const user = createUser('valid@example.com', 'password123', 'validuser')!;
+    const user = (await createUser('valid@example.com', 'password123', 'validuser'))!;
     const token = makeToken(user.id);
     const res = await request(app)
       .get('/protected')
@@ -90,7 +90,7 @@ describe('authMiddleware token_version (ZEMA-3412)', () => {
   }
 
   it('accepts a token whose v matches user token_version (200) — regression for 401 on new login/signup', async () => {
-    const user = createUser('versioned@example.com', 'password123', 'versioned')!;
+    const user = (await createUser('versioned@example.com', 'password123', 'versioned'))!;
     const token = makeVersionedToken(user.id, user.token_version);
     const res = await request(app)
       .get('/protected')
@@ -100,7 +100,7 @@ describe('authMiddleware token_version (ZEMA-3412)', () => {
   });
 
   it('still rejects a stale token after token_version bump (401) — revocation intact', async () => {
-    const user = createUser('revoked@example.com', 'password123', 'revoked')!;
+    const user = (await createUser('revoked@example.com', 'password123', 'revoked'))!;
     const staleToken = makeVersionedToken(user.id, user.token_version);
     getDb().prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(user.id);
     const res = await request(app)
@@ -124,7 +124,7 @@ describe('login brute force protection', () => {
   });
 
   it('locks account after 5 failed login attempts (429)', async () => {
-    createUser('bruteforce@example.com', 'correctpass', 'bruteforce');
+    await createUser('bruteforce@example.com', 'correctpass', 'bruteforce');
 
     for (let i = 0; i < 5; i++) {
       const res = await request(app)
@@ -140,7 +140,7 @@ describe('login brute force protection', () => {
   });
 
   it('returns 429 on subsequent attempts while locked', async () => {
-    createUser('locked@example.com', 'correctpass', 'locked');
+    await createUser('locked@example.com', 'correctpass', 'locked');
 
     for (let i = 0; i < 5; i++) {
       await request(app)
@@ -155,7 +155,7 @@ describe('login brute force protection', () => {
   });
 
   it('clears attempts on successful login', async () => {
-    createUser('clear@example.com', 'correctpass', 'clear');
+    await createUser('clear@example.com', 'correctpass', 'clear');
 
     const fail1 = await request(app)
       .post('/api/auth/login')
@@ -175,8 +175,8 @@ describe('login brute force protection', () => {
   });
 
   it('does not lock a different account', async () => {
-    createUser('user-a@example.com', 'passA', 'userA');
-    createUser('user-b@example.com', 'passB', 'userB');
+    await createUser('user-a@example.com', 'passA', 'userA');
+    await createUser('user-b@example.com', 'passB', 'userB');
 
     for (let i = 0; i < 5; i++) {
       await request(app)
@@ -191,7 +191,7 @@ describe('login brute force protection', () => {
   });
 
   it('resets failed_count after lockout expires (no perpetual lockout)', async () => {
-    createUser('expire@example.com', 'correctpass', 'expire');
+    await createUser('expire@example.com', 'correctpass', 'expire');
 
     for (let i = 0; i < 5; i++) {
       await request(app)
@@ -240,7 +240,7 @@ describe('HttpOnly cookie auth (ZEMA-3283)', () => {
   });
 
   it('authMiddleware accepts a valid token sent via HttpOnly cookie (200)', async () => {
-    const user = createUser('cookie@example.com', 'password123', 'cookieuser')!;
+    const user = (await createUser('cookie@example.com', 'password123', 'cookieuser'))!;
     const token = jwt.sign({ user_id: user.id }, config.jwtSecret, { expiresIn: '7d' });
     const res = await request(protectedApp)
       .get('/protected')
@@ -250,7 +250,7 @@ describe('HttpOnly cookie auth (ZEMA-3283)', () => {
   });
 
   it('login sets an HttpOnly auth cookie containing a valid token', async () => {
-    createUser('cookielogin@example.com', 'correctpass', 'cookielogin');
+    await createUser('cookielogin@example.com', 'correctpass', 'cookielogin');
     const res = await request(authApp)
       .post('/api/auth/login')
       .send({ email: 'cookielogin@example.com', password: 'correctpass' });

@@ -34,7 +34,7 @@ describe('readings routes', () => {
     });
 
     it('returns empty list for new user', async () => {
-      const user = createUser('reader1@test.com', 'pass123');
+      const user = await createUser('reader1@test.com', 'pass123');
       const res = await request(app)
         .get('/readings')
         .set('Authorization', `Bearer ${makeToken(user!.id)}`);
@@ -44,7 +44,7 @@ describe('readings routes', () => {
     });
 
     it('returns saved readings ordered by newest first', async () => {
-      const user = createUser('reader2@test.com', 'pass123');
+      const user = await createUser('reader2@test.com', 'pass123');
       saveReading(user!.id, 'love', '질문1', [], '해석1');
       saveReading(user!.id, 'career', '질문2', [], '해석2');
 
@@ -56,8 +56,8 @@ describe('readings routes', () => {
     });
 
     it('only returns own readings', async () => {
-      const user1 = createUser('reader3@test.com', 'pass123');
-      const user2 = createUser('reader4@test.com', 'pass123');
+      const user1 = await createUser('reader3@test.com', 'pass123');
+      const user2 = await createUser('reader4@test.com', 'pass123');
       saveReading(user1!.id, 'love', 'private', [], '비공개');
 
       const res = await request(app)
@@ -70,7 +70,7 @@ describe('readings routes', () => {
 
   describe('GET /readings/:readingId', () => {
     it('returns 404 for non-existent reading', async () => {
-      const user = createUser('reader5@test.com', 'pass123');
+      const user = await createUser('reader5@test.com', 'pass123');
       const res = await request(app)
         .get('/readings/nonexistent-id')
         .set('Authorization', `Bearer ${makeToken(user!.id)}`);
@@ -78,7 +78,7 @@ describe('readings routes', () => {
     });
 
     it('returns reading detail for own reading', async () => {
-      const user = createUser('reader6@test.com', 'pass123');
+      const user = await createUser('reader6@test.com', 'pass123');
       const id = saveReading(user!.id, 'love', '테스트 질문', [], '테스트 해석');
 
       const res = await request(app)
@@ -90,8 +90,8 @@ describe('readings routes', () => {
     });
 
     it('returns 404 for other user reading', async () => {
-      const user1 = createUser('reader7@test.com', 'pass123');
-      const user2 = createUser('reader8@test.com', 'pass123');
+      const user1 = await createUser('reader7@test.com', 'pass123');
+      const user2 = await createUser('reader8@test.com', 'pass123');
       const id = saveReading(user1!.id, 'love', '비공개', [], '비공개 해석');
 
       const res = await request(app)
@@ -103,7 +103,7 @@ describe('readings routes', () => {
 
   describe('DELETE /readings/:readingId', () => {
     it('deletes own reading', async () => {
-      const user = createUser('reader9@test.com', 'pass123');
+      const user = await createUser('reader9@test.com', 'pass123');
       const id = saveReading(user!.id, 'love', '삭제할 질문', [], '삭제할 해석');
 
       const res = await request(app)
@@ -119,8 +119,8 @@ describe('readings routes', () => {
     });
 
     it('cannot delete other user reading', async () => {
-      const user1 = createUser('reader10@test.com', 'pass123');
-      const user2 = createUser('reader11@test.com', 'pass123');
+      const user1 = await createUser('reader10@test.com', 'pass123');
+      const user2 = await createUser('reader11@test.com', 'pass123');
       const id = saveReading(user1!.id, 'love', '비공개', [], '비공개 해석');
 
       const res = await request(app)

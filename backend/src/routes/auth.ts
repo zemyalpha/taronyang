@@ -94,7 +94,7 @@ function makeUserResponse(user: User) {
 // --- 엔드포인트 ---
 
 /** 회원가입 */
-authRouter.post('/signup', (req: Request, res: Response) => {
+authRouter.post('/signup', async (req: Request, res: Response) => {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -108,7 +108,7 @@ authRouter.post('/signup', (req: Request, res: Response) => {
     return;
   }
 
-  const user = createUser(email, password, nickname);
+  const user = await createUser(email, password, nickname);
   if (!user) {
     res.status(500).json({ detail: '회원가입에 실패했습니다' });
     return;
@@ -121,7 +121,7 @@ authRouter.post('/signup', (req: Request, res: Response) => {
 });
 
 /** 로그인 */
-authRouter.post('/login', (req: Request, res: Response) => {
+authRouter.post('/login', async (req: Request, res: Response) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -135,7 +135,7 @@ authRouter.post('/login', (req: Request, res: Response) => {
     return;
   }
 
-  const user = verifyUser(email, password);
+  const user = await verifyUser(email, password);
   if (!user) {
     const result = recordFailedLogin(email);
     if (result.locked) {

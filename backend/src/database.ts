@@ -211,10 +211,10 @@ export interface User {
 }
 
 /** 이메일 사용자 생성 */
-export function createUser(email: string, password: string, nickname?: string): User | null {
+export async function createUser(email: string, password: string, nickname?: string): Promise<User | null> {
   const db = getDb();
   const userId = randomUUID();
-  const hashed = bcrypt.hashSync(password, 12);
+  const hashed = await bcrypt.hash(password, 12);
   const normalizedEmail = email.trim().toLowerCase();
   const nick = nickname || normalizedEmail.split('@')[0];
   const isAdmin = isAdminEmail(normalizedEmail) ? 1 : 0;
@@ -231,16 +231,16 @@ export function createUser(email: string, password: string, nickname?: string): 
 }
 
 /** 이메일/비밀번호 확인 (timing-safe) */
-export function verifyUser(email: string, password: string): User | null {
+export async function verifyUser(email: string, password: string): Promise<User | null> {
   const db = getDb();
   const normalizedEmail = email.trim().toLowerCase();
   const row = db.prepare('SELECT * FROM users WHERE email = ? AND provider = ?').get(normalizedEmail, 'email') as User | undefined;
 
   if (!row || !row.password_hash) {
-    bcrypt.compareSync(password, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
+    await bcrypt.compare(password, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
     return null;
   }
-  if (bcrypt.compareSync(password, row.password_hash)) return row;
+  if (await bcrypt.compare(password, row.password_hash)) return row;
   return null;
 }
 
