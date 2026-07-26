@@ -44,7 +44,12 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     }
     req.user = user as User;
     next();
-  } catch {
+  } catch (err) {
+    if (err instanceof jwt.TokenExpiredError) {
+      logger.debug('JWT expired', { error: String(err) });
+    } else {
+      logger.warn('JWT verification failed', { error: String(err) });
+    }
     res.status(401).json({ detail: '토큰이 만료되었거나 유효하지 않습니다' });
   }
 }
@@ -190,7 +195,11 @@ authRouter.put('/me', authMiddleware, (req: Request, res: Response) => {
   }
 
   const updated = getUserById(user.id);
-  res.json(makeUserResponse(updated!));
+  if (!updated) {
+    res.status(404).json({ detail: '사용자를 찾을 수 없습니다' });
+    return;
+  }
+  res.json(makeUserResponse(updated));
 });
 
 /** 소셜 로그인 URL 목록 */
@@ -385,36 +394,32 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
 
 /** 생일로 별자리 계산 */
 function calcZodiac(birthDate: string): string | null {
-  try {
-    const parts = birthDate.split('-');
-    const month = parseInt(parts[1]);
-    const day = parseInt(parts[2]);
-    if ((month === 3 && day >= 21) || (month === 4 && day <= 19))
-      return '양자리';
-    if ((month === 4 && day >= 20) || (month === 5 && day <= 20))
-      return '황소자리';
-    if ((month === 5 && day >= 21) || (month === 6 && day <= 21))
-      return '쌍둥이자리';
-    if ((month === 6 && day >= 22) || (month === 7 && day <= 22))
-      return '게자리';
-    if ((month === 7 && day >= 23) || (month === 8 && day <= 22))
-      return '사자자리';
-    if ((month === 8 && day >= 23) || (month === 9 && day <= 23))
-      return '처녀자리';
-    if ((month === 9 && day >= 24) || (month === 10 && day <= 22))
-      return '천칭자리';
-    if ((month === 10 && day >= 23) || (month === 11 && day <= 22))
-      return '전갈자리';
-    if ((month === 11 && day >= 23) || (month === 12 && day <= 24))
-      return '사수자리';
-    if ((month === 12 && day >= 25) || (month === 1 && day <= 19))
-      return '염소자리';
-    if ((month === 1 && day >= 20) || (month === 2 && day <= 18))
-      return '물병자리';
-    if ((month === 2 && day >= 19) || (month === 3 && day <= 20))
-      return '물고기자리';
-  } catch {
-    // 무시
-  }
+  const parts = birthDate.split('-');
+  const month = parseInt(parts[1]);
+  const day = parseInt(parts[2]);
+  if ((month === 3 && day >= 21) || (month === 4 && day <= 19))
+    return '양자리';
+  if ((month === 4 && day >= 20) || (month === 5 && day <= 20))
+    return '황소자리';
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 21))
+    return '쌍둥이자리';
+  if ((month === 6 && day >= 22) || (month === 7 && day <= 22))
+    return '게자리';
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22))
+    return '사자자리';
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 23))
+    return '처녀자리';
+  if ((month === 9 && day >= 24) || (month === 10 && day <= 22))
+    return '천칭자리';
+  if ((month === 10 && day >= 23) || (month === 11 && day <= 22))
+    return '전갈자리';
+  if ((month === 11 && day >= 23) || (month === 12 && day <= 24))
+    return '사수자리';
+  if ((month === 12 && day >= 25) || (month === 1 && day <= 19))
+    return '염소자리';
+  if ((month === 1 && day >= 20) || (month === 2 && day <= 18))
+    return '물병자리';
+  if ((month === 2 && day >= 19) || (month === 3 && day <= 20))
+    return '물고기자리';
   return null;
 }
