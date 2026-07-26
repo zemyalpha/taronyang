@@ -10,6 +10,12 @@ export async function onRequest(context) {
   const normalizedUrl = backendUrl.replace(/\/+$/, "");
   const url = new URL(context.request.url);
   const apiPath = context.params.path ? context.params.path.join("/") : "";
+  if (apiPath.includes("..")) {
+    return new Response(JSON.stringify({ error: "Bad Request" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const apiUrl = `${normalizedUrl}/api/${apiPath}${url.search}`;
 
   // Allow-list headers to forward (prevent trust-signaling header injection)

@@ -384,7 +384,7 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     const jwtToken = createToken(user.id, user.token_version);
     setAuthCookie(res, jwtToken);
 
-    const redirectUrl = `/login?oauth=1&user_id=${encodeURIComponent(user.id)}&nickname=${encodeURIComponent(user.nickname || '')}`;
+    const redirectUrl = '/login?oauth=1';
     res.redirect(redirectUrl);
   } catch (err) {
     logger.error('OAuth callback error', { provider, error: String(err) });
