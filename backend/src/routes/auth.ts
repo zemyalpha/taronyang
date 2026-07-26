@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { config } from '../config';
 import { createUser, verifyUser, getUserById, getUserByIdSafe, getUserByEmail, findOrCreateOAuthUser, getDb, User, isAccountLocked, recordFailedLogin, clearLoginAttempts } from '../database';
 import { signupSchema, loginSchema, updateMeSchema } from '../validation';
+import { logger } from '../logger';
 
 export const authRouter = Router();
 
@@ -197,7 +198,7 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
   const urls: Record<string, string> = {};
   if (config.kakaoClientId) {
     const state = crypto.randomUUID();
-    res.cookie('oauth_state', state, {
+    res.cookie('kakao_oauth_state', state, {
       httpOnly: true,
       secure: config.nodeEnv === 'production',
       sameSite: 'lax',
@@ -217,7 +218,7 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
   }
   if (config.googleClientId) {
     const state = crypto.randomUUID();
-    res.cookie('oauth_state', state, {
+    res.cookie('google_oauth_state', state, {
       httpOnly: true,
       secure: config.nodeEnv === 'production',
       sameSite: 'lax',
@@ -252,6 +253,10 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
   let redirectUri: string;
 
   if (provider === 'kakao') {
+    if (!state || state !== req.cookies?.kakao_oauth_state) {
+      res.redirect('/login?oauth_error=state_mismatch');
+      return;
+    }
     tokenUrl = 'https://kauth.kakao.com/oauth/token';
     tokenBody = {
       grant_type: 'authorization_code',
@@ -281,6 +286,10 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     clientId = config.naverClientId;
     redirectUri = config.naverRedirectUri;
   } else {
+    if (!state || state !== req.cookies?.google_oauth_state) {
+      res.redirect('/login?oauth_error=state_mismatch');
+      return;
+    }
     tokenUrl = 'https://oauth2.googleapis.com/token';
     tokenBody = {
       grant_type: 'authorization_code',
@@ -369,7 +378,8 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     const redirectUrl = `/login?oauth=1&user_id=${encodeURIComponent(user.id)}&nickname=${encodeURIComponent(user.nickname || '')}`;
     res.redirect(redirectUrl);
   } catch (err) {
-    res.redirect(`/login?oauth_error=server_error&detail=${encodeURIComponent(String(err).slice(0, 200))}`);
+    logger.error('OAuth callback error', { provider, error: String(err) });
+    res.redirect('/login?oauth_error=server_error');
   }
 });
 

@@ -118,6 +118,7 @@ function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string)
   const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
   const safeNickname = escapeHtml(nickname);
   const safeHoroscope = escapeHtml(horoscope).replace(/\n/g, '<br>');
+  const safeUrl = escapeHtml(config.frontendUrl);
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
@@ -137,7 +138,7 @@ function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string)
         ${safeHoroscope}
       </div>
       <p style="text-align:center; margin-top:25px;">
-        <a href="${config.frontendUrl}" style="background:#e94560; color:#fff; padding:12px 30px; border-radius:8px; text-decoration:none; font-size:14px; display:inline-block;">
+        <a href="${safeUrl}" style="background:#e94560; color:#fff; padding:12px 30px; border-radius:8px; text-decoration:none; font-size:14px; display:inline-block;">
           타로 상담 받으러 가기 →
         </a>
       </p>
@@ -145,7 +146,7 @@ function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string)
   </tr>
   <tr>
     <td style="padding:15px; text-align:center; color:#666; font-size:11px; border-top:1px solid #333;">
-      <p style="margin:0;">타로냥 · 알림 설정 변경: <a href="${config.frontendUrl}/mypage" style="color:#e94560;">마이페이지</a></p>
+      <p style="margin:0;">타로냥 · 알림 설정 변경: <a href="${safeUrl}/mypage" style="color:#e94560;">마이페이지</a></p>
     </td>
   </tr>
 </table>

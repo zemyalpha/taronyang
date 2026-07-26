@@ -156,6 +156,7 @@ export function isAccountLocked(email: string): { locked: boolean; lockedUntil: 
   if (lockedUntil > new Date()) {
     return { locked: true, lockedUntil: row.locked_until };
   }
+  db.prepare('UPDATE login_attempts SET failed_count = 0, locked_until = NULL WHERE email = ?').run(email.toLowerCase());
   return { locked: false, lockedUntil: null };
 }
 

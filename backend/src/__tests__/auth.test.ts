@@ -276,12 +276,29 @@ describe('OAuth callback error handling (ZEMA-3416)', () => {
     config.kakaoClientId = '';
     config.kakaoRedirectUri = '';
 
-    const res = await request(app).get('/api/auth/oauth/callback/kakao?code=test');
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/kakao?code=test&state=test-state')
+      .set('Cookie', 'kakao_oauth_state=test-state');
     expect(res.status).toBe(302);
     expect(res.headers.location).toContain('oauth_error=not_configured');
 
     config.kakaoClientId = origKakaoId;
     config.kakaoRedirectUri = origKakaoUri;
+  });
+
+  it('kakao state mismatch — redirects with state_mismatch', async () => {
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/kakao?code=test&state=wrong-state')
+      .set('Cookie', 'kakao_oauth_state=correct-state');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=state_mismatch');
+  });
+
+  it('kakao missing state — redirects with state_mismatch', async () => {
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/kakao?code=test');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=state_mismatch');
   });
 
   it('naver state mismatch — redirects with state_mismatch', async () => {
@@ -298,11 +315,28 @@ describe('OAuth callback error handling (ZEMA-3416)', () => {
     config.googleClientId = '';
     config.googleRedirectUri = '';
 
-    const res = await request(app).get('/api/auth/oauth/callback/google?code=test');
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/google?code=test&state=test-state')
+      .set('Cookie', 'google_oauth_state=test-state');
     expect(res.status).toBe(302);
     expect(res.headers.location).toContain('oauth_error=not_configured');
 
     config.googleClientId = origGoogleId;
     config.googleRedirectUri = origGoogleUri;
+  });
+
+  it('google state mismatch — redirects with state_mismatch', async () => {
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/google?code=test&state=wrong-state')
+      .set('Cookie', 'google_oauth_state=correct-state');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=state_mismatch');
+  });
+
+  it('google missing state — redirects with state_mismatch', async () => {
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/google?code=test');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('oauth_error=state_mismatch');
   });
 });

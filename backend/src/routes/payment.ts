@@ -149,9 +149,8 @@ paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {
     return;
   }
 
-  let status = user.subscription_status;
   expireIfNeeded(user);
-  status = user.subscription_status;
+  const status = user.subscription_status;
 
   res.json({ status, expires_at: user.subscription_expires_at });
 });
