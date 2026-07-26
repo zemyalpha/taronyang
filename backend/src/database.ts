@@ -373,11 +373,6 @@ export function rollbackFreeQuota(user: User): void {
   }
 }
 
-export function invalidateUserTokens(userId: string): void {
-  const db = getDb();
-  db.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(userId);
-}
-
 export function checkAndIncrementChatQuota(user: User): boolean {
   const db = getDb();
   const today = todayString();

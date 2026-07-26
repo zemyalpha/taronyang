@@ -251,10 +251,20 @@ export async function sendDailyNotifications(): Promise<void> {
 /** 일운 캐시 사전 생성 (이메일 구독자 유무와 무관하게 매일 12별자리 캐시를 채운다)
  *  콜드 캐시에서 사용자 요청이 LLM을 동기 호출하면 Cloudflare 터널 타임아웃이
  *  발생하므로(콜드 호출 ~20-50s), 사용자 트래픽 전에 미리 생성한다. */
+let prewarming = false;
 export async function prewarmDailyCache(): Promise<void> {
-  logger.info('일운 캐시 사전 생성 시작');
-  await generateAllHoroscopes();
-  logger.info('일운 캐시 사전 생성 완료');
+  if (prewarming) {
+    logger.info('일운 캐시 사전 생성 스킵 — 이미 실행 중');
+    return;
+  }
+  prewarming = true;
+  try {
+    logger.info('일운 캐시 사전 생성 시작');
+    await generateAllHoroscopes();
+    logger.info('일운 캐시 사전 생성 완료');
+  } finally {
+    prewarming = false;
+  }
 }
 
 /** 스케줄러 시작 — interval handle 반환 (graceful shutdown용) */

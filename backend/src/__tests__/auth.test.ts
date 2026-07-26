@@ -3,7 +3,7 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import { authMiddleware, authRouter } from '../routes/auth';
-import { initDb, createUser, getDb } from '../database';
+import { initDb, createUser, getDb, isAccountLocked } from '../database';
 import { config } from '../config';
 
 function createTestApp() {
@@ -188,6 +188,39 @@ describe('login brute force protection', () => {
       .post('/api/auth/login')
       .send({ email: 'user-b@example.com', password: 'passB' });
     expect(res.status).toBe(200);
+  });
+
+  it('resets failed_count after lockout expires (no perpetual lockout)', async () => {
+    createUser('expire@example.com', 'correctpass', 'expire');
+
+    for (let i = 0; i < 5; i++) {
+      await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'expire@example.com', password: 'wrongpass' });
+    }
+
+    const rowBefore = getDb()
+      .prepare('SELECT failed_count, locked_until FROM login_attempts WHERE email = ?')
+      .get('expire@example.com') as { failed_count: number; locked_until: string };
+    expect(rowBefore.failed_count).toBe(5);
+    expect(rowBefore.locked_until).not.toBeNull();
+
+    getDb()
+      .prepare('UPDATE login_attempts SET locked_until = ? WHERE email = ?')
+      .run(new Date(Date.now() - 60_000).toISOString(), 'expire@example.com');
+
+    const locked = isAccountLocked('expire@example.com');
+    expect(locked.locked).toBe(false);
+
+    const rowAfter = getDb()
+      .prepare('SELECT failed_count FROM login_attempts WHERE email = ?')
+      .get('expire@example.com') as { failed_count: number };
+    expect(rowAfter.failed_count).toBe(0);
+
+    const singleFail = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'expire@example.com', password: 'wrongpass' });
+    expect(singleFail.status).toBe(401);
   });
 });
 
