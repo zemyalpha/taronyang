@@ -290,4 +290,43 @@ describe('analytics routes', () => {
       expect(row.ip).toBe('203.0.113.1');
     });
   });
+
+  // --- POST /api/analytics/event — DB error path ---
+
+  describe('POST /api/analytics/event — DB error path', () => {
+    it('returns 500 when DB insert fails', async () => {
+      const db = getDb();
+      db.pragma('query_only = 1');
+
+      const res = await request(app)
+        .post('/api/analytics/event')
+        .send({ events: [{ name: 'fail_test' }] });
+
+      expect(res.status).toBe(500);
+      expect(res.body.error).toContain('Failed');
+
+      db.pragma('query_only = 0');
+    });
+  });
+
+  // --- GET /api/analytics/summary — DB error path ---
+
+  describe('GET /api/analytics/summary — DB error path', () => {
+    it('returns 500 when summary query fails', async () => {
+      const admin = await createAdminUser('admin-test@taronyang.com', 'pass123');
+      const token = makeToken(admin!.id);
+
+      const db = getDb();
+      db.prepare('ALTER TABLE analytics_events RENAME TO analytics_events_bak').run();
+
+      const res = await request(app)
+        .get('/api/analytics/summary?days=7')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(500);
+      expect(res.body.error).toContain('Failed');
+
+      db.prepare('ALTER TABLE analytics_events_bak RENAME TO analytics_events').run();
+    });
+  });
 });

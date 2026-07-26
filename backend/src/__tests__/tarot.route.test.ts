@@ -16,7 +16,18 @@ jest.mock('../llm', () => {
   };
 });
 
+jest.mock('../routes/readings', () => {
+  const express = require('express');
+  const actual = jest.requireActual('../routes/readings');
+  return {
+    ...actual,
+    saveReading: jest.fn(actual.saveReading),
+    readingsRouter: express.Router(),
+  };
+});
+
 import { tarotReading, callLlm, RateLimitError } from '../llm';
+import { saveReading } from '../routes/readings';
 import { tarotRouter } from '../routes/tarot';
 import { initDb, getDb, createUser } from '../database';
 import { config } from '../config';
@@ -401,6 +412,42 @@ describe('POST /api/tarot/read — error handling', () => {
       });
 
     expect(res.status).toBe(200);
+  });
+
+  it('should return 400 when card ID does not exist', async () => {
+    const user = (await createUser('invalidcard@test.com', 'password123'))!;
+    const token = makeToken(user.id);
+
+    const res = await request(app)
+      .post('/api/tarot/read')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        category: 'love',
+        question: '테스트',
+        cards: [
+          { id: 0, is_upright: true },
+          { id: 1, is_upright: false },
+          { id: 999, is_upright: true },
+        ],
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.detail).toContain('카드');
+  });
+
+  it('should still return 200 when saveReading fails (non-fatal)', async () => {
+    (saveReading as jest.Mock).mockImplementationOnce(() => { throw new Error('DB write failed'); });
+
+    const user = (await createUser('savefail@test.com', 'password123'))!;
+    const token = makeToken(user.id);
+
+    const res = await request(app)
+      .post('/api/tarot/read')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ category: 'love', question: '테스트', cards: VALID_CARDS });
+
+    expect(res.status).toBe(200);
+    expect(res.body.interpretation).toBeDefined();
   });
 
   it('should return 500 when LLM throws a generic error', async () => {
