@@ -7,23 +7,10 @@ import { saveReading } from './readings';
 import { tarotReadSchema, tarotChatSchema } from '../validation';
 import { logger } from '../logger';
 import { config } from '../config';
-import { checkAndIncrementFreeQuota, getRemainingFreeCount, rollbackFreeQuota, checkAndIncrementChatQuota, rollbackChatQuota, isPremiumUser, getDb, getUserById, User } from '../database';
-import jwt from 'jsonwebtoken';
+import { checkAndIncrementFreeQuota, getRemainingFreeCount, rollbackFreeQuota, checkAndIncrementChatQuota, rollbackChatQuota, isPremiumUser, getDb, User } from '../database';
 import { authMiddleware } from './auth';
 
 export const tarotRouter = Router();
-
-/** JWT에서 사용자 추출 (선택적 — 비회원도 허용) */
-function extractUser(req: Request): User | null {
-  const auth = req.headers.authorization;
-  if (!auth?.startsWith('Bearer ')) return null;
-  try {
-    const payload = jwt.verify(auth.slice(7), config.jwtSecret) as { user_id: string };
-    return getUserById(payload.user_id);
-  } catch {
-    return null;
-  }
-}
 
 /** 카테고리 목록 */
 tarotRouter.get('/categories', (_req: Request, res: Response) => {

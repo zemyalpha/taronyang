@@ -249,7 +249,6 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
   let tokenBody: Record<string, string>;
   let userInfoUrl: string;
   let clientId: string;
-  let clientSecret: string;
   let redirectUri: string;
 
   if (provider === 'kakao') {
@@ -263,7 +262,6 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     };
     userInfoUrl = 'https://kapi.kakao.com/v2/user/me';
     clientId = config.kakaoClientId;
-    clientSecret = config.kakaoClientSecret;
     redirectUri = config.kakaoRedirectUri;
   } else if (provider === 'naver') {
     if (!state || state !== req.cookies?.naver_oauth_state) {
@@ -281,7 +279,6 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     };
     userInfoUrl = 'https://openapi.naver.com/v1/nid/me';
     clientId = config.naverClientId;
-    clientSecret = config.naverClientSecret;
     redirectUri = config.naverRedirectUri;
   } else {
     tokenUrl = 'https://oauth2.googleapis.com/token';
@@ -294,7 +291,6 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     };
     userInfoUrl = 'https://www.googleapis.com/oauth2/v2/userinfo';
     clientId = config.googleClientId;
-    clientSecret = config.googleClientSecret;
     redirectUri = config.googleRedirectUri;
   }
 
