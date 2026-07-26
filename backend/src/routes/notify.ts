@@ -16,7 +16,7 @@ interface UserSettings {
 
 function getSettings(user: { settings: string | null }): UserSettings {
   try { return JSON.parse(user.settings || '{}'); }
-  catch { return {}; }
+  catch (e) { logger.warn('Failed to parse user settings JSON', { error: String(e) }); return {}; }
 }
 
 /** 알림 설정 조회 */
