@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import { config } from './config';
 import { getDb } from './database';
 import { callLlm } from './llm';
+import { buildDailyPrompt } from './tarotPrompt';
 import { getKstDate } from './routes/notify';
 import { logger } from './logger';
 
@@ -43,19 +44,7 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
     return cached.full_reading;
   }
 
-  const prompt = `오늘의 운세를 작성해주세요.
-
-별자리: ${zodiacSign}
-날짜: ${date}
-
-다음 항목을 포함해주세요:
-1. 종합 운세 (2~3문장)
-2. ⭐ 운세 지수 (1~5점): 사랑, 재물, 건강, 행운
-3. 💡 오늘의 조언 (1문장)
-4. 🎨 Lucky 컬러 & 아이템
-
-따뜻하고 친근한 톤으로, 너무 막연하지 않게 작성해주세요.
-마크다운 형식으로 작성해주세요.`;
+  const prompt = buildDailyPrompt(zodiacSign, date);
 
   const messages = [
     { role: 'system' as const, content: '너는 타로냥, 친근한 AI 타로 점성술사야. 한국어로 따뜻하게 운세를 알려줘.' },

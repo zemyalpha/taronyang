@@ -48,19 +48,25 @@ export const READING_PROMPT = `## 상담 정보
 각 카드의 키워드를 자연스럽게 해석에 녹여내.
 마지막에 따뜻한 격려 한마디 해줘.`;
 
-export const DAILY_PROMPT = `## 별자리: {zodiac}
-## 날짜: {date}
+export const DAILY_PROMPT = `오늘의 운세를 작성해주세요.
 
-오늘의 운세를 작성해줘.
+별자리: {zodiac}
+날짜: {date}
 
-구조:
-1. 오늘의 한 줄 요약 (1문장)
-2. 운세 지수 (연애/재물/직장/건강, 각각 1~5점)
-3. Lucky Color (하나)
-4. Lucky Number (1~9)
-5. 상세 운세 (3~4문장)
+다음 항목을 포함해주세요:
+1. 종합 운세 (2~3문장)
+2. ⭐ 운세 지수 (1~5점): 사랑, 재물, 건강, 행운
+3. 💡 오늘의 조언 (1문장)
+4. 🎨 Lucky 컬러 & 아이템
 
-타로냥 말투로 작성해. 따뜻하고 희망차게.`;
+따뜻하고 친근한 톤으로, 너무 막연하지 않게 작성해주세요.
+마크다운 형식으로 작성해주세요.`;
+
+export function buildDailyPrompt(zodiacSign: string, date: string): string {
+  return DAILY_PROMPT
+    .replaceAll('{zodiac}', zodiacSign)
+    .replaceAll('{date}', date);
+}
 
 export function buildReadingPrompt(
   category: string,
