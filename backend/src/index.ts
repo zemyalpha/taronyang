@@ -1,5 +1,5 @@
 /** Express 앱 진입점 */
-import express from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -38,7 +38,18 @@ app.set('trust proxy', 1);
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
+  hsts: {
+    maxAge: 63072000,
+    includeSubDomains: true,
+    preload: true,
+  },
 }));
+
+// Permissions-Policy — 카메라/마이크/위치/결제/USB/클립보드 접근 차단
+app.use((_req: Request, res: Response, _next: NextFunction) => {
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), clipboard-write=()');
+  _next();
+});
 
 // 프로덕션 환경 HTTPS 강제 (host 헤더 검증으로 오픈 리다이렉트 방지)
 if (config.nodeEnv === 'production') {
