@@ -122,16 +122,30 @@ test.describe('SEO 최적화 (ZEMA-2573)', () => {
 
   test.describe('페이지 로딩 회귀 테스트', () => {
     test('모든 주요 페이지 200 로드', async ({ page }) => {
-      const routes = ['/', '/tarot', '/daily', '/history', '/mypage', '/login', '/pricing'];
+      const routes = [
+        '/', '/tarot', '/daily', '/history', '/mypage', '/login', '/pricing',
+        '/faq', '/blog/', '/cards/',
+      ];
       for (const route of routes) {
         const response = await page.goto(route, { waitUntil: 'domcontentloaded' });
         expect(response?.status()).toBe(200);
       }
     });
 
-    test('CSS 스타일시트 로드', async ({ page }) => {
-      const response = await page.goto('/static/css/style.css');
-      expect(response?.status()).toBe(200);
+    test('정적 자산 및 SEO 파일 로드', async ({ request }) => {
+      const assets = [
+        '/static/css/style.css',
+        '/og-image.png',
+        '/sitemap.xml',
+        '/robots.txt',
+        '/rss.xml',
+        '/manifest.json',
+        '/blog/daily/today-meta.json',
+      ];
+      for (const asset of assets) {
+        const response = await request.get(asset);
+        expect(response.status(), `${asset} should be 200`).toBe(200);
+      }
     });
   });
 });
