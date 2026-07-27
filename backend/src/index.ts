@@ -207,6 +207,13 @@ app.get('/rss.xml', (_req, res) => {
   res.set('Content-Type', 'application/rss+xml; charset=utf-8');
   res.sendFile(path.join(frontendPath, 'rss.xml'));
 });
+
+// OG 이미지 — 소셜 미디어 공유 미리보기 (모든 페이지에서 참조)
+app.get('/og-image.png', (_req, res) => {
+  res.set('Content-Type', 'image/png');
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(frontendPath, 'og-image.png'));
+});
 // 아이콘 — 장기 캐싱 (immutable)
 app.use('/icons', express.static(path.join(frontendPath, 'icons'), {
   maxAge: '1y',
