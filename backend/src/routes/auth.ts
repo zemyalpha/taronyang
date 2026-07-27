@@ -153,7 +153,12 @@ authRouter.post('/login', async (req: Request, res: Response) => {
 
 /** 로그아웃 — HttpOnly 쿠키 삭제 (ZEMA-3283) */
 authRouter.post('/logout', (_req: Request, res: Response) => {
-  res.clearCookie('token', { path: '/' });
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: config.nodeEnv === 'production',
+    sameSite: 'strict',
+    path: '/',
+  });
   res.json({ ok: true });
 });
 
