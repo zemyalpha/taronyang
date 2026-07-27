@@ -1,4 +1,4 @@
-import { initDb, getDb, createUser, verifyUser, getUserById, getUserByIdSafe, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, isPremiumUser, User } from '../database';
+import { initDb, getDb, createUser, verifyUser, getUserById, getUserByIdSafe, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, isPremiumUser, closeDb, User } from '../database';
 
 function makeFreeUser(overrides: Partial<User> = {}): User {
   return {
@@ -538,5 +538,66 @@ describe('getUserByIdSafe (ZEMA-3412)', () => {
     const user = (await createUser('safe-hash@example.com', 'password123', 'hashuser'))!;
     const safe = getUserByIdSafe(user.id)!;
     expect((safe as Record<string, unknown>).password_hash).toBeUndefined();
+  });
+});
+
+describe('findOrCreateOAuthUser — email merge edge cases', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('merges OAuth into existing passwordless account with same email', () => {
+    const existing = insertUser(makeFreeUser({
+      email: 'merge@test.com',
+      provider: 'email',
+      password_hash: null,
+    }));
+
+    const merged = findOrCreateOAuthUser({
+      provider: 'kakao',
+      provider_id: 'kakao-merge-1',
+      email: 'merge@test.com',
+      nickname: 'MergedUser',
+    });
+
+    expect(merged.id).toBe(existing.id);
+    expect(merged.provider).toBe('kakao');
+    expect(merged.provider_id).toBe('kakao-merge-1');
+  });
+
+  it('does NOT merge when existing account has password_hash (email conflict)', () => {
+    insertUser(makeFreeUser({
+      email: 'conflict@test.com',
+      provider: 'email',
+      password_hash: 'hashed_password_here',
+    }));
+
+    const user = findOrCreateOAuthUser({
+      provider: 'google',
+      provider_id: 'google-conflict-1',
+      email: 'conflict@test.com',
+      nickname: 'ConflictUser',
+    });
+
+    expect(user.id).not.toBe(getUserByEmail('conflict@test.com')?.id);
+    expect(user.email).toBeNull();
+    expect(user.provider).toBe('google');
+  });
+});
+
+describe('closeDb', () => {
+  it('closes the database connection safely', () => {
+    initDb();
+    const db = getDb();
+    expect(db).toBeDefined();
+
+    closeDb();
+
+    initDb();
+    const reopened = getDb();
+    expect(reopened).toBeDefined();
   });
 });
