@@ -192,6 +192,21 @@ app.get('/manifest.json', (_req, res) => {
   res.set('Cache-Control', 'public, max-age=3600');
   res.sendFile(path.join(frontendPath, 'manifest.json'));
 });
+
+// SEO 파일 — sitemap.xml, robots.txt, rss.xml
+app.get('/sitemap.xml', (_req, res) => {
+  res.set('Content-Type', 'application/xml; charset=utf-8');
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(frontendPath, 'sitemap.xml'));
+});
+app.get('/robots.txt', (_req, res) => {
+  res.set('Content-Type', 'text/plain; charset=utf-8');
+  res.sendFile(path.join(frontendPath, 'robots.txt'));
+});
+app.get('/rss.xml', (_req, res) => {
+  res.set('Content-Type', 'application/rss+xml; charset=utf-8');
+  res.sendFile(path.join(frontendPath, 'rss.xml'));
+});
 // 아이콘 — 장기 캐싱 (immutable)
 app.use('/icons', express.static(path.join(frontendPath, 'icons'), {
   maxAge: '1y',
