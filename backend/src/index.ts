@@ -204,6 +204,12 @@ app.use('/blog', express.static(path.join(frontendPath, 'blog'), {
   maxAge: '1h',
 }));
 
+// 타로카드 의미 페이지 (78장 메이저+마이너 아르카나)
+app.use('/cards', express.static(path.join(frontendPath, 'cards'), {
+  extensions: ['html'],
+  maxAge: '1h',
+}));
+
 const htmlPages = [
   { route: '/', file: 'index.html' },
   { route: '/tarot', file: 'tarot.html' },
