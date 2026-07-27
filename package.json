@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "build:css": "tailwindcss -i frontend/css/tailwind-input.css -o frontend/css/tailwind.css --minify",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:backend": "cd backend && npm run build",
+    "build": "npm run build:css && npm run build:backend",
+    "test": "cd backend && npm test",
+    "test:e2e": "npx playwright test",
+    "typecheck": "cd backend && npx tsc --noEmit",
+    "lint": "cd backend && npx eslint src --ext .ts",
     "prepare": "husky"
   },
   "repository": {
