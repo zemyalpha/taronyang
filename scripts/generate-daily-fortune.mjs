@@ -30,7 +30,7 @@ const __scriptDir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__scriptDir, '..');
 const DAILY_DIR = join(ROOT, 'frontend', 'blog', 'daily');
 const SITEMAP_PATH = join(ROOT, 'frontend', 'sitemap.xml');
-const SITE_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
+const SITE_URL = (process.env.SITE_URL || 'https://taronyang.com').replace(/\/$/, '');
 
 // ── Deterministic PRNG ────────────────────────────────────────────
 
