@@ -272,6 +272,62 @@ htmlPages.forEach(({ route, file }) => {
 // 헬스체크
 app.use('/api/health', healthRouter);
 
+// 404 처리 — 매칭되지 않는 모든 라우트
+app.use((req: Request, res: Response) => {
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({ error: '요청하신 API 엔드포인트를 찾을 수 없습니다.' });
+    return;
+  }
+
+  const html404 = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>페이지를 찾을 수 없어요 — 타로냥</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0a2e;
+    color: #f8fafc;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+  .box { max-width: 400px; }
+  .moon { font-size: 80px; margin-bottom: 20px; }
+  h1 { font-size: 24px; margin-bottom: 12px; color: #a78bfa; }
+  p { font-size: 16px; line-height: 1.6; color: #94a3b8; margin-bottom: 28px; }
+  .home {
+    display: inline-block;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: #fff; border: none; padding: 14px 32px;
+    border-radius: 999px; font-size: 16px; font-weight: 700;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="moon">🔮</div>
+    <h1>페이지를 찾을 수 없어요</h1>
+    <p>찾으시는 페이지가 존재하지 않거나 이동되었어요.<br>타로냥 홈으로 돌아가서 다시 시작해 보세요.</p>
+    <a href="/" class="home">타로냥 홈으로</a>
+  </div>
+</body>
+</html>`;
+
+  res.status(404).set('Content-Type', 'text/html; charset=utf-8').send(html404);
+});
+
 // 전역 에러 핸들러
 app.use((err: Error & { status?: number; statusCode?: number; type?: string }, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err instanceof SyntaxError && 'body' in err) {
