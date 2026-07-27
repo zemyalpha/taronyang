@@ -373,3 +373,86 @@ describe('OAuth callback error handling (ZEMA-3416)', () => {
     expect(res.headers.location).toContain('oauth_error=state_mismatch');
   });
 });
+
+describe('OAuth callback success redirect — no identity leak (ZEMA-3445)', () => {
+  let app: express.Application;
+  const origFetch = global.fetch;
+
+  beforeAll(() => {
+    initDb();
+    app = createAuthApp();
+  });
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+    config.googleClientId = 'test-google-id';
+    config.googleClientSecret = 'test-google-secret';
+    config.googleRedirectUri = 'https://example.com/api/auth/oauth/callback/google';
+  });
+
+  afterEach(() => {
+    global.fetch = origFetch;
+    config.googleClientId = '';
+    config.googleRedirectUri = '';
+  });
+
+  it('success redirect URL is exactly /login?oauth=1 — no user_id or nickname', async () => {
+    global.fetch = jest.fn().mockImplementation((url: string) => {
+      if (typeof url === 'string' && url.includes('token')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ access_token: 'mock-access-token' }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          email: 'oauth-user@example.com',
+          name: '오오쓰유저',
+          id: 'google-profile-42',
+        }),
+      });
+    }) as typeof fetch;
+
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/google?code=test-code&state=test-state')
+      .set('Cookie', 'google_oauth_state=test-state');
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('/login?oauth=1');
+    expect(res.headers.location).not.toMatch(/user_id/i);
+    expect(res.headers.location).not.toMatch(/nickname/i);
+    expect(res.headers.location).not.toContain('google-profile-42');
+    expect(res.headers.location).not.toContain('oauth-user');
+  });
+
+  it('success redirect sets HttpOnly auth cookie', async () => {
+    global.fetch = jest.fn().mockImplementation((url: string) => {
+      if (typeof url === 'string' && url.includes('token')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ access_token: 'mock-access-token' }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          email: 'cookie-test@example.com',
+          name: '쿠키냥',
+          id: 'google-cookie-99',
+        }),
+      });
+    }) as typeof fetch;
+
+    const res = await request(app)
+      .get('/api/auth/oauth/callback/google?code=test-code&state=test-state')
+      .set('Cookie', 'google_oauth_state=test-state');
+
+    expect(res.status).toBe(302);
+    const setCookie = res.headers['set-cookie'];
+    expect(setCookie).toBeDefined();
+    const cookieStr = Array.isArray(setCookie) ? setCookie.join(';') : setCookie;
+    expect(cookieStr).toMatch(/httponly/i);
+  });
+});
