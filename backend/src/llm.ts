@@ -92,6 +92,7 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
       }
       const reasoning = message.reasoning_content;
       if (typeof reasoning === 'string' && reasoning.length > 0) {
+        lastError = new Error('Z.ai API 응답 형식 오류: content 비어있음 (reasoning_content만 반환됨)');
         continue;
       }
       throw new Error('Z.ai API 응답 형식 오류: content와 reasoning_content 모두 비어있음');
