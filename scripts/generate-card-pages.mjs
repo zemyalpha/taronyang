@@ -13,7 +13,7 @@
  * base path (/taronyang/...) during the build.
  */
 
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { MAJOR_ARCANA, MINOR_ARCANA, ALL_CARDS, getNextCard, getPrevCard } from './card-data.mjs';
@@ -410,6 +410,42 @@ function generateIndexPage(cards) {
 </html>`;
 }
 
+function updateSitemapWithCards(outputDir) {
+  const sitemapPath = join(outputDir, 'sitemap.xml');
+  if (!existsSync(sitemapPath)) {
+    console.log('  ⚠ sitemap.xml not found — skipping sitemap update');
+    return;
+  }
+
+  let sitemap = readFileSync(sitemapPath, 'utf-8');
+  const today = new Date().toISOString().split('T')[0];
+
+  sitemap = sitemap.replace(/\r?\n[ \t]*<!-- card-pages-start -->[\s\S]*?<!-- card-pages-end -->[ \t]*(\r?\n)?/g, '');
+
+  const indexUrl = [
+    '  <url>',
+    `    <loc>${SITE_URL}/cards/</loc>`,
+    `    <lastmod>${today}</lastmod>`,
+    '    <changefreq>monthly</changefreq>',
+    '    <priority>0.8</priority>',
+    '  </url>',
+  ].join('\n');
+
+  const cardUrls = ALL_CARDS.map((card) => [
+    '  <url>',
+    `    <loc>${SITE_URL}/cards/${slugify(card)}.html</loc>`,
+    `    <lastmod>${today}</lastmod>`,
+    '    <changefreq>monthly</changefreq>',
+    '    <priority>0.7</priority>',
+    '  </url>',
+  ].join('\n')).join('\n');
+
+  const injection = `\n  <!-- card-pages-start -->\n${indexUrl}\n${cardUrls}\n  <!-- card-pages-end -->`;
+  sitemap = sitemap.replace('</urlset>', `${injection}\n</urlset>`);
+  writeFileSync(sitemapPath, sitemap);
+  console.log(`  ✓ sitemap.xml updated with ${ALL_CARDS.length + 1} card URLs`);
+}
+
 export function generateCardPages(outputDir) {
   const cardsDir = join(outputDir, 'cards');
   mkdirSync(cardsDir, { recursive: true });
@@ -425,6 +461,8 @@ export function generateCardPages(outputDir) {
   const indexHtml = generateIndexPage(ALL_CARDS);
   writeFileSync(join(cardsDir, 'index.html'), indexHtml);
   console.log('  ✓ cards/index.html');
+
+  updateSitemapWithCards(outputDir);
 
   console.log(`[card-pages] ✅ Generated ${ALL_CARDS.length} card pages + index`);
 }
