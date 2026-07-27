@@ -147,5 +147,32 @@ test.describe('SEO 최적화 (ZEMA-2573)', () => {
         expect(response.status(), `${asset} should be 200`).toBe(200);
       }
     });
+
+    test('404 — 존재하지 않는 HTML 페이지 → 브랜드 404 페이지', async ({ page }) => {
+      const response = await page.goto('/nonexistent-page-xyz', { waitUntil: 'domcontentloaded' });
+      expect(response?.status()).toBe(404);
+      const lang = await page.locator('html').getAttribute('lang');
+      expect(lang).toBe('ko');
+      const title = await page.title();
+      expect(title).toContain('페이지를 찾을 수 없어요');
+      const homeLink = page.locator('a[href="/"]');
+      await expect(homeLink).toBeVisible();
+    });
+
+    test('404 — 존재하지 않는 API 엔드포인트 → JSON 에러', async ({ request }) => {
+      const response = await request.get('/api/nonexistent-endpoint');
+      expect(response.status()).toBe(404);
+      const body = await response.json();
+      expect(body).toHaveProperty('error');
+    });
+
+    test('gzip 압축 활성화 확인', async ({ request }) => {
+      const response = await request.get('/blog/', {
+        headers: { 'Accept-Encoding': 'gzip' },
+      });
+      expect(response.status()).toBe(200);
+      const encoding = response.headers()['content-encoding'];
+      expect(encoding).toContain('gzip');
+    });
   });
 });
