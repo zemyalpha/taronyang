@@ -198,6 +198,12 @@ app.use('/icons', express.static(path.join(frontendPath, 'icons'), {
   immutable: true,
 }));
 
+// 블로그 정적 페이지 (SEO 콘텐츠 + 일일 운세 메타데이터)
+app.use('/blog', express.static(path.join(frontendPath, 'blog'), {
+  extensions: ['html'],
+  maxAge: '1h',
+}));
+
 const htmlPages = [
   { route: '/', file: 'index.html' },
   { route: '/tarot', file: 'tarot.html' },
@@ -206,6 +212,7 @@ const htmlPages = [
   { route: '/mypage', file: 'mypage.html' },
   { route: '/login', file: 'login.html' },
   { route: '/pricing', file: 'pricing.html' },
+  { route: '/faq', file: 'faq.html' },
   { route: '/admin', file: 'admin/index.html' },
 ];
 
