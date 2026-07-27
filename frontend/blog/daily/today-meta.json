@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-27",
-  "weekday": "월요일",
+  "date": "2026-07-28",
+  "weekday": "화요일",
   "cards": [
-    {
-      "name": "전차",
-      "symbol": "⚡",
-      "slug": "7-chariot"
-    },
     {
       "name": "세계",
       "symbol": "🌍",
       "slug": "21-world"
     },
     {
-      "name": "탑",
-      "symbol": "🗼",
-      "slug": "16-tower"
+      "name": "여사제",
+      "symbol": "🌙",
+      "slug": "2-high-priestess"
+    },
+    {
+      "name": "마법사",
+      "symbol": "🧙",
+      "slug": "1-magician"
     }
   ],
-  "summary": "오늘은 「승리」의 에너지가 흐르는 날이에요. 강한 의지로 목표를 향해 전진할 때예요. 승리는 가까워요. 다만 「완성」과 관련된 부분은 조심하고, 탑이 주는 「급변」의 메시지를…",
-  "luckyColor": "소프트 그린",
-  "luckyColorHex": "#86efac",
-  "luckyNumber": 3,
-  "url": "/blog/daily/2026-07-27.html"
+  "summary": "오늘은 「완성」의 에너지가 흐르는 날이에요. 하나의 큰 순환이 완성되고 있어요. 지금까지의 노력이 아름답게 완성될 거예요. 다만 「직관」과 관련된 부분은 조심하고, 마법사가 …",
+  "luckyColor": "라벤더 퍼플",
+  "luckyColorHex": "#a78bfa",
+  "luckyNumber": 8,
+  "url": "/blog/daily/2026-07-28.html"
 }
