@@ -12,8 +12,10 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@types/compression": "^1.8.1",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^12.11.1",
+    "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.0",

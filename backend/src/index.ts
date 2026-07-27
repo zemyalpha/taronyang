@@ -1,5 +1,6 @@
 /** Express 앱 진입점 */
 import express, { type Request, type Response, type NextFunction } from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -69,6 +70,9 @@ if (config.nodeEnv === 'production') {
     next();
   });
 }
+
+// gzip/deflate 압축 — HTML/CSS/JS 응답 크기 ~70% 절감
+app.use(compression());
 
 // CORS — 프로덕션에서는 명시적으로 허용된 Origin만 검증 (credentials: true + wildcard 금지)
 // Quick Tunnel URL 회전 대응: config.frontendUrl + extraCorsOrigins로 명시적 허용 (ZEMA-2620)
@@ -183,8 +187,12 @@ app.use('/api/analytics', analyticsRouter);
 
 // 정적 파일 (프론트엔드 자산만 — js/css/icons 하위 디렉토리만 노출)
 const frontendPath = path.join(__dirname, '../../frontend');
-app.use('/static/js', express.static(path.join(frontendPath, 'js')));
-app.use('/static/css', express.static(path.join(frontendPath, 'css')));
+app.use('/static/js', express.static(path.join(frontendPath, 'js'), {
+  maxAge: '1d',
+}));
+app.use('/static/css', express.static(path.join(frontendPath, 'css'), {
+  maxAge: '1d',
+}));
 app.use('/static/icons', express.static(path.join(frontendPath, 'icons'), {
   maxAge: '1y',
   immutable: true,
