@@ -41,11 +41,11 @@
         <!-- 로그인 폼 -->
         <form id="form-login" onsubmit="doLogin(event)" class="space-y-4">
             <div>
-                <label class="block text-sm text-gray-400 mb-1">이메일</label>
+                <label for="login-email" class="block text-sm text-gray-400 mb-1">이메일</label>
                 <input type="email" id="login-email" required autocomplete="email" placeholder="example@email.com" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
+                <label for="login-password" class="block text-sm text-gray-400 mb-1">비밀번호</label>
                 <input type="password" id="login-password" required autocomplete="current-password" maxlength="128" placeholder="비밀번호" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div id="login-error" class="text-softred text-sm hidden"></div>
@@ -55,15 +55,15 @@
         <!-- 회원가입 폼 -->
         <form id="form-signup" onsubmit="doSignup(event)" class="space-y-4 hidden">
             <div>
-                <label class="block text-sm text-gray-400 mb-1">이메일</label>
+                <label for="signup-email" class="block text-sm text-gray-400 mb-1">이메일</label>
                 <input type="email" id="signup-email" required autocomplete="email" placeholder="example@email.com" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
+                <label for="signup-password" class="block text-sm text-gray-400 mb-1">비밀번호</label>
                 <input type="password" id="signup-password" required autocomplete="new-password" minlength="8" maxlength="128" placeholder="8자 이상" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">닉네임 (선택)</label>
+                <label for="signup-nickname" class="block text-sm text-gray-400 mb-1">닉네임 (선택)</label>
                 <input type="text" id="signup-nickname" autocomplete="nickname" maxlength="30" placeholder="타로냥러버" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div id="signup-error" class="text-softred text-sm hidden"></div>
