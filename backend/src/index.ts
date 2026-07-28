@@ -239,6 +239,16 @@ app.use('/icons', express.static(path.join(frontendPath, 'icons'), {
   immutable: true,
 }));
 
+// 루트 파비콘 — 브라우저가 자동 요청하는 기본 경로 처리
+app.get('/favicon.ico', (_req, res) => {
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(frontendPath, 'icons', 'favicon-32.png'));
+});
+app.get('/apple-touch-icon.png', (_req, res) => {
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(frontendPath, 'icons', 'apple-touch-icon.png'));
+});
+
 // 블로그 정적 페이지 (SEO 콘텐츠 + 일일 운세 메타데이터)
 app.use('/blog', express.static(path.join(frontendPath, 'blog'), {
   extensions: ['html'],
