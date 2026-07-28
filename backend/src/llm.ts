@@ -55,6 +55,7 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
           messages,
           max_tokens: maxTokens,
           temperature,
+          reasoning_effort: 'none',
         }),
         signal: controller.signal,
       });

@@ -52,7 +52,7 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
   ];
 
   try {
-    const rawHoroscope = await callLlm(messages, 800, 0.9);
+    const rawHoroscope = await callLlm(messages, 2000, 0.9);
     const horoscope = stripChainOfThought(rawHoroscope);
     // 캐시 저장
     db.prepare(
