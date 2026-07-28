@@ -148,6 +148,16 @@ test.describe('SEO 최적화 (ZEMA-2573)', () => {
       }
     });
 
+    test('루트 파비콘 — favicon.ico와 apple-touch-icon.png가 200', async ({ request }) => {
+      const favicon = await request.get('/favicon.ico');
+      expect(favicon.status(), '/favicon.ico should be 200').toBe(200);
+      expect(favicon.headers()['content-type']).toContain('image/');
+
+      const appleIcon = await request.get('/apple-touch-icon.png');
+      expect(appleIcon.status(), '/apple-touch-icon.png should be 200').toBe(200);
+      expect(appleIcon.headers()['content-type']).toContain('image/');
+    });
+
     test('404 — 존재하지 않는 HTML 페이지 → 브랜드 404 페이지', async ({ page }) => {
       const response = await page.goto('/nonexistent-page-xyz', { waitUntil: 'domcontentloaded' });
       expect(response?.status()).toBe(404);
