@@ -181,11 +181,11 @@ function cardSlug(card) {
 }
 
 function cardUrl(card) {
-  return `/cards/${cardSlug(card)}.html`;
+  return `/cards/${cardSlug(card)}`;
 }
 
 function cardFullUrl(card) {
-  return `${SITE_URL}/cards/${cardSlug(card)}.html`;
+  return `${SITE_URL}/cards/${cardSlug(card)}`;
 }
 
 // ── Daily fortune HTML page ────────────────────────────────────────
@@ -208,7 +208,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     '@type': 'Article',
     headline: `${dateKr} ${weekday} 오늘의 타로운세`,
     description: summary,
-    url: `${SITE_URL}/blog/daily/${dateStr}.html`,
+    url: `${SITE_URL}/blog/daily/${dateStr}`,
     image: `${SITE_URL}/og-image.png`,
     author: { '@type': 'Organization', name: '타로냥' },
     publisher: {
@@ -233,7 +233,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
       { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
       { '@type': 'ListItem', position: 2, name: '블로그', item: `${SITE_URL}/blog/` },
       { '@type': 'ListItem', position: 3, name: '오늘의 운세', item: `${SITE_URL}/blog/daily/` },
-      { '@type': 'ListItem', position: 4, name: dateKr, item: `${SITE_URL}/blog/daily/${dateStr}.html` },
+      { '@type': 'ListItem', position: 4, name: dateKr, item: `${SITE_URL}/blog/daily/${dateStr}` },
     ],
   };
 
@@ -261,19 +261,19 @@ function generateDailyPage(dateStr, cards, allDates = []) {
 
   const prevDate = subtractDays(dateStr, 1);
   const nextDate = subtractDays(dateStr, -1);
-  const prevExists = allDates.includes(prevDate) || existsSync(join(DAILY_DIR, `${prevDate}.html`));
-  const nextExists = allDates.includes(nextDate) || existsSync(join(DAILY_DIR, `${nextDate}.html`));
+  const prevExists = allDates.includes(prevDate) || existsSync(join(DAILY_DIR, `${prevDate}`));
+  const nextExists = allDates.includes(nextDate) || existsSync(join(DAILY_DIR, `${nextDate}`));
 
   const navHtml = `
             <nav class="card-nav" aria-label="일운 탐색">
-                ${prevExists ? `<a href="/blog/daily/${prevDate}.html" class="card-nav-btn prev" rel="prev">
+                ${prevExists ? `<a href="/blog/daily/${prevDate}" class="card-nav-btn prev" rel="prev">
                     <span class="card-nav-arrow" aria-hidden="true">←</span>
                     <span class="card-nav-info">
                         <span class="card-nav-label">어제의 운세</span>
                         <span class="card-nav-name">${formatDateKorean(prevDate)}</span>
                     </span>
                 </a>` : '<span class="card-nav-btn prev disabled"></span>'}
-                ${nextExists ? `<a href="/blog/daily/${nextDate}.html" class="card-nav-btn next" rel="next">
+                ${nextExists ? `<a href="/blog/daily/${nextDate}" class="card-nav-btn next" rel="next">
                     <span class="card-nav-info">
                         <span class="card-nav-label">내일의 운세</span>
                         <span class="card-nav-name">${formatDateKorean(nextDate)}</span>
@@ -296,7 +296,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     <meta property="og:title" content="${dateKr} ${weekday} 오늘의 타로운세 | 타로냥">
     <meta property="og:description" content="${escapeHtml(summary)}">
     <meta property="og:type" content="article">
-    <meta property="og:url" content="${SITE_URL}/blog/daily/${dateStr}.html">
+    <meta property="og:url" content="${SITE_URL}/blog/daily/${dateStr}">
     <meta property="og:site_name" content="타로냥">
     <meta property="og:image" content="${SITE_URL}/og-image.png">
     <meta property="og:image:width" content="1200">
@@ -310,7 +310,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     <meta name="twitter:image" content="${SITE_URL}/og-image.png">
     <meta name="robots" content="${robotsMeta}">
     <meta name="author" content="타로냥">
-    <link rel="canonical" href="${SITE_URL}/blog/daily/${dateStr}.html">
+    <link rel="canonical" href="${SITE_URL}/blog/daily/${dateStr}">
     <script type="application/ld+json">
     ${JSON.stringify(articleSchema, null, 2)}
     </script>
@@ -491,7 +491,7 @@ function generateDailyIndex(fortuneDates) {
     const weekday = getWeekday(dateStr);
     const summary = overallSummary(cards);
     return `
-                <a href="/blog/daily/${dateStr}.html" class="daily-index-item">
+                <a href="/blog/daily/${dateStr}" class="daily-index-item">
                     <div class="daily-index-date">${formatDateKorean(dateStr)} ${weekday}</div>
                     <div class="daily-index-cards">${cards.map(c => `<span class="daily-index-card-symbol" aria-hidden="true">${c.symbol}</span>`).join('')}</div>
                     <div class="daily-index-summary">${escapeHtml(summary.length > 80 ? summary.slice(0, 78) + '…' : summary)}</div>
@@ -610,7 +610,7 @@ function generateTodayMeta(dateStr, cards) {
     luckyColor: luckyColor(dateStr).name,
     luckyColorHex: luckyColor(dateStr).hex,
     luckyNumber: luckyNumber(dateStr),
-    url: `/blog/daily/${dateStr}.html`,
+    url: `/blog/daily/${dateStr}`,
   };
 }
 
@@ -649,7 +649,7 @@ function updateSitemapWithDailyFortunes(fortuneDates) {
 
   const fortuneUrls = fortuneDates.map((dateStr) => [
     `  <url>`,
-    `    <loc>${SITE_URL}/blog/daily/${dateStr}.html</loc>`,
+    `    <loc>${SITE_URL}/blog/daily/${dateStr}</loc>`,
     `    <lastmod>${dateStr}</lastmod>`,
     `    <changefreq>monthly</changefreq>`,
     `    <priority>0.8</priority>`,
@@ -722,10 +722,10 @@ function updateRssWithDailyFortunes(visibleFortunes) {
     return [
       '    <item>',
       `      <title>${escapeXml(`${formatted} ${weekday} 오늘의 타로운세 — ${cardNames}`)}</title>`,
-      `      <link>${SITE_URL}/blog/daily/${dateStr}.html</link>`,
+      `      <link>${SITE_URL}/blog/daily/${dateStr}</link>`,
       `      <description>${escapeXml(`${formatted} ${weekday}의 타로운세. ${cardNames} 카드로 보는 하루 운세와 행운의 색.`)}</description>`,
       `      <pubDate>${formatRssDate(dateStr)}</pubDate>`,
-      `      <guid>${SITE_URL}/blog/daily/${dateStr}.html</guid>`,
+      `      <guid>${SITE_URL}/blog/daily/${dateStr}</guid>`,
       '    </item>',
     ].join('\n');
   }).join('\n');
@@ -801,7 +801,7 @@ function main() {
   for (const dateStr of dates) {
     const cards = pickCardsForDate(dateStr);
     const html = generateDailyPage(dateStr, cards, dates);
-    writeFileSync(join(DAILY_DIR, `${dateStr}.html`), html);
+    writeFileSync(join(DAILY_DIR, `${dateStr}`), html);
     console.log(`  ✓ ${dateStr} — ${cards.map(c => c.name).join(' · ')}`);
   }
 

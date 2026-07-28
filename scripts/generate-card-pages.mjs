@@ -27,11 +27,11 @@ function slugify(card) {
 }
 
 function cardUrl(card) {
-  return `/cards/${slugify(card)}.html`;
+  return `/cards/${slugify(card)}`;
 }
 
 function cardFullUrl(card) {
-  return `${SITE_URL}/cards/${slugify(card)}.html`;
+  return `${SITE_URL}/cards/${slugify(card)}`;
 }
 
 function escapeHtml(str) {
@@ -439,7 +439,7 @@ function updateSitemapWithCards(outputDir) {
 
   const cardUrls = ALL_CARDS.map((card) => [
     '  <url>',
-    `    <loc>${SITE_URL}/cards/${slugify(card)}.html</loc>`,
+    `    <loc>${SITE_URL}/cards/${slugify(card)}</loc>`,
     `    <lastmod>${today}</lastmod>`,
     '    <changefreq>monthly</changefreq>',
     '    <priority>0.7</priority>',
