@@ -96,6 +96,15 @@
 
     <script src="/static/js/utils.js"></script>
     <script>
+        function getRedirectUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get('redirect');
+            if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+                return redirect;
+            }
+            return '/';
+        }
+
         function showTab(tab) {
             document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
             document.getElementById('form-signup').classList.toggle('hidden', tab !== 'signup');
@@ -131,7 +140,7 @@
                 if (window.TaronyangAnalytics) {
                     TaronyangAnalytics.track('login_complete', { method: 'email' });
                 }
-                window.location.href = '/';
+                window.location.href = getRedirectUrl();
             } catch (err) {
                 errEl.textContent = err?.message || err || '로그인 중 오류가 발생했습니다.';
                 errEl.classList.remove('hidden');
@@ -163,7 +172,7 @@
                 if (window.TaronyangAnalytics) {
                     TaronyangAnalytics.track('signup_complete', { method: 'email' });
                 }
-                window.location.href = '/';
+                window.location.href = getRedirectUrl();
             } catch (err) {
                 errEl.textContent = err?.message || err || '회원가입 중 오류가 발생했습니다.';
                 errEl.classList.remove('hidden');
@@ -199,12 +208,12 @@
         }
 
         // OAuth 콜백 처리 — 쿠키는 백엔드에서 설정 (ZEMA-3283)
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('oauth') === '1') {
-            const user = { id: params.get('user_id'), nickname: params.get('nickname') };
+        const oauthParams = new URLSearchParams(window.location.search);
+        if (oauthParams.get('oauth') === '1') {
+            const user = { id: oauthParams.get('user_id'), nickname: oauthParams.get('nickname') };
             if (user.id) {
                 localStorage.setItem('user', JSON.stringify(user));
-                window.location.href = '/';
+                window.location.href = getRedirectUrl();
             }
         }
     </script>
