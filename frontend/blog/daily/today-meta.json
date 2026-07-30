@@ -1,26 +1,26 @@
 {
-  "date": "2026-07-30",
-  "weekday": "목요일",
+  "date": "2026-07-31",
+  "weekday": "금요일",
   "cards": [
     {
-      "name": "별",
-      "symbol": "⭐",
-      "slug": "17-star"
+      "name": "세계",
+      "symbol": "🌍",
+      "slug": "21-world"
     },
     {
-      "name": "마법사",
-      "symbol": "🧙",
-      "slug": "1-magician"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     },
     {
-      "name": "전차",
-      "symbol": "⚡",
-      "slug": "7-chariot"
+      "name": "매달린 사람",
+      "symbol": "🔄",
+      "slug": "12-hanged-man"
     }
   ],
-  "summary": "오늘은 「희망」의 에너지가 흐르는 날이에요. 희망의 빛이 비치고 있어요. 어려움 속에서도 빛은 항상 있어요. 다만 「창조」와 관련된 부분은 조심하고, 전차가 주는 「승리」의 …",
-  "luckyColor": "코랄 핑크",
-  "luckyColorHex": "#fb7185",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-07-30.html"
+  "summary": "오늘은 「완성」의 에너지가 흐르는 날이에요. 하나의 큰 순환이 완성되고 있어요. 지금까지의 노력이 아름답게 완성될 거예요. 다만 「용기」와 관련된 부분은 조심하고, 매달린 사…",
+  "luckyColor": "스카이 블루",
+  "luckyColorHex": "#38bdf8",
+  "luckyNumber": 3,
+  "url": "/blog/daily/2026-07-31.html"
 }
