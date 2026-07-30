@@ -77,19 +77,19 @@
             <h2 class="font-serif text-2xl text-center text-lavender mb-2">어떤 운이 궁금하신가요?</h2>
             <p class="text-center text-gray-400 mb-8">카테고리를 선택해주세요</p>
             <div class="grid grid-cols-2 gap-4" id="categories">
-                <button onclick="selectCategory('love')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button type="button" onclick="selectCategory('love')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">💕</div>
                     <div class="font-bold text-gold">연애운</div>
                 </button>
-                <button onclick="selectCategory('money')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button type="button" onclick="selectCategory('money')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">💰</div>
                     <div class="font-bold text-gold">재물운</div>
                 </button>
-                <button onclick="selectCategory('career')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button type="button" onclick="selectCategory('career')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">💼</div>
                     <div class="font-bold text-gold">직장운</div>
                 </button>
-                <button onclick="selectCategory('general')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button type="button" onclick="selectCategory('general')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">🌟</div>
                     <div class="font-bold text-gold">종합운</div>
                 </button>
@@ -103,8 +103,8 @@
             <div class="space-y-4">
                 <textarea id="user-question" rows="3" maxlength="500" placeholder="예: 새로운 인연이 있을까요? (선택사항)" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none resize-none"></textarea>
                 <div class="flex gap-3 justify-center">
-                    <button onclick="prevStep('category')" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">이전</button>
-                    <button onclick="goToShuffle()" class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">카드 뽑기 🃏</button>
+                    <button type="button" onclick="prevStep('category')" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">이전</button>
+                    <button type="button" onclick="goToShuffle()" class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">카드 뽑기 🃏</button>
                 </div>
             </div>
         </div>
@@ -115,7 +115,7 @@
             <p class="text-center text-gray-400 mb-2">선택: <span id="selected-count">0</span>/3</p>
             <div id="card-area" class="flex flex-wrap justify-center gap-3 my-6"></div>
             <div class="text-center">
-                <button id="btn-read" onclick="doReading()" disabled class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                <button type="button" id="btn-read" onclick="doReading()" disabled class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition disabled:opacity-40 disabled:cursor-not-allowed">
                     해석 받기 ✨
                 </button>
             </div>
@@ -134,11 +134,11 @@
                 <div id="chat-history" class="space-y-3 mb-4 max-h-64 overflow-y-auto"></div>
                 <div class="flex gap-2">
                     <input id="chat-input" type="text" placeholder="질문을 입력하세요..." maxlength="500" class="flex-1 bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none" onkeydown="if(event.key==='Enter')sendChat()">
-                    <button onclick="sendChat()" class="px-5 py-3 bg-lavender/20 text-lavender rounded-xl hover:bg-lavender/30 transition">전송</button>
+                    <button type="button" onclick="sendChat()" class="px-5 py-3 bg-lavender/20 text-lavender rounded-xl hover:bg-lavender/30 transition">전송</button>
                 </div>
             </div>
             <div class="text-center mt-8">
-                <button onclick="resetReading()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 상담받기 🔄</button>
+                <button type="button" onclick="resetReading()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 상담받기 🔄</button>
             </div>
         </div>
 

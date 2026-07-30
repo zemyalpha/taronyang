@@ -24,6 +24,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
 </head>
 <body class="bg-navy text-gray-100 font-sans min-h-screen flex items-center justify-center px-4">
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
 
     <div class="w-full max-w-sm">
         <!-- 로고 -->
@@ -34,8 +35,8 @@
 
         <!-- 탭 -->
         <div class="flex mb-6 border-b border-lavender/20">
-            <button id="tab-login" onclick="showTab('login')" class="flex-1 py-3 text-center text-lavender border-b-2 border-lavender font-bold">로그인</button>
-            <button id="tab-signup" onclick="showTab('signup')" class="flex-1 py-3 text-center text-gray-400 border-b-2 border-transparent hover:text-lavender transition">회원가입</button>
+            <button type="button" id="tab-login" onclick="showTab('login')" class="flex-1 py-3 text-center text-lavender border-b-2 border-lavender font-bold">로그인</button>
+            <button type="button" id="tab-signup" onclick="showTab('signup')" class="flex-1 py-3 text-center text-gray-400 border-b-2 border-transparent hover:text-lavender transition">회원가입</button>
         </div>
 
         <!-- 로그인 폼 -->
@@ -79,13 +80,13 @@
         <div class="mt-8 pt-6 border-t border-lavender/20">
             <p class="text-center text-sm text-gray-400 mb-4">또는 소셜 계정으로</p>
             <div class="space-y-3" id="social-buttons">
-                <button onclick="socialLogin('kakao')" class="w-full py-3 bg-[#FEE500] text-[#3C1E1E] rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
+                <button type="button" onclick="socialLogin('kakao')" class="w-full py-3 bg-[#FEE500] text-[#3C1E1E] rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
                     <span>💬</span> 카카오 로그인
                 </button>
-                <button onclick="socialLogin('naver')" class="w-full py-3 bg-[#03C75A] text-white rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
+                <button type="button" onclick="socialLogin('naver')" class="w-full py-3 bg-[#03C75A] text-white rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
                     <span>🟢</span> 네이버 로그인
                 </button>
-                <button onclick="socialLogin('google')" class="w-full py-3 bg-white text-gray-800 rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
+                <button type="button" onclick="socialLogin('google')" class="w-full py-3 bg-white text-gray-800 rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
                     <span>🔵</span> 구글 로그인
                 </button>
             </div>
