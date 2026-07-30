@@ -307,7 +307,7 @@
                 var todayStr = getTodayKST();
                 if (data.date && data.date < todayStr) {
                     try {
-                        var todayPageUrl = 'blog/daily/' + todayStr + '.html';
+                        var todayPageUrl = 'blog/daily/' + todayStr;
                         var pageResp = await fetch(todayPageUrl, { cache: 'no-cache' });
                         if (pageResp.ok) {
                             var html = await pageResp.text();
@@ -332,7 +332,7 @@
                                 var numMatch = heroMeta.textContent.match(/행운의 숫자\s*(\d+)/);
                                 if (numMatch) { data.luckyNumber = parseInt(numMatch[1], 10); }
                             }
-                            data.url = '/blog/daily/' + todayStr + '.html';
+                            data.url = '/blog/daily/' + todayStr;
                         }
                     } catch (e) { /* fallback failed — use stale meta data as-is */ }
                 }
