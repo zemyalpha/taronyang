@@ -232,6 +232,11 @@ app.get('/og-image.png', (_req, res) => {
   res.set('Cache-Control', 'public, max-age=86400');
   res.sendFile(path.join(frontendPath, 'og-image.png'));
 });
+app.get('/favicon.ico', (_req, res) => {
+  res.set('Content-Type', 'image/png');
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(frontendPath, 'icons/favicon-32.png'));
+});
 
 const htmlPages = [
   { route: '/', file: 'index.html' },
