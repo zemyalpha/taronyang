@@ -22,4 +22,10 @@
             t.classList.add('opacity-0', 'pointer-events-none');
         }, 2500);
     };
+
+    window.logout = async function () {
+        try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (_) {}
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+    };
 })();
