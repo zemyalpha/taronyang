@@ -198,6 +198,41 @@ app.use('/icons', express.static(path.join(frontendPath, 'icons'), {
   immutable: true,
 }));
 
+// SEO 및 콘텐츠 정적 파일
+// blog: 확장자 없는 파일(일운 페이지 등)을 text/html로 서빙 (Content-Type 버그 수정)
+app.use('/blog', express.static(path.join(frontendPath, 'blog'), {
+  extensions: ['html'],
+  setHeaders: (res, filePath) => {
+    if (!path.extname(filePath)) {
+      res.set('Content-Type', 'text/html; charset=utf-8');
+    }
+  },
+}));
+app.use('/assets', express.static(path.join(frontendPath, 'assets')));
+app.use('/cards', express.static(path.join(frontendPath, 'cards'), {
+  extensions: ['html'],
+}));
+app.get('/sitemap.xml', (_req, res) => {
+  res.set('Content-Type', 'application/xml; charset=utf-8');
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(frontendPath, 'sitemap.xml'));
+});
+app.get('/robots.txt', (_req, res) => {
+  res.set('Content-Type', 'text/plain; charset=utf-8');
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(frontendPath, 'robots.txt'));
+});
+app.get('/rss.xml', (_req, res) => {
+  res.set('Content-Type', 'application/rss+xml; charset=utf-8');
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(frontendPath, 'rss.xml'));
+});
+app.get('/og-image.png', (_req, res) => {
+  res.set('Content-Type', 'image/png');
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(frontendPath, 'og-image.png'));
+});
+
 const htmlPages = [
   { route: '/', file: 'index.html' },
   { route: '/tarot', file: 'tarot.html' },
@@ -206,6 +241,7 @@ const htmlPages = [
   { route: '/mypage', file: 'mypage.html' },
   { route: '/login', file: 'login.html' },
   { route: '/pricing', file: 'pricing.html' },
+  { route: '/faq', file: 'faq.html' },
   { route: '/admin', file: 'admin/index.html' },
 ];
 
@@ -217,6 +253,15 @@ htmlPages.forEach(({ route, file }) => {
 
 // 헬스체크
 app.use('/api/health', healthRouter);
+
+// 404 핸들러 (API는 JSON, HTML은 스타일된 페이지)
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({ error: '요청한 API 엔드포인트를 찾을 수 없습니다.' });
+    return;
+  }
+  res.status(404).sendFile(path.join(frontendPath, '404.html'));
+});
 
 // 전역 에러 핸들러
 app.use((err: Error & { status?: number; statusCode?: number; type?: string }, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
