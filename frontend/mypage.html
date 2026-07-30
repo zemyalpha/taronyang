@@ -128,7 +128,7 @@
     <script src="/static/js/utils.js"></script>
     <script>
         const API = window.location.origin + '/api';
-        if (!localStorage.getItem('user')) { location.href = '/login'; }
+        if (!localStorage.getItem('user')) { location.href = '/login?redirect=/mypage'; }
         const headers = {};
 
         function escapeHtml(str) {
@@ -147,7 +147,7 @@
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         localStorage.removeItem('user');
-                        location.href = '/login';
+                        location.href = '/login?redirect=/mypage';
                     } else {
                         showToast('프로필을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
                     }
