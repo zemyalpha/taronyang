@@ -261,8 +261,8 @@ function generateDailyPage(dateStr, cards, allDates = []) {
 
   const prevDate = subtractDays(dateStr, 1);
   const nextDate = subtractDays(dateStr, -1);
-  const prevExists = allDates.includes(prevDate) || existsSync(join(DAILY_DIR, `${prevDate}`));
-  const nextExists = allDates.includes(nextDate) || existsSync(join(DAILY_DIR, `${nextDate}`));
+  const prevExists = allDates.includes(prevDate) || existsSync(join(DAILY_DIR, `${prevDate}`)) || existsSync(join(DAILY_DIR, `${prevDate}.html`));
+  const nextExists = allDates.includes(nextDate) || existsSync(join(DAILY_DIR, `${nextDate}`)) || existsSync(join(DAILY_DIR, `${nextDate}.html`));
 
   const navHtml = `
             <nav class="card-nav" aria-label="일운 탐색">
@@ -464,9 +464,17 @@ function generateDailyPage(dateStr, cards, allDates = []) {
 
 function scanExistingFortunes() {
   if (!existsSync(DAILY_DIR)) return [];
+  const seen = new Set();
   return readdirSync(DAILY_DIR)
-    .filter((f) => /^\d{4}-\d{2}-\d{2}\.html$/.test(f))
-    .map((f) => f.replace('.html', ''))
+    .map((f) => {
+      const match = f.match(/^(\d{4}-\d{2}-\d{2})(?:\.html)?$/);
+      return match ? match[1] : null;
+    })
+    .filter((date) => {
+      if (!date || seen.has(date)) return false;
+      seen.add(date);
+      return true;
+    })
     .sort()
     .reverse();
 }

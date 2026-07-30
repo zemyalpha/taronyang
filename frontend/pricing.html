@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com cdn.iamport.kr; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-src cdn.iamport.kr; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com cdn.iamport.kr; style-src 'self' 'unsafe-inline' cdn.tailwindcss.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.trycloudflare.com; frame-src cdn.iamport.kr; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,12 +15,8 @@
     <meta property="og:url" content="https://taronyang.com/pricing">
     <meta property="og:site_name" content="타로냥">
     <meta property="og:image" content="https://taronyang.com/og-image.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
     <meta property="og:locale" content="ko_KR">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="요금제 - 무료 타로 & 프리미엄 무제한 상담 | 타로냥">
-    <meta name="twitter:description" content="매일 1회 무료 타로! 무제한 상담 프리미엄은 월 9,900원.">
     <meta name="twitter:image" content="https://taronyang.com/og-image.png">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://taronyang.com/pricing">
@@ -54,7 +50,8 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/tailwind.config.js"></script>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -68,7 +65,6 @@
 </head>
 <body class="bg-navy text-gray-100 font-sans min-h-screen">
 
-    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="/" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
@@ -76,7 +72,7 @@
         </div>
     </nav>
 
-    <main id="main-content" tabindex="-1" class="pt-20 pb-10 px-4 max-w-3xl mx-auto">
+    <main class="pt-20 pb-10 px-4 max-w-3xl mx-auto">
         <h1 class="font-serif text-3xl text-center text-lavender mb-12">💎 프리미엄 구독</h1>
 
         <!-- 현재 상태 -->

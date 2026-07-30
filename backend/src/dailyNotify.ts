@@ -8,7 +8,6 @@ import crypto from 'crypto';
 import { config } from './config';
 import { getDb } from './database';
 import { callLlm } from './llm';
-import { buildDailyPrompt } from './tarotPrompt';
 import { getKstDate } from './routes/notify';
 import { logger } from './logger';
 
@@ -39,12 +38,27 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
   ).get(zodiacSign, date) as { full_reading?: string } | undefined;
 
   const FALLBACK_PREFIX = '🐹 오늘';
+  const MIN_HOROSCOPE_LENGTH = 300;
 
-  if (cached?.full_reading && !cached.full_reading.startsWith(FALLBACK_PREFIX)) {
+  if (cached?.full_reading
+    && !cached.full_reading.startsWith(FALLBACK_PREFIX)
+    && cached.full_reading.length >= MIN_HOROSCOPE_LENGTH) {
     return cached.full_reading;
   }
 
-  const prompt = buildDailyPrompt(zodiacSign, date);
+  const prompt = `오늘의 운세를 작성해주세요.
+
+별자리: ${zodiacSign}
+날짜: ${date}
+
+다음 항목을 포함해주세요:
+1. 종합 운세 (2~3문장)
+2. ⭐ 운세 지수 (1~5점): 사랑, 재물, 건강, 행운
+3. 💡 오늘의 조언 (1문장)
+4. 🎨 Lucky 컬러 & 아이템
+
+따뜻하고 친근한 톤으로, 너무 막연하지 않게 작성해주세요.
+마크다운 형식으로 작성해주세요.`;
 
   const messages = [
     { role: 'system' as const, content: '너는 타로냥, 친근한 AI 타로 점성술사야. 한국어로 따뜻하게 운세를 알려줘.' },
@@ -54,9 +68,9 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
   try {
     const rawHoroscope = await callLlm(messages, 2000, 0.9);
     const horoscope = stripChainOfThought(rawHoroscope);
-    // 캐시 저장
+    // 캐시 저장 (REPLACE: 덮어쓰기 — truncated entry 재생성 시 필수)
     db.prepare(
-      'INSERT OR IGNORE INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT OR REPLACE INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
     ).run(crypto.randomUUID(), zodiacSign, date, horoscope, horoscope.substring(0, 100), '{}');
     return horoscope;
   } catch (err) {
@@ -79,7 +93,7 @@ export async function generateAllHoroscopes(): Promise<Record<string, string>> {
     const cached = stmt.get(sign, today) as { full_reading?: string } | undefined;
 
     let horoscope: string;
-    if (cached && cached.full_reading) {
+    if (cached && cached.full_reading && cached.full_reading.length >= 300) {
       horoscope = cached.full_reading;
     } else {
       if (needsDelay) {

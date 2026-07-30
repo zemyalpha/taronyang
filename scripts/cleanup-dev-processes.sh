@@ -93,7 +93,7 @@ fi
 # 임계치 초과 시 마지막 1000라인만 유지 (crash 루프 등으로 인한 무한 증식 방지)
 LOG_MAX_LINES="${LOG_MAX_LINES:-50000}"
 ROTATED=0
-for LOGFILE in /tmp/taronyang-backend.err /tmp/taronyang-backend.log /tmp/taronyang-monitor.out /tmp/taronyang-tunnel.err; do
+for LOGFILE in /tmp/taronyang-backend.err /tmp/taronyang-backend.log /tmp/taronyang-monitor.out /tmp/taronyang-tunnel.err /tmp/taronyang-cot-guard.log; do
   if [ -f "$LOGFILE" ]; then
     LINES=$(wc -l < "$LOGFILE" 2>/dev/null || echo 0)
     if [ "$LINES" -gt "$LOG_MAX_LINES" ]; then

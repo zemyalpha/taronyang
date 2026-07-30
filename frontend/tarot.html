@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com cdn.iamport.kr; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-src cdn.iamport.kr; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com cdn.iamport.kr; style-src 'self' 'unsafe-inline' cdn.tailwindcss.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.trycloudflare.com; frame-src cdn.iamport.kr; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,12 +15,8 @@
     <meta property="og:url" content="https://taronyang.com/tarot">
     <meta property="og:site_name" content="타로냥">
     <meta property="og:image" content="https://taronyang.com/og-image.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
     <meta property="og:locale" content="ko_KR">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="무료 AI 타로 상담 - 연애운·재물운·직장운 | 타로냥">
-    <meta name="twitter:description" content="24시간 무료 AI 타로! 연애운, 재물운, 직장운을 카드 3장으로 해석. 다운로드 없이 바로!">
     <meta name="twitter:image" content="https://taronyang.com/og-image.png">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://taronyang.com/tarot">
@@ -44,7 +40,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/tailwind.config.js"></script>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -80,19 +77,19 @@
             <h2 class="font-serif text-2xl text-center text-lavender mb-2">어떤 운이 궁금하신가요?</h2>
             <p class="text-center text-gray-400 mb-8">카테고리를 선택해주세요</p>
             <div class="grid grid-cols-2 gap-4" id="categories">
-                <button type="button" onclick="selectCategory('love')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button onclick="selectCategory('love')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">💕</div>
                     <div class="font-bold text-gold">연애운</div>
                 </button>
-                <button type="button" onclick="selectCategory('money')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button onclick="selectCategory('money')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">💰</div>
                     <div class="font-bold text-gold">재물운</div>
                 </button>
-                <button type="button" onclick="selectCategory('career')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button onclick="selectCategory('career')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">💼</div>
                     <div class="font-bold text-gold">직장운</div>
                 </button>
-                <button type="button" onclick="selectCategory('general')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
+                <button onclick="selectCategory('general')" class="cat-btn bg-dark-purple/60 border border-lavender/20 rounded-2xl p-6 hover:border-lavender/60 hover:bg-lavender/10 transition-all text-center">
                     <div class="text-4xl mb-2">🌟</div>
                     <div class="font-bold text-gold">종합운</div>
                 </button>
@@ -104,10 +101,10 @@
             <h2 class="font-serif text-2xl text-center text-lavender mb-2">구체적인 질문이 있으신가요?</h2>
             <p class="text-center text-gray-400 mb-8">없으면 그냥 넘어가셔도 좋아요</p>
             <div class="space-y-4">
-                <textarea id="user-question" rows="3" maxlength="500" aria-label="타로 질문 입력" placeholder="예: 새로운 인연이 있을까요? (선택사항)" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none resize-none"></textarea>
+                <textarea id="user-question" rows="3" maxlength="500" placeholder="예: 새로운 인연이 있을까요? (선택사항)" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none resize-none"></textarea>
                 <div class="flex gap-3 justify-center">
-                    <button type="button" onclick="prevStep('category')" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">이전</button>
-                    <button type="button" onclick="goToShuffle()" class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">카드 뽑기 🃏</button>
+                    <button onclick="prevStep('category')" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">이전</button>
+                    <button onclick="goToShuffle()" class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">카드 뽑기 🃏</button>
                 </div>
             </div>
         </div>
@@ -118,7 +115,7 @@
             <p class="text-center text-gray-400 mb-2">선택: <span id="selected-count">0</span>/3</p>
             <div id="card-area" class="flex flex-wrap justify-center gap-3 my-6"></div>
             <div class="text-center">
-                <button type="button" id="btn-read" onclick="doReading()" disabled class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                <button id="btn-read" onclick="doReading()" disabled class="px-8 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition disabled:opacity-40 disabled:cursor-not-allowed">
                     해석 받기 ✨
                 </button>
             </div>
@@ -136,12 +133,12 @@
                 <h3 class="text-gold font-bold mb-3">💬 더 궁금한 점이 있으시면 물어보세요</h3>
                 <div id="chat-history" class="space-y-3 mb-4 max-h-64 overflow-y-auto"></div>
                 <div class="flex gap-2">
-                    <input id="chat-input" type="text" aria-label="채팅 질문 입력" placeholder="질문을 입력하세요..." maxlength="500" class="flex-1 bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none" onkeydown="if(event.key==='Enter')sendChat()">
-                    <button type="button" onclick="sendChat()" class="px-5 py-3 bg-lavender/20 text-lavender rounded-xl hover:bg-lavender/30 transition">전송</button>
+                    <input id="chat-input" type="text" placeholder="질문을 입력하세요..." maxlength="500" class="flex-1 bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none" onkeydown="if(event.key==='Enter')sendChat()">
+                    <button onclick="sendChat()" class="px-5 py-3 bg-lavender/20 text-lavender rounded-xl hover:bg-lavender/30 transition">전송</button>
                 </div>
             </div>
             <div class="text-center mt-8">
-                <button type="button" onclick="resetReading()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 상담받기 🔄</button>
+                <button onclick="resetReading()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 상담받기 🔄</button>
             </div>
         </div>
 

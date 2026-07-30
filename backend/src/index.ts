@@ -1,6 +1,5 @@
 /** Express 앱 진입점 */
-import express, { type Request, type Response, type NextFunction } from 'express';
-import compression from 'compression';
+import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -39,18 +38,7 @@ app.set('trust proxy', 1);
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
-  hsts: {
-    maxAge: 63072000,
-    includeSubDomains: true,
-    preload: true,
-  },
 }));
-
-// Permissions-Policy — 카메라/마이크/위치/결제/USB/클립보드 접근 차단
-app.use((_req: Request, res: Response, _next: NextFunction) => {
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), clipboard-write=()');
-  _next();
-});
 
 // 프로덕션 환경 HTTPS 강제 (host 헤더 검증으로 오픈 리다이렉트 방지)
 if (config.nodeEnv === 'production') {
@@ -70,9 +58,6 @@ if (config.nodeEnv === 'production') {
     next();
   });
 }
-
-// gzip/deflate 압축 — HTML/CSS/JS 응답 크기 ~70% 절감
-app.use(compression());
 
 // CORS — 프로덕션에서는 명시적으로 허용된 Origin만 검증 (credentials: true + wildcard 금지)
 // Quick Tunnel URL 회전 대응: config.frontendUrl + extraCorsOrigins로 명시적 허용 (ZEMA-2620)
@@ -187,12 +172,8 @@ app.use('/api/analytics', analyticsRouter);
 
 // 정적 파일 (프론트엔드 자산만 — js/css/icons 하위 디렉토리만 노출)
 const frontendPath = path.join(__dirname, '../../frontend');
-app.use('/static/js', express.static(path.join(frontendPath, 'js'), {
-  maxAge: '1d',
-}));
-app.use('/static/css', express.static(path.join(frontendPath, 'css'), {
-  maxAge: '1d',
-}));
+app.use('/static/js', express.static(path.join(frontendPath, 'js')));
+app.use('/static/css', express.static(path.join(frontendPath, 'css')));
 app.use('/static/icons', express.static(path.join(frontendPath, 'icons'), {
   maxAge: '1y',
   immutable: true,
@@ -211,54 +192,10 @@ app.get('/manifest.json', (_req, res) => {
   res.set('Cache-Control', 'public, max-age=3600');
   res.sendFile(path.join(frontendPath, 'manifest.json'));
 });
-
-// SEO 파일 — sitemap.xml, robots.txt, rss.xml
-app.get('/sitemap.xml', (_req, res) => {
-  res.set('Content-Type', 'application/xml; charset=utf-8');
-  res.set('Cache-Control', 'public, max-age=3600');
-  res.sendFile(path.join(frontendPath, 'sitemap.xml'));
-});
-app.get('/robots.txt', (_req, res) => {
-  res.set('Content-Type', 'text/plain; charset=utf-8');
-  res.sendFile(path.join(frontendPath, 'robots.txt'));
-});
-app.get('/rss.xml', (_req, res) => {
-  res.set('Content-Type', 'application/rss+xml; charset=utf-8');
-  res.sendFile(path.join(frontendPath, 'rss.xml'));
-});
-
-// OG 이미지 — 소셜 미디어 공유 미리보기 (모든 페이지에서 참조)
-app.get('/og-image.png', (_req, res) => {
-  res.set('Content-Type', 'image/png');
-  res.set('Cache-Control', 'public, max-age=86400');
-  res.sendFile(path.join(frontendPath, 'og-image.png'));
-});
 // 아이콘 — 장기 캐싱 (immutable)
 app.use('/icons', express.static(path.join(frontendPath, 'icons'), {
   maxAge: '1y',
   immutable: true,
-}));
-
-// 루트 파비콘 — 브라우저가 자동 요청하는 기본 경로 처리
-app.get('/favicon.ico', (_req, res) => {
-  res.set('Cache-Control', 'public, max-age=86400');
-  res.sendFile(path.join(frontendPath, 'icons', 'favicon-32.png'));
-});
-app.get('/apple-touch-icon.png', (_req, res) => {
-  res.set('Cache-Control', 'public, max-age=86400');
-  res.sendFile(path.join(frontendPath, 'icons', 'apple-touch-icon.png'));
-});
-
-// 블로그 정적 페이지 (SEO 콘텐츠 + 일일 운세 메타데이터)
-app.use('/blog', express.static(path.join(frontendPath, 'blog'), {
-  extensions: ['html'],
-  maxAge: '1h',
-}));
-
-// 타로카드 의미 페이지 (78장 메이저+마이너 아르카나)
-app.use('/cards', express.static(path.join(frontendPath, 'cards'), {
-  extensions: ['html'],
-  maxAge: '1h',
 }));
 
 const htmlPages = [
@@ -269,7 +206,6 @@ const htmlPages = [
   { route: '/mypage', file: 'mypage.html' },
   { route: '/login', file: 'login.html' },
   { route: '/pricing', file: 'pricing.html' },
-  { route: '/faq', file: 'faq.html' },
   { route: '/admin', file: 'admin/index.html' },
 ];
 
@@ -281,62 +217,6 @@ htmlPages.forEach(({ route, file }) => {
 
 // 헬스체크
 app.use('/api/health', healthRouter);
-
-// 404 처리 — 매칭되지 않는 모든 라우트
-app.use((req: Request, res: Response) => {
-  if (req.path.startsWith('/api/')) {
-    res.status(404).json({ error: '요청하신 API 엔드포인트를 찾을 수 없습니다.' });
-    return;
-  }
-
-  const html404 = `<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>페이지를 찾을 수 없어요 — 타로냥</title>
-<meta name="robots" content="noindex">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0a0a2e;
-    color: #f8fafc;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    text-align: center;
-  }
-  .box { max-width: 400px; }
-  .moon { font-size: 80px; margin-bottom: 20px; }
-  h1 { font-size: 24px; margin-bottom: 12px; color: #a78bfa; }
-  p { font-size: 16px; line-height: 1.6; color: #94a3b8; margin-bottom: 28px; }
-  .home {
-    display: inline-block;
-    background: linear-gradient(135deg, #7c3aed, #a78bfa);
-    color: #fff; border: none; padding: 14px 32px;
-    border-radius: 999px; font-size: 16px; font-weight: 700;
-    text-decoration: none;
-  }
-</style>
-</head>
-<body>
-  <div class="box">
-    <div class="moon">🔮</div>
-    <h1>페이지를 찾을 수 없어요</h1>
-    <p>찾으시는 페이지가 존재하지 않거나 이동되었어요.<br>타로냥 홈으로 돌아가서 다시 시작해 보세요.</p>
-    <a href="/" class="home">타로냥 홈으로</a>
-  </div>
-</body>
-</html>`;
-
-  res.status(404).set('Content-Type', 'text/html; charset=utf-8').send(html404);
-});
 
 // 전역 에러 핸들러
 app.use((err: Error & { status?: number; statusCode?: number; type?: string }, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -367,9 +247,9 @@ const server = app.listen(config.port, config.host, () => {
   schedulerHandle = startDailyScheduler();
 });
 
-server.timeout = 30000;
-server.headersTimeout = 35000;
-server.requestTimeout = 40000;
+server.timeout = 120000;
+server.headersTimeout = 125000;
+server.requestTimeout = 130000;
 server.keepAliveTimeout = 5000;
 
 // Graceful shutdown — SIGTERM/SIGINT 수신 시 안전하게 종료

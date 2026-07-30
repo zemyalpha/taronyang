@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com cdn.iamport.kr; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-src cdn.iamport.kr; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com cdn.iamport.kr; style-src 'self' 'unsafe-inline' cdn.tailwindcss.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.trycloudflare.com; frame-src cdn.iamport.kr; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,12 +15,8 @@
     <meta property="og:url" content="https://taronyang.com/daily">
     <meta property="og:site_name" content="타로냥">
     <meta property="og:image" content="https://taronyang.com/og-image.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
     <meta property="og:locale" content="ko_KR">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="오늘의 운세 - 매일 업데이트 무료 일일 운세 | 타로냥">
-    <meta name="twitter:description" content="매일 업데이트되는 AI 오늘의 운세. 행운의 색, 추천 카드, 한 줄 조언을 확인하세요.">
     <meta name="twitter:image" content="https://taronyang.com/og-image.png">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://taronyang.com/daily">
@@ -43,7 +39,8 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/tailwind.config.js"></script>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -57,7 +54,6 @@
 </head>
 <body class="bg-navy text-gray-100 font-sans min-h-screen">
 
-    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <!-- 네비게이션 -->
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -72,47 +68,47 @@
         </div>
     </nav>
 
-    <main id="main-content" tabindex="-1" class="pt-20 pb-10 px-4 max-w-2xl mx-auto">
+    <main class="pt-20 pb-10 px-4 max-w-2xl mx-auto">
 
         <!-- 별자리 선택 -->
         <div id="zodiac-select" class="text-center py-10">
             <h1 class="font-serif text-3xl text-lavender mb-2">⭐ 오늘의 운세</h1>
             <p class="text-gray-400 mb-8">별자리를 선택하세요</p>
             <div class="grid grid-cols-3 gap-3" id="zodiac-grid">
-                <button type="button" onclick="selectZodiac('양자리','♈',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('양자리','♈',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♈</div><div class="text-sm mt-1">양자리</div><div class="text-xs text-gray-500">3/21-4/19</div>
                 </button>
-                <button type="button" onclick="selectZodiac('황소자리','♉',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('황소자리','♉',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♉</div><div class="text-sm mt-1">황소자리</div><div class="text-xs text-gray-500">4/20-5/20</div>
                 </button>
-                <button type="button" onclick="selectZodiac('쌍둥이자리','♊',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('쌍둥이자리','♊',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♊</div><div class="text-sm mt-1">쌍둥이자리</div><div class="text-xs text-gray-500">5/21-6/21</div>
                 </button>
-                <button type="button" onclick="selectZodiac('게자리','♋',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('게자리','♋',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♋</div><div class="text-sm mt-1">게자리</div><div class="text-xs text-gray-500">6/22-7/22</div>
                 </button>
-                <button type="button" onclick="selectZodiac('사자자리','♌',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('사자자리','♌',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♌</div><div class="text-sm mt-1">사자자리</div><div class="text-xs text-gray-500">7/23-8/22</div>
                 </button>
-                <button type="button" onclick="selectZodiac('처녀자리','♍',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('처녀자리','♍',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♍</div><div class="text-sm mt-1">처녀자리</div><div class="text-xs text-gray-500">8/23-9/23</div>
                 </button>
-                <button type="button" onclick="selectZodiac('천칭자리','♎',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('천칭자리','♎',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♎</div><div class="text-sm mt-1">천칭자리</div><div class="text-xs text-gray-500">9/24-10/22</div>
                 </button>
-                <button type="button" onclick="selectZodiac('전갈자리','♏',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('전갈자리','♏',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♏</div><div class="text-sm mt-1">전갈자리</div><div class="text-xs text-gray-500">10/23-11/22</div>
                 </button>
-                <button type="button" onclick="selectZodiac('궁수자리','♐',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('궁수자리','♐',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♐</div><div class="text-sm mt-1">궁수자리</div><div class="text-xs text-gray-500">11/23-12/24</div>
                 </button>
-                <button type="button" onclick="selectZodiac('염소자리','♑',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('염소자리','♑',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♑</div><div class="text-sm mt-1">염소자리</div><div class="text-xs text-gray-500">12/25-1/19</div>
                 </button>
-                <button type="button" onclick="selectZodiac('물병자리','♒',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('물병자리','♒',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♒</div><div class="text-sm mt-1">물병자리</div><div class="text-xs text-gray-500">1/20-2/18</div>
                 </button>
-                <button type="button" onclick="selectZodiac('물고기자리','♓',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
+                <button onclick="selectZodiac('물고기자리','♓',event)" class="z-btn bg-dark-purple/60 border border-lavender/20 rounded-xl p-4 hover:border-lavender/60 hover:bg-lavender/10 transition">
                     <div class="text-2xl">♓</div><div class="text-sm mt-1">물고기자리</div><div class="text-xs text-gray-500">2/19-3/20</div>
                 </button>
             </div>
@@ -175,7 +171,7 @@
 
             <!-- 공유/다시 -->
             <div class="flex gap-3 justify-center">
-                <button type="button" onclick="resetDaily()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 선택하기 🔄</button>
+                <button onclick="resetDaily()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 선택하기 🔄</button>
                 <a href="/tarot" class="px-6 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">타로 상담 🃏</a>
             </div>
         </div>
