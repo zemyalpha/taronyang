@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' cdn.iamport.kr; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.trycloudflare.com; frame-src cdn.iamport.kr; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +25,7 @@
 <body class="bg-navy text-gray-100 font-sans min-h-screen flex items-center justify-center px-4">
     <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
 
-    <div class="w-full max-w-sm">
+    <div id="main-content" tabindex="-1" class="w-full max-w-sm">
         <!-- 로고 -->
         <div class="text-center mb-8">
             <a href="/" class="text-4xl">🔮</a>
@@ -41,11 +41,11 @@
         <!-- 로그인 폼 -->
         <form id="form-login" onsubmit="doLogin(event)" class="space-y-4">
             <div>
-                <label class="block text-sm text-gray-400 mb-1">이메일</label>
+                <label for="login-email" class="block text-sm text-gray-400 mb-1">이메일</label>
                 <input type="email" id="login-email" required autocomplete="email" placeholder="example@email.com" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
+                <label for="login-password" class="block text-sm text-gray-400 mb-1">비밀번호</label>
                 <input type="password" id="login-password" required autocomplete="current-password" minlength="8" maxlength="128" placeholder="8자 이상" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div id="login-error" class="text-softred text-sm hidden"></div>
@@ -55,15 +55,15 @@
         <!-- 회원가입 폼 -->
         <form id="form-signup" onsubmit="doSignup(event)" class="space-y-4 hidden">
             <div>
-                <label class="block text-sm text-gray-400 mb-1">이메일</label>
+                <label for="signup-email" class="block text-sm text-gray-400 mb-1">이메일</label>
                 <input type="email" id="signup-email" required autocomplete="email" placeholder="example@email.com" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
+                <label for="signup-password" class="block text-sm text-gray-400 mb-1">비밀번호</label>
                 <input type="password" id="signup-password" required autocomplete="new-password" minlength="8" maxlength="128" placeholder="8자 이상" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">닉네임 (선택)</label>
+                <label for="signup-nickname" class="block text-sm text-gray-400 mb-1">닉네임 (선택)</label>
                 <input type="text" id="signup-nickname" autocomplete="nickname" maxlength="30" placeholder="타로냥러버" class="w-full bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
             </div>
             <div id="signup-error" class="text-softred text-sm hidden"></div>
