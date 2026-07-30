@@ -4,7 +4,7 @@
  * - API(/api/*): Network First, 실패 시 캐시 (있으면)
  */
 
-const SW_VERSION = "taronyang-sw-v3";
+const SW_VERSION = "taronyang-sw-v4";
 const STATIC_CACHE = `${SW_VERSION}-static`;
 const PAGE_CACHE = `${SW_VERSION}-pages`;
 const API_CACHE = `${SW_VERSION}-api`;
@@ -19,6 +19,7 @@ const PRECACHE_URLS = [
   "/blog/",
   "/cards/",
   "/manifest.json",
+  "/static/css/tailwind.css",
   "/static/css/style.css",
   "/static/js/app.js",
   "/static/js/config.js",
