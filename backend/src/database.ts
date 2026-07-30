@@ -362,7 +362,7 @@ export function getRemainingFreeCount(user: User): number {
 
 /** LLM 호출 실패 시 무료 할당량 롤백 (사용자가 서버 오류로 인해 할당량을 잃지 않도록) */
 export function rollbackFreeQuota(user: User): void {
-  if (user.subscription_status === 'premium') return;
+  if (isPremiumUser(user)) return;
   const db = getDb();
   db.prepare(
     'UPDATE users SET free_count_today = MAX(0, free_count_today - 1) WHERE id = ? AND free_count_today > 0'
@@ -397,7 +397,7 @@ export function checkAndIncrementChatQuota(user: User): boolean {
 }
 
 export function rollbackChatQuota(user: User): void {
-  if (user.subscription_status === 'premium') return;
+  if (isPremiumUser(user)) return;
   const db = getDb();
   db.prepare(
     'UPDATE users SET chat_count_today = MAX(0, chat_count_today - 1) WHERE id = ? AND chat_count_today > 0'

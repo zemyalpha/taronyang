@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -210,14 +210,22 @@
         }
 
         // OAuth 콜백 처리 — 쿠키는 백엔드에서 설정 (ZEMA-3283)
+        // 백엔드 redirect는 /login?oauth=1 (user_id/nickname 포함하지 않음)
+        // 쿠키 기반으로 /api/auth/me 호출하여 사용자 정보 획득
         const oauthParams = new URLSearchParams(window.location.search);
         if (oauthParams.get('oauth') === '1') {
-            const rawNick = oauthParams.get('nickname') || '';
-            const user = { id: oauthParams.get('user_id'), nickname: rawNick.substring(0, 30).replace(/[\x00-\x1f\x7f]/g, '') };
-            if (user.id) {
-                localStorage.setItem('user', JSON.stringify(user));
-                window.location.href = getRedirectUrl();
-            }
+            (async () => {
+                try {
+                    const res = await fetch('/api/auth/me');
+                    if (res.ok) {
+                        const user = await res.json();
+                        localStorage.setItem('user', JSON.stringify(user));
+                        window.location.href = getRedirectUrl();
+                    }
+                } catch (e) {
+                    // 쿠키가 설정되지 않은 경우 — 로그인 페이지 유지
+                }
+            })();
         }
     </script>
 

@@ -10,6 +10,7 @@ import { getDb } from './database';
 import { callLlm } from './llm';
 import { getKstDate } from './routes/notify';
 import { logger } from './logger';
+import { cleanupOldAnalyticsEvents } from './routes/analytics';
 
 function stripChainOfThought(text: string): string {
   if (typeof text !== 'string') return text;
@@ -68,9 +69,14 @@ export async function generateDailyHoroscope(zodiacSign: string, date: string): 
   try {
     const rawHoroscope = await callLlm(messages, 2000, 0.9);
     const horoscope = stripChainOfThought(rawHoroscope);
-    // 캐시 저장 (REPLACE: 덮어쓰기 — truncated entry 재생성 시 필수)
+    // 캐시 저장 (ON CONFLICT: email_sent 플래그 보존)
     db.prepare(
-      'INSERT OR REPLACE INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
+      `INSERT INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(date, zodiac_sign) DO UPDATE SET
+         full_reading = excluded.full_reading,
+         summary = excluded.summary,
+         scores = excluded.scores`
     ).run(crypto.randomUUID(), zodiacSign, date, horoscope, horoscope.substring(0, 100), '{}');
     return horoscope;
   } catch (err) {
@@ -276,6 +282,7 @@ export function startDailyScheduler(): NodeJS.Timeout {
   const CHECK_INTERVAL = 60_000; // 1분
   let lastSentDate = '';
   let lastPrewarmDate = '';
+  let lastCleanupDate = '';
 
   // 서버 시작 시 오늘 캐시 사전 생성 — 재시작해도 콜드 캐시로 인한 지연이 없음
   prewarmDailyCache().catch((err) =>
@@ -304,6 +311,17 @@ export function startDailyScheduler(): NodeJS.Timeout {
         lastSentDate = today;
       } catch (err) {
         logger.error('일운 발송 오류 — 재시도 대기', { error: String(err), date: today });
+      }
+    }
+
+    // 매일 04:00(KST) 분석 이벤트 정리 (90일 이전 데이터 삭제)
+    if (hour >= 4 && lastCleanupDate !== today) {
+      lastCleanupDate = today;
+      try {
+        const deleted = cleanupOldAnalyticsEvents();
+        if (deleted > 0) logger.info('분석 이벤트 정리', { deleted });
+      } catch (err) {
+        logger.error('분석 이벤트 정리 오류', { error: String(err) });
       }
     }
   }, CHECK_INTERVAL);
