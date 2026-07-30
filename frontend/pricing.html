@@ -162,7 +162,7 @@
 
             if (!localStorage.getItem('user')) {
                 showToast('로그인이 필요합니다');
-                setTimeout(() => window.location.href = '/login', 1000);
+                setTimeout(() => window.location.href = '/login?redirect=/pricing', 1000);
                 return;
             }
 
