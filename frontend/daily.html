@@ -177,8 +177,8 @@
                 }
                 const data = await res.json();
 
-                document.getElementById('result-summary').textContent = data.horoscope.substring(0, 60) + '...';
-                document.getElementById('result-detail').textContent = data.horoscope;
+                document.getElementById('result-summary').textContent = (data.horoscope || '').substring(0, 60) + '...';
+                document.getElementById('result-detail').textContent = data.horoscope || '';
 
             } catch (e) {
                 document.getElementById('result-detail').textContent = '운세를 불러오지 못했어요 😿 잠시 후 다시 시도해주세요.';

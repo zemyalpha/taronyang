@@ -28,7 +28,7 @@
     <div id="main-content" tabindex="-1" class="w-full max-w-sm">
         <!-- 로고 -->
         <div class="text-center mb-8">
-            <a href="/" class="text-4xl">🔮</a>
+            <a href="/" class="text-4xl" aria-label="타로냥 홈으로">🔮</a>
             <h1 class="font-serif text-2xl text-lavender mt-2">타로냥</h1>
         </div>
 
@@ -134,7 +134,7 @@
                         password: document.getElementById('login-password').value,
                     })
                 });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.detail || '로그인 실패');
                 localStorage.setItem('user', JSON.stringify(data.user));
                 if (window.TaronyangAnalytics) {
@@ -166,7 +166,7 @@
                         nickname: document.getElementById('signup-nickname').value || null,
                     })
                 });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.detail || '회원가입 실패');
                 localStorage.setItem('user', JSON.stringify(data.user));
                 if (window.TaronyangAnalytics) {
