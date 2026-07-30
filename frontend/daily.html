@@ -134,38 +134,6 @@
                 <p id="result-summary" class="text-lg font-serif text-gold"></p>
             </div>
 
-            <!-- 운세 지수 -->
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
-                    <div class="text-sm text-gray-400 mb-1">💕 연애운</div>
-                    <div id="score-love" class="text-xl"></div>
-                </div>
-                <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
-                    <div class="text-sm text-gray-400 mb-1">💰 재물운</div>
-                    <div id="score-money" class="text-xl"></div>
-                </div>
-                <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
-                    <div class="text-sm text-gray-400 mb-1">💼 직장운</div>
-                    <div id="score-career" class="text-xl"></div>
-                </div>
-                <div class="bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
-                    <div class="text-sm text-gray-400 mb-1">🏃 건강운</div>
-                    <div id="score-health" class="text-xl"></div>
-                </div>
-            </div>
-
-            <!-- Lucky -->
-            <div class="flex gap-3 mb-6">
-                <div class="flex-1 bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
-                    <div class="text-sm text-gray-400 mb-1">🎨 Lucky Color</div>
-                    <div id="lucky-color" class="font-bold text-gold"></div>
-                </div>
-                <div class="flex-1 bg-dark-purple/60 border border-lavender/15 rounded-xl p-4 text-center">
-                    <div class="text-sm text-gray-400 mb-1">🔢 Lucky Number</div>
-                    <div id="lucky-number" class="font-bold text-gold"></div>
-                </div>
-            </div>
-
             <!-- 상세 운세 -->
             <div id="result-detail" class="bg-dark-purple/40 border border-lavender/15 rounded-2xl p-6 leading-relaxed whitespace-pre-wrap text-gray-200 mb-6"></div>
 
@@ -174,16 +142,17 @@
                 <button onclick="resetDaily()" class="px-6 py-3 border border-lavender/30 text-lavender rounded-full hover:bg-lavender/10 transition">다시 선택하기 🔄</button>
                 <a href="/tarot" class="px-6 py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">타로 상담 🃏</a>
             </div>
+
+            <!-- 오늘의 타로운세 블로그 링크 -->
+            <div class="mt-6 text-center">
+                <a href="/blog/daily/" class="text-sm text-lavender/70 hover:text-lavender transition">📖 오늘의 타로운세 블로그에서 행운의 카드 보기 →</a>
+            </div>
         </div>
 
     </main>
 
     <script>
         let selectedZodiac = '';
-
-        function starsHtml(score) {
-            return '⭐'.repeat(score) + '☆'.repeat(5 - score);
-        }
 
         async function selectZodiac(name, symbol, ev) {
             selectedZodiac = name;
@@ -208,26 +177,11 @@
                 const data = await res.json();
 
                 document.getElementById('result-summary').textContent = data.horoscope.substring(0, 60) + '...';
-
-                const scores = { love: 3, money: 3, career: 3, health: 3 };
-                document.getElementById('score-love').innerHTML = starsHtml(scores.love);
-                document.getElementById('score-money').innerHTML = starsHtml(scores.money);
-                document.getElementById('score-career').innerHTML = starsHtml(scores.career);
-                document.getElementById('score-health').innerHTML = starsHtml(scores.health);
-                document.getElementById('lucky-color').textContent = '—';
-                document.getElementById('lucky-number').textContent = '—';
-
                 document.getElementById('result-detail').textContent = data.horoscope;
 
             } catch (e) {
                 document.getElementById('result-detail').textContent = '운세를 불러오지 못했어요 😿 잠시 후 다시 시도해주세요.';
                 document.getElementById('result-summary').textContent = '잠시 후 다시 시도해주세요';
-                document.getElementById('score-love').innerHTML = '';
-                document.getElementById('score-money').innerHTML = '';
-                document.getElementById('score-career').innerHTML = '';
-                document.getElementById('score-health').innerHTML = '';
-                document.getElementById('lucky-color').textContent = '—';
-                document.getElementById('lucky-number').textContent = '—';
             }
 
             document.getElementById('loading').classList.add('hidden');
