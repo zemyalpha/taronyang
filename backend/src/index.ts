@@ -199,6 +199,13 @@ app.use('/icons', express.static(path.join(frontendPath, 'icons'), {
 }));
 
 // SEO 및 콘텐츠 정적 파일
+// blog/daily: .html → extensionless 301 redirect (SEO canonical 통일)
+app.use('/blog/daily', (req, res, next) => {
+  if (req.path.endsWith('.html')) {
+    return res.redirect(301, `/blog/daily${req.path.replace(/\.html$/, '')}`);
+  }
+  next();
+});
 // blog: 확장자 없는 파일(일운 페이지 등)을 text/html로 서빙 (Content-Type 버그 수정)
 app.use('/blog', express.static(path.join(frontendPath, 'blog'), {
   extensions: ['html'],
