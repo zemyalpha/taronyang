@@ -89,6 +89,7 @@ function makeUserResponse(user: User) {
     nickname: user.nickname,
     provider: user.provider,
     subscription_status: user.subscription_status,
+    zodiac_sign: user.zodiac_sign || '',
   };
 }
 

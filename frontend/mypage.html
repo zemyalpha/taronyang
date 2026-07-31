@@ -172,6 +172,9 @@
                 const data = await res.json();
                 document.getElementById('notify_enabled').checked = data.daily_email !== false;
                 document.getElementById('notify_time').value = data.notify_time || '07:00';
+                if (data.zodiac_sign) {
+                    document.getElementById('zodiac_sign').value = data.zodiac_sign;
+                }
             } catch(e) { console.error(e); }
         }
 
