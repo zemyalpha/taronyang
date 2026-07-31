@@ -4,7 +4,7 @@
  * - API(/api/*): Network First, 실패 시 캐시 (있으면)
  */
 
-const SW_VERSION = "taronyang-sw-v7";
+const SW_VERSION = "taronyang-sw-v8";
 const STATIC_CACHE = `${SW_VERSION}-static`;
 const PAGE_CACHE = `${SW_VERSION}-pages`;
 const API_CACHE = `${SW_VERSION}-api`;
