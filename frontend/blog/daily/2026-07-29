@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -258,7 +258,13 @@
 
             
             <nav class="card-nav" aria-label="일운 탐색">
-                <span class="card-nav-btn prev disabled"></span>
+                <a href="/blog/daily/2026-07-28" class="card-nav-btn prev" rel="prev">
+                    <span class="card-nav-arrow" aria-hidden="true">←</span>
+                    <span class="card-nav-info">
+                        <span class="card-nav-label">어제의 운세</span>
+                        <span class="card-nav-name">2026년 7월 28일</span>
+                    </span>
+                </a>
                 <a href="/blog/daily/2026-07-30" class="card-nav-btn next" rel="next">
                     <span class="card-nav-info">
                         <span class="card-nav-label">내일의 운세</span>

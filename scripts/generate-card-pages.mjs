@@ -95,7 +95,7 @@ function generateCardPage(card, allCards) {
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -130,6 +130,10 @@ function generateCardPage(card, allCards) {
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="타로냥">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
@@ -251,7 +255,7 @@ function generateCardPage(card, allCards) {
         </article>
 
         <footer class="footer">
-            <p><a href="/cards/">메이저 아르카나 전체 보기</a> · <a href="/">타로냥 홈</a></p>
+            <p><a href="/cards/">메이저 아르카나 전체 보기</a> · <a href="/">타로냥 홈</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
         </footer>
     </div>
@@ -312,7 +316,7 @@ function generateIndexPage(cards) {
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -344,6 +348,10 @@ function generateIndexPage(cards) {
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="타로냥">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
@@ -390,7 +398,7 @@ function generateIndexPage(cards) {
 
         <footer class="footer">
             <p>타로냥 © 2026</p>
-            <p><a href="/">홈으로</a> · <a href="/tarot">타로 보기</a></p>
+            <p><a href="/">홈으로</a> · <a href="/tarot">타로 보기</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
         </footer>
     </div>

@@ -286,7 +286,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -323,6 +323,10 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="타로냥">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
@@ -434,7 +438,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
         </article>
 
         <footer class="footer">
-            <p><a href="/blog/daily/">일운 목록</a> · <a href="/blog/">블로그</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a></p>
+            <p><a href="/blog/daily/">일운 목록</a> · <a href="/blog/">블로그</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
         </footer>
     </div>
@@ -510,7 +514,7 @@ function generateDailyIndex(fortuneDates) {
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -541,6 +545,10 @@ function generateDailyIndex(fortuneDates) {
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="타로냥">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
@@ -576,7 +584,7 @@ ${recent.map(itemHtml).join('\n')}
         </section>
 
         <footer class="footer">
-            <p><a href="/blog/">블로그</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a></p>
+            <p><a href="/blog/">블로그</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
         </footer>
     </div>
@@ -684,6 +692,25 @@ function escapeXml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 }
 
+function scanBlogArticles() {
+  const blogDir = join(ROOT, 'frontend', 'blog');
+  if (!existsSync(blogDir)) return [];
+  return readdirSync(blogDir)
+    .filter((f) => f.endsWith('.html') && f !== 'index.html')
+    .sort()
+    .map((f) => {
+      const html = readFileSync(join(blogDir, f), 'utf-8');
+      const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+      const descMatch = html.match(/<meta name="description" content="([^"]+)"/);
+      const slug = f.replace(/\.html$/, '');
+      return {
+        title: titleMatch ? titleMatch[1] : slug,
+        link: `/blog/${slug}`,
+        description: descMatch ? descMatch[1] : '',
+      };
+    });
+}
+
 function updateRssWithDailyFortunes(visibleFortunes) {
   const today = todayKST();
 
@@ -748,6 +775,17 @@ function updateRssWithDailyFortunes(visibleFortunes) {
     '    </item>',
   ].join('\n')).join('\n');
 
+  const blogArticles = scanBlogArticles();
+  const blogItems = blogArticles.map((item) => [
+    '    <item>',
+    `      <title>${escapeXml(item.title)}</title>`,
+    `      <link>${SITE_URL}${item.link}</link>`,
+    `      <description>${escapeXml(item.description)}</description>`,
+    `      <pubDate>${formatRssDate(today)}</pubDate>`,
+    `      <guid>${SITE_URL}${item.link}</guid>`,
+    '    </item>',
+  ].join('\n')).join('\n');
+
   const rss = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<rss version="2.0">',
@@ -762,13 +800,15 @@ function updateRssWithDailyFortunes(visibleFortunes) {
     fortuneItems,
     '',
     allStaticItems,
+    '',
+    blogItems,
     '  </channel>',
     '</rss>',
     '',
   ].join('\n');
 
   writeFileSync(RSS_PATH, rss);
-  console.log(`  ✓ rss.xml updated with ${recentFortunes.length} daily fortune entries`);
+  console.log(`  ✓ rss.xml updated with ${recentFortunes.length} daily fortunes, ${staticItems.length} static items, ${blogArticles.length} blog articles`);
 }
 
 // ── Main ───────────────────────────────────────────────────────────
