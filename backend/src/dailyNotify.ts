@@ -5,7 +5,7 @@
  */
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
-import { config } from './config';
+import { config, getPublicUrl } from './config';
 import { getDb } from './database';
 import { callLlm } from './llm';
 import { getKstDate } from './routes/notify';
@@ -127,7 +127,7 @@ function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string)
   const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
   const safeNickname = escapeHtml(nickname);
   const safeHoroscope = escapeHtml(horoscope).replace(/\n/g, '<br>');
-  const safeUrl = escapeHtml(config.frontendUrl);
+  const safeUrl = escapeHtml(getPublicUrl());
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>

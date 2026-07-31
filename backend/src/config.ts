@@ -1,5 +1,7 @@
 /** 환경 변수 설정 */
 import dotenv from 'dotenv';
+import { readFileSync } from 'fs';
+import path from 'path';
 dotenv.config();
 
 function safeParseInt(value: string | undefined, fallback: number): number {
@@ -64,3 +66,43 @@ export const config = {
   frontendUrl: (process.env.FRONTEND_URL || 'http://localhost:8000').replace(/\/$/, ''),
   extraCorsOrigins: (process.env.EXTRA_CORS_ORIGINS || '').split(',').map(o => o.trim().replace(/\/$/, '')).filter(Boolean),
 };
+
+/** Cloudflare Quick Tunnel 로그에서 현재 공개 URL을 동적으로 추출.
+ *  Quick Tunnel URL은 프로세스 재시작 시마다 변경되므로 정적 .env 대신 런타임에 읽는다.
+ *  이메일 링크 등 외부에 노출되는 URL에 사용된다. */
+const TUNNEL_LOG_PATHS = ['/tmp/taronyang-tunnel.err', '/tmp/taronyang-tunnel.log'];
+let _cachedTunnelUrl = '';
+let _cacheTimestamp = 0;
+const CACHE_TTL_MS = 60_000;
+
+function extractTunnelUrl(): string {
+  const now = Date.now();
+  if (_cachedTunnelUrl && now - _cacheTimestamp < CACHE_TTL_MS) {
+    return _cachedTunnelUrl;
+  }
+
+  for (const logPath of TUNNEL_LOG_PATHS) {
+    try {
+      const log = readFileSync(logPath, 'utf-8');
+      const match = log.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/g);
+      if (match && match.length > 0) {
+        _cachedTunnelUrl = match[match.length - 1];
+        _cacheTimestamp = now;
+        return _cachedTunnelUrl;
+      }
+    } catch { /* file not found or unreadable */ }
+  }
+
+  _cacheTimestamp = now;
+  return '';
+}
+
+/** 이메일 링크 등 외부에 노출되는 공개 URL 반환.
+ *  프로덕션에서 FRONTEND_URL이 localhost인 경우 Cloudflare 터널 URL을 동적으로 사용. */
+export function getPublicUrl(): string {
+  if (config.nodeEnv === 'production' && config.frontendUrl.includes('localhost')) {
+    const tunnelUrl = extractTunnelUrl();
+    if (tunnelUrl) return tunnelUrl;
+  }
+  return config.frontendUrl;
+}
