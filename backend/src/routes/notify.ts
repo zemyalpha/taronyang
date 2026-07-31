@@ -25,7 +25,7 @@ notifyRouter.get('/settings', authMiddleware, (req: Request, res: Response) => {
   const user = req.user!;
   const settings = getSettings(user);
   res.json({
-    daily_email: settings.daily_email !== 0,
+    daily_email: settings.daily_email === 1,
     notify_time: settings.notify_time || '07:00',
     notify_channel: settings.notify_channel || 'email',
     zodiac_sign: user.zodiac_sign || '',

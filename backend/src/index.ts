@@ -16,7 +16,7 @@ import { adminRouter } from './routes/admin';
 import { notifyRouter } from './routes/notify';
 import { analyticsRouter, cleanupOldAnalyticsEvents } from './routes/analytics';
 import { healthRouter } from './routes/health';
-import { startDailyScheduler } from './dailyNotify';
+import { startDailyScheduler, closeTransporter } from './dailyNotify';
 import { closeDb } from './database';
 import { logger } from './logger';
 
@@ -339,6 +339,11 @@ function gracefulShutdown(signal: string): void {
   server.close((err) => {
     if (err) {
       logger.error('서버 종료 중 오류', { error: String(err) });
+    }
+    try {
+      closeTransporter();
+    } catch (smtpErr) {
+      logger.error('SMTP 종료 중 오류', { error: String(smtpErr) });
     }
     try {
       closeDb();

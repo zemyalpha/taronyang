@@ -6,7 +6,7 @@
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { config, getPublicUrl } from './config';
-import { getDb } from './database';
+import { getDb, cleanupOldLoginAttempts } from './database';
 import { callLlm } from './llm';
 import { getKstDate } from './routes/notify';
 import { logger } from './logger';
@@ -124,7 +124,7 @@ export function escapeHtml(str: string): string {
 }
 
 function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string): string {
-  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+  const today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
   const safeNickname = escapeHtml(nickname);
   const safeHoroscope = escapeHtml(horoscope).replace(/\n/g, '<br>');
   const safeUrl = escapeHtml(getPublicUrl());
@@ -176,6 +176,14 @@ function getTransporter(): nodemailer.Transporter {
     });
   }
   return _transporter;
+}
+
+/** SMTP transporter 종료 (graceful shutdown용) */
+export function closeTransporter(): void {
+  if (_transporter) {
+    _transporter.close();
+    _transporter = null;
+  }
 }
 
 /** SMTP 전송 */
@@ -338,14 +346,16 @@ export function startDailyScheduler(): NodeJS.Timeout {
       logger.error('일운 발송 오류 — 재시도 대기', { error: String(err), date: today, time: currentHHMM });
     }
 
-    // 매일 04:00(KST) 분석 이벤트 정리 (90일 이전 데이터 삭제)
+    // 매일 04:00(KST) 분석 이벤트 정리 (90일 이전 데이터 삭제) + 만료된 로그인 시도 정리
     if (hour >= 4 && lastCleanupDate !== today) {
       lastCleanupDate = today;
       try {
         const deleted = cleanupOldAnalyticsEvents();
         if (deleted > 0) logger.info('분석 이벤트 정리', { deleted });
+        const deletedLogins = cleanupOldLoginAttempts();
+        if (deletedLogins > 0) logger.info('만료된 로그인 시도 정리', { deleted: deletedLogins });
       } catch (err) {
-        logger.error('분석 이벤트 정리 오류', { error: String(err) });
+        logger.error('정기 정리 오류', { error: String(err) });
       }
     }
   }, CHECK_INTERVAL);

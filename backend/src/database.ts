@@ -189,6 +189,15 @@ export function clearLoginAttempts(email: string): void {
   db.prepare('DELETE FROM login_attempts WHERE email = ?').run(email.toLowerCase());
 }
 
+/** 만료된 로그인 시도 기록 정리 (lockout 만료 + 1일 경과) */
+export function cleanupOldLoginAttempts(): number {
+  const db = getDb();
+  const result = db.prepare(
+    "DELETE FROM login_attempts WHERE locked_until IS NOT NULL AND locked_until < datetime('now', '-1 day')"
+  ).run();
+  return result.changes;
+}
+
 // --- 사용자 타입 ---
 export interface User {
   id: string;

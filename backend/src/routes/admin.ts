@@ -12,9 +12,9 @@ adminRouter.get('/stats', authMiddleware, adminMiddleware, (_req: Request, res: 
 
   const totalUsers = db.prepare('SELECT COUNT(*) AS total FROM users').get() as { total: number };
   const premiumUsers = db.prepare("SELECT COUNT(*) AS total FROM users WHERE subscription_status = 'premium'").get() as { total: number };
-  const todayUsers = db.prepare("SELECT COUNT(*) AS total FROM users WHERE date(created_at) = date('now')").get() as { total: number };
+  const todayUsers = db.prepare("SELECT COUNT(*) AS total FROM users WHERE date(created_at) = date('now', '+9 hours')").get() as { total: number };
   const totalReadings = db.prepare('SELECT COUNT(*) AS total FROM readings').get() as { total: number };
-  const todayReadings = db.prepare("SELECT COUNT(*) AS total FROM readings WHERE date(created_at) = date('now')").get() as { total: number };
+  const todayReadings = db.prepare("SELECT COUNT(*) AS total FROM readings WHERE date(created_at) = date('now', '+9 hours')").get() as { total: number };
 
   res.json({
     total_users: totalUsers.total,
