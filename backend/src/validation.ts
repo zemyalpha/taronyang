@@ -78,5 +78,5 @@ export const analyticsEventSchema = z.object({
 
 /** 분석 이벤트 배치 */
 export const analyticsBatchSchema = z.object({
-  events: z.array(analyticsEventSchema).min(1).max(50),
+  events: z.array(analyticsEventSchema).min(1).max(20),
 });

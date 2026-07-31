@@ -74,7 +74,7 @@ describe('analytics routes', () => {
       expect(res.status).toBe(400);
     });
 
-    it('caps batch size at 20 events', async () => {
+    it('rejects batch size over 20 events', async () => {
       const events = Array.from({ length: 25 }, (_, i) => ({
         name: `event_${i}`,
         path: '/test',
@@ -84,12 +84,7 @@ describe('analytics routes', () => {
         .post('/api/analytics/event')
         .send({ events });
 
-      expect(res.status).toBe(201);
-      expect(res.body.stored).toBe(20);
-
-      const db = getDb();
-      const count = db.prepare('SELECT COUNT(*) as n FROM analytics_events').get() as { n: number };
-      expect(count.n).toBe(20);
+      expect(res.status).toBe(400);
     });
 
     it('persists single event fields correctly', async () => {

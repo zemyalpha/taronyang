@@ -28,8 +28,7 @@ analyticsRouter.post('/event', (req: Request, res: Response) => {
     return res.status(400).json({ error: parsed.error.issues[0]?.message || 'events array required' });
   }
 
-  // Cap batch size to prevent abuse
-  const batch = parsed.data.events.slice(0, 20);
+  const batch = parsed.data.events;
   const db = getDb();
   const ip = (String(req.headers['x-forwarded-for'] ?? '') || req.socket.remoteAddress || '').split(',')[0].trim();
   const ua = req.headers['user-agent'] || '';
