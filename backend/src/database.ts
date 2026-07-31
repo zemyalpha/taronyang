@@ -3,6 +3,7 @@ import Database from 'better-sqlite3';
 import { config } from './config';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { getKstDateString } from './datetime';
 import { logger } from './logger';
 
 let db: Database.Database;
@@ -193,11 +194,9 @@ function isAdminEmail(email: string): boolean {
   return config.adminEmails.includes(email.toLowerCase());
 }
 
-/** 오늘 날짜 (KST 기준 YYYY-MM-DD) — UTC epoch 기반으로 timezone 독립적 */
+/** 오늘 날짜 (KST 기준 YYYY-MM-DD) */
 function todayString(): string {
-  const now = new Date();
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  return kst.toISOString().slice(0, 10);
+  return getKstDateString();
 }
 
 /** 무료 월터 사용량 확인 및 증가 — true면 허용, false면 초과 */
