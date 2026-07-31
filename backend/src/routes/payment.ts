@@ -1,5 +1,6 @@
 /** 결제 API 라우터 */
 import { Router, Request, Response } from 'express';
+import { asyncHandler } from '../utils/asyncHandler';
 import { config } from '../config';
 import { getDb, getUserById } from '../database';
 import { authMiddleware } from './auth';
@@ -59,7 +60,7 @@ paymentRouter.get('/price', (_req: Request, res: Response) => {
 });
 
 /** 결제 검증 + 프리미엄 활성화 */
-paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response) => {
+paymentRouter.post('/verify', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const parsed = paymentVerifySchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -139,7 +140,7 @@ paymentRouter.post('/verify', authMiddleware, async (req: Request, res: Response
     logger.error('결제 검증 실패', { error: String(err), imp_uid });
     res.status(400).json({ detail: '결제 검증에 실패했습니다. 잠시 후 다시 시도해주세요.' });
   }
-});
+}));
 
 /** 구독 상태 */
 paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {

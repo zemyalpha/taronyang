@@ -253,8 +253,11 @@ export async function sendDailyNotifications(): Promise<void> {
 
   logger.info('일운 이메일 발송 완료', { sent, total: enabled.length });
 
-  // 발송 완료 기록
-  db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
+  if (sent === enabled.length) {
+    db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
+  } else {
+    logger.warn('일운 이메일 일부 발송 실패 — 재시도 허용을 위해 email_sent 미설정', { sent, total: enabled.length });
+  }
 }
 
 /** 일운 캐시 사전 생성 (이메일 구독자 유무와 무관하게 매일 12별자리 캐시를 채운다)

@@ -296,7 +296,14 @@ export function findOrCreateOAuthUser(info: { provider: string; provider_id: str
   const nickname = info.nickname || info.email?.split('@')[0] || '사용자';
   const email = emailConflict ? null : (info.email || null);
   const isAdmin = info.email ? (isAdminEmail(info.email) ? 1 : 0) : 0;
-  db.prepare('INSERT INTO users (id, provider, provider_id, email, nickname, is_admin) VALUES (?, ?, ?, ?, ?, ?)').run(userId, info.provider, info.provider_id, email, nickname, isAdmin);
+  try {
+    db.prepare('INSERT INTO users (id, provider, provider_id, email, nickname, is_admin) VALUES (?, ?, ?, ?, ?, ?)').run(userId, info.provider, info.provider_id, email, nickname, isAdmin);
+  } catch {
+    // 동시 OAuth 로그인 시 UNIQUE(provider, provider_id) 충돌 — 이미 생성된 사용자 재조회
+    const retry = db.prepare('SELECT * FROM users WHERE provider = ? AND provider_id = ?').get(info.provider, info.provider_id) as User | undefined;
+    if (retry) return retry;
+    throw new Error('OAuth user creation failed');
+  }
   return getUserById(userId)!;
 }
 

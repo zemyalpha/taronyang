@@ -1,5 +1,6 @@
 /** 인증 API 라우터 */
 import { Router, Request, Response, NextFunction } from 'express';
+import { asyncHandler } from '../utils/asyncHandler';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { config } from '../config';
@@ -94,7 +95,7 @@ function makeUserResponse(user: User) {
 // --- 엔드포인트 ---
 
 /** 회원가입 */
-authRouter.post('/signup', async (req: Request, res: Response) => {
+authRouter.post('/signup', asyncHandler(async (req: Request, res: Response) => {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -110,7 +111,11 @@ authRouter.post('/signup', async (req: Request, res: Response) => {
 
   const user = await createUser(email, password, nickname);
   if (!user) {
-    res.status(500).json({ detail: '회원가입에 실패했습니다' });
+    if (getUserByEmail(email)) {
+      res.status(409).json({ detail: '이미 가입된 이메일입니다' });
+    } else {
+      res.status(500).json({ detail: '회원가입에 실패했습니다' });
+    }
     return;
   }
 
@@ -118,10 +123,10 @@ authRouter.post('/signup', async (req: Request, res: Response) => {
   setAuthCookie(res, token);
   res.json({ token, user: makeUserResponse(user) });
   return;
-});
+}));
 
 /** 로그인 */
-authRouter.post('/login', async (req: Request, res: Response) => {
+authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -149,7 +154,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   const token = createToken(user.id, user.token_version);
   setAuthCookie(res, token);
   res.json({ token, user: makeUserResponse(user) });
-});
+}));
 
 /** 로그아웃 — HttpOnly 쿠키 삭제 (ZEMA-3283) */
 authRouter.post('/logout', (_req: Request, res: Response) => {
@@ -245,7 +250,7 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
 });
 
 /** 소셜 로그인 콜백 — 인증 코드를 토큰으로 교환하고 사용자 생성/조회 (ZEMA-3416) */
-authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) => {
+authRouter.get('/oauth/callback/:provider', asyncHandler(async (req: Request, res: Response) => {
   const { provider } = req.params;
   const { code, state } = req.query;
 
@@ -395,7 +400,7 @@ authRouter.get('/oauth/callback/:provider', async (req: Request, res: Response) 
     logger.error('OAuth callback error', { provider, error: String(err) });
     res.redirect('/login?oauth_error=server_error');
   }
-});
+}));
 
 /** 생일로 별자리 계산 */
 function calcZodiac(birthDate: string): string | null {

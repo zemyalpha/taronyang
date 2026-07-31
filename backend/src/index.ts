@@ -119,6 +119,7 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
+app.use('/api/auth/oauth/callback', authLimiter);
 
 // 결제 검증 레이트 리미팅 — PortOne 외부 API 호출 방어
 const paymentLimiter = rateLimit({
@@ -357,5 +358,8 @@ function gracefulShutdown(signal: string): void {
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled Promise Rejection', { reason: String(reason) });
+});
 
 export default app;

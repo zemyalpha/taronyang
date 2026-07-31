@@ -1,5 +1,6 @@
 /** 타로 API 라우터 */
 import { Router, Request, Response } from 'express';
+import { asyncHandler } from '../utils/asyncHandler';
 import { ALL_CARDS, getCard, CATEGORY_NAMES, TarotCard } from '../tarotData';
 import { SYSTEM_PROMPT, buildReadingPrompt } from '../tarotPrompt';
 import { tarotReading, callLlm, RateLimitError } from '../llm';
@@ -42,7 +43,7 @@ tarotRouter.get('/shuffle', (req: Request, res: Response) => {
 });
 
 /** 타로 해석 — 로그인 필수 (무료 할당량 적용) */
-tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) => {
+tarotRouter.post('/read', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const parsed = tarotReadSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -74,6 +75,7 @@ tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) =>
       return { ...card, is_upright: s.is_upright };
     });
   } catch {
+    rollbackFreeQuota(user);
     res.status(400).json({ detail: '올바르지 않은 카드입니다' });
     return;
   }
@@ -113,10 +115,10 @@ tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) =>
       res.status(500).json({ detail: 'AI 해석에 실패했어요. 잠시 후 다시 시도해주세요.' });
     }
   }
-});
+}));
 
 /** 추가 대화 — 로그인 필수 */
-tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) => {
+tarotRouter.post('/chat', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const parsed = tarotChatSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ detail: parsed.error.issues[0]?.message || '잘못된 입력입니다' });
@@ -138,12 +140,19 @@ tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) =>
 
   let verifiedReading = previous_reading || '';
   if (reading_id) {
-    const db = getDb();
-    const row = db.prepare(
-      'SELECT interpretation FROM readings WHERE id = ? AND user_id = ?'
-    ).get(reading_id, user.id) as { interpretation?: string } | undefined;
-    if (row?.interpretation) {
-      verifiedReading = row.interpretation;
+    try {
+      const db = getDb();
+      const row = db.prepare(
+        'SELECT interpretation FROM readings WHERE id = ? AND user_id = ?'
+      ).get(reading_id, user.id) as { interpretation?: string } | undefined;
+      if (row?.interpretation) {
+        verifiedReading = row.interpretation;
+      }
+    } catch (dbErr) {
+      rollbackChatQuota(user);
+      logger.error('Chat reading lookup failed', { user_id: user.id, error: String(dbErr) });
+      res.status(500).json({ detail: '이전 상담 내역을 불러오지 못했어요. 잠시 후 다시 시도해주세요.' });
+      return;
     }
   }
 
@@ -177,4 +186,4 @@ tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) =>
       res.status(500).json({ detail: 'AI 응답에 실패했어요. 잠시 후 다시 시도해주세요.' });
     }
   }
-});
+}));
