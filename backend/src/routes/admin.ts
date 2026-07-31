@@ -69,7 +69,12 @@ adminRouter.get('/readings', authMiddleware, adminMiddleware, (req: Request, res
 });
 
 /** 사용자 삭제 */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 adminRouter.delete('/users/:id', authMiddleware, adminMiddleware, (req: Request, res: Response) => {
+  if (!UUID_RE.test(req.params.id)) {
+    res.status(400).json({ error: '잘못된 사용자 ID입니다' });
+    return;
+  }
   const db = getDb();
 
   if (req.params.id === req.user!.id) {

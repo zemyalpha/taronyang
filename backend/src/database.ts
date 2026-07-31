@@ -111,12 +111,24 @@ export function initDb(): void {
     CREATE INDEX IF NOT EXISTS idx_readings_user_created ON readings(user_id, created_at);
 
     CREATE TABLE IF NOT EXISTS login_attempts (
-      email TEXT PRIMARY KEY,
+      email TEXT NOT NULL,
+      ip_address TEXT NOT NULL DEFAULT '',
       failed_count INTEGER NOT NULL DEFAULT 0,
       last_failed_at TEXT,
-      locked_until TEXT
+      locked_until TEXT,
+      PRIMARY KEY (email, ip_address)
     );
   `);
+
+  // Migration: login_attempts PK changed from (email) to (email, ip_address)
+  // to prevent account-lockout DoS where an attacker locks a victim's account from a different IP
+  try {
+    db.exec(`
+      ALTER TABLE login_attempts ADD COLUMN ip_address TEXT NOT NULL DEFAULT '';
+    `);
+  } catch {
+    // Column already exists — expected on subsequent inits
+  }
 
   db.exec(`
     DELETE FROM daily_horoscopes
@@ -149,38 +161,39 @@ export function initDb(): void {
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 
-export function isAccountLocked(email: string): { locked: boolean; lockedUntil: string | null } {
+export function isAccountLocked(email: string, ip: string): { locked: boolean; lockedUntil: string | null } {
   const db = getDb();
-  const row = db.prepare('SELECT locked_until FROM login_attempts WHERE email = ?').get(email.toLowerCase()) as { locked_until: string | null } | undefined;
+  const normalizedEmail = email.toLowerCase();
+  const row = db.prepare('SELECT locked_until FROM login_attempts WHERE email = ? AND ip_address = ?').get(normalizedEmail, ip) as { locked_until: string | null } | undefined;
   if (!row || !row.locked_until) return { locked: false, lockedUntil: null };
   const lockedUntil = new Date(row.locked_until);
   if (lockedUntil > new Date()) {
     return { locked: true, lockedUntil: row.locked_until };
   }
-  db.prepare('UPDATE login_attempts SET failed_count = 0, locked_until = NULL WHERE email = ?').run(email.toLowerCase());
+  db.prepare('UPDATE login_attempts SET failed_count = 0, locked_until = NULL WHERE email = ? AND ip_address = ?').run(normalizedEmail, ip);
   return { locked: false, lockedUntil: null };
 }
 
-export function recordFailedLogin(email: string): { locked: boolean; lockedUntil: string | null } {
+export function recordFailedLogin(email: string, ip: string): { locked: boolean; lockedUntil: string | null } {
   const db = getDb();
   const normalizedEmail = email.toLowerCase();
   const now = new Date().toISOString();
-  const row = db.prepare('SELECT failed_count FROM login_attempts WHERE email = ?').get(normalizedEmail) as { failed_count: number } | undefined;
+  const row = db.prepare('SELECT failed_count FROM login_attempts WHERE email = ? AND ip_address = ?').get(normalizedEmail, ip) as { failed_count: number } | undefined;
   const newCount = (row?.failed_count ?? 0) + 1;
 
   if (newCount >= MAX_LOGIN_ATTEMPTS) {
     const lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS).toISOString();
     db.prepare(
-      'INSERT INTO login_attempts (email, failed_count, last_failed_at, locked_until) VALUES (?, ?, ?, ?) ' +
-      'ON CONFLICT(email) DO UPDATE SET failed_count = excluded.failed_count, last_failed_at = excluded.last_failed_at, locked_until = excluded.locked_until'
-    ).run(normalizedEmail, newCount, now, lockedUntil);
+      'INSERT INTO login_attempts (email, ip_address, failed_count, last_failed_at, locked_until) VALUES (?, ?, ?, ?, ?) ' +
+      'ON CONFLICT(email, ip_address) DO UPDATE SET failed_count = excluded.failed_count, last_failed_at = excluded.last_failed_at, locked_until = excluded.locked_until'
+    ).run(normalizedEmail, ip, newCount, now, lockedUntil);
     return { locked: true, lockedUntil };
   }
 
   db.prepare(
-    'INSERT INTO login_attempts (email, failed_count, last_failed_at, locked_until) VALUES (?, ?, ?, NULL) ' +
-    'ON CONFLICT(email) DO UPDATE SET failed_count = excluded.failed_count, last_failed_at = excluded.last_failed_at'
-  ).run(normalizedEmail, newCount, now);
+    'INSERT INTO login_attempts (email, ip_address, failed_count, last_failed_at, locked_until) VALUES (?, ?, ?, ?, NULL) ' +
+    'ON CONFLICT(email, ip_address) DO UPDATE SET failed_count = excluded.failed_count, last_failed_at = excluded.last_failed_at'
+  ).run(normalizedEmail, ip, newCount, now);
   return { locked: false, lockedUntil: null };
 }
 

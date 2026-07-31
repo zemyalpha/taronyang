@@ -209,7 +209,11 @@ describe('login brute force protection', () => {
       .prepare('UPDATE login_attempts SET locked_until = ? WHERE email = ?')
       .run(new Date(Date.now() - 60_000).toISOString(), 'expire@example.com');
 
-    const locked = isAccountLocked('expire@example.com');
+    const attemptIp = getDb()
+      .prepare('SELECT ip_address FROM login_attempts WHERE email = ?')
+      .get('expire@example.com') as { ip_address: string };
+
+    const locked = isAccountLocked('expire@example.com', attemptIp.ip_address);
     expect(locked.locked).toBe(false);
 
     const rowAfter = getDb()

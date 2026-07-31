@@ -72,7 +72,7 @@ describe('readings routes', () => {
     it('returns 404 for non-existent reading', async () => {
       const user = await createUser('reader5@test.com', 'pass123');
       const res = await request(app)
-        .get('/readings/nonexistent-id')
+        .get('/readings/00000000-0000-4000-a000-000000000000')
         .set('Authorization', `Bearer ${makeToken(user!.id)}`);
       expect(res.status).toBe(404);
     });

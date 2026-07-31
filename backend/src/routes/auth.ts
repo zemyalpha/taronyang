@@ -135,7 +135,9 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
   }
   const { email, password } = parsed.data;
 
-  const lockState = isAccountLocked(email);
+  const clientIp = req.ip || '';
+
+  const lockState = isAccountLocked(email, clientIp);
   if (lockState.locked) {
     res.status(429).json({ detail: '로그인 시도 횟수가 초과되었습니다. 잠시 후 다시 시도해주세요.' });
     return;
@@ -143,7 +145,7 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
 
   const user = await verifyUser(email, password);
   if (!user) {
-    const result = recordFailedLogin(email);
+    const result = recordFailedLogin(email, clientIp);
     if (result.locked) {
       res.status(429).json({ detail: '로그인 시도 횟수가 초과되었습니다. 15분 후 다시 시도해주세요.' });
       return;
