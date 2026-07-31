@@ -145,7 +145,7 @@
                 <div id="chat-history" class="space-y-3 mb-4 max-h-64 overflow-y-auto"></div>
                 <div class="flex gap-2">
                     <input id="chat-input" type="text" placeholder="질문을 입력하세요..." maxlength="500" class="flex-1 bg-dark-purple/60 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none" onkeydown="if(event.key==='Enter')sendChat()">
-                    <button type="button" onclick="sendChat()" class="px-5 py-3 bg-lavender/20 text-lavender rounded-xl hover:bg-lavender/30 transition">전송</button>
+                    <button type="button" id="chat-send" onclick="sendChat()" class="px-5 py-3 bg-lavender/20 text-lavender rounded-xl hover:bg-lavender/30 transition">전송</button>
                 </div>
             </div>
             <div class="text-center mt-8">
@@ -237,7 +237,10 @@
         }
 
         // 셔플 페이지로
+        let shuffleInFlight = false;
         async function goToShuffle() {
+            if (shuffleInFlight) return;
+            shuffleInFlight = true;
             question = document.getElementById('user-question').value.trim();
             showStep('shuffle');
             document.getElementById('loading').classList.remove('hidden');
@@ -260,6 +263,7 @@
                 showStep('question');
             }
             document.getElementById('loading').classList.add('hidden');
+            shuffleInFlight = false;
         }
 
         // 셔플된 카드 렌더링
@@ -380,18 +384,22 @@
         }
 
         // 추가 대화
+        let chatInFlight = false;
         async function sendChat() {
             const input = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('chat-send');
             const msg = input.value.trim();
-            if (!msg) return;
+            if (!msg || chatInFlight) return;
             input.value = '';
+            chatInFlight = true;
+            input.disabled = true;
+            sendBtn.disabled = true;
 
             addChatBubble('user', msg);
             chatHistory.push({ role: 'user', content: msg });
 
             // 로딩 표시
             const loadingEl = addChatBubble('assistant', '...');
-            loadingEl.id = 'chat-loading';
 
             try {
                 const res = await fetch(apiUrl('/api/tarot/chat'), {
@@ -420,6 +428,11 @@
                 chatHistory.push({ role: 'assistant', content: data.reply });
             } catch (e) {
                 loadingEl.textContent = '응답을 받지 못했어요 😿';
+            } finally {
+                chatInFlight = false;
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
             }
         }
 
