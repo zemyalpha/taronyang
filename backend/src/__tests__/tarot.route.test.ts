@@ -8,7 +8,7 @@ jest.mock('../llm', () => ({
 }));
 
 import { tarotRouter } from '../routes/tarot';
-import { initDb, getDb, createUser, getUserById, User } from '../database';
+import { initDb, getDb, createUser } from '../database';
 import { config } from '../config';
 
 const VALID_CARDS = [
@@ -130,7 +130,7 @@ describe('POST /api/tarot/read — auth required', () => {
       .send({ category: 'money', question: '테스트 질문', cards: VALID_CARDS });
 
     const db = getDb();
-    const reading = db.prepare('SELECT * FROM readings WHERE user_id = ?').get(user.id) as any;
+    const reading = db.prepare('SELECT * FROM readings WHERE user_id = ?').get(user.id) as { user_id: string; category: string; question: string; interpretation: string };
     expect(reading).toBeDefined();
     expect(reading.user_id).toBe(user.id);
     expect(reading.category).toBe('money');
