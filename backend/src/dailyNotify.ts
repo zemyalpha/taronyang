@@ -199,34 +199,39 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
   }
 }
 
-/** 구독자 전체에게 일운 발송
- *  @returns true if all emails sent successfully, false otherwise */
-export async function sendDailyNotifications(): Promise<boolean> {
-  logger.info('일운 이메일 발송 시작');
-
+/** 특정 시간대 구독자에게 일운 발송
+ *  사용자별 notify_time 설정을 존중하여 해당 시간에만 발송한다.
+ *  @param targetTime HH:MM 형식 (기본 07:00)
+ *  @returns true if all eligible users in this slot sent successfully */
+export async function sendDailyNotifications(targetTime: string = '07:00'): Promise<boolean> {
   const db = getDb();
-
-  // DB에서 발송 완료 여부 확인 (서버 재시작 시에도 안전)
   const today = getKstDate();
-  const alreadySent = db.prepare(
-    'SELECT COUNT(*) as cnt FROM daily_horoscopes WHERE date = ? AND email_sent = 1'
+
+  // 남은 미발송 구독자가 있는지 확인 (서버 재시작 시에도 안전)
+  const remaining = db.prepare(
+    "SELECT COUNT(*) as cnt FROM users " +
+    "WHERE json_extract(settings, '$.daily_email') = 1 " +
+    "AND COALESCE(json_extract(settings, '$.last_email_sent_date'), '') != ?"
   ).get(today) as { cnt: number };
-  if (alreadySent.cnt >= ZODIAC_SIGNS.length) {
-    logger.info('오늘 이미 발송 완료 — 건너뜀', { date: today });
+  if (remaining.cnt === 0) {
+    db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
     return true;
   }
 
-  // DB에서 알림 수신 명시적 동의한 사용자만 조회 (PIPA 준수 — opt-in)
+  // 이 시간대에 해당하며 아직 발송하지 않은 구독자만 조회 (PIPA 준수 — opt-in)
   const enabled = db.prepare(
     "SELECT id, email, nickname, zodiac_sign, settings FROM users " +
     "WHERE zodiac_sign IS NOT NULL AND zodiac_sign != '' AND email IS NOT NULL " +
-    "AND json_extract(settings, '$.daily_email') = 1"
-  ).all() as Array<{ id: string; email: string; nickname: string | null; zodiac_sign: string; settings: string }>;
+    "AND json_extract(settings, '$.daily_email') = 1 " +
+    "AND COALESCE(json_extract(settings, '$.notify_time'), '07:00') = ? " +
+    "AND COALESCE(json_extract(settings, '$.last_email_sent_date'), '') != ?"
+  ).all(targetTime, today) as Array<{ id: string; email: string; nickname: string | null; zodiac_sign: string; settings: string }>;
 
   if (!enabled.length) {
-    logger.info('구독자 없음 — 발송 건너뜀');
     return true;
   }
+
+  logger.info('일운 이메일 발송 시작', { targetTime, count: enabled.length });
 
   const horoscopes = await generateAllHoroscopes();
   const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
@@ -252,15 +257,30 @@ export async function sendDailyNotifications(): Promise<boolean> {
 
   sent = results.filter(r => r.status === 'fulfilled' && r.value).length;
 
-  logger.info('일운 이메일 발송 완료', { sent, total: enabled.length });
-
-  if (sent === enabled.length) {
-    db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
-    return true;
-  } else {
-    logger.warn('일운 이메일 일부 발송 실패 — 재시도 허용을 위해 email_sent 미설정', { sent, total: enabled.length });
-    return false;
+  // 성공한 사용자만 last_email_sent_date 업데이트 (재시도 허용)
+  const markSent = db.prepare(
+    "UPDATE users SET settings = json_set(COALESCE(settings, '{}'), '$.last_email_sent_date', ?) WHERE id = ?"
+  );
+  for (let i = 0; i < enabled.length; i++) {
+    const r = results[i];
+    if (r.status === 'fulfilled' && r.value) {
+      markSent.run(today, enabled[i].id);
+    }
   }
+
+  logger.info('일운 이메일 발송 완료', { targetTime, sent, total: enabled.length });
+
+  // 남은 미발송자가 없으면 email_sent 플래그 설정
+  const stillRemaining = db.prepare(
+    "SELECT COUNT(*) as cnt FROM users " +
+    "WHERE json_extract(settings, '$.daily_email') = 1 " +
+    "AND COALESCE(json_extract(settings, '$.last_email_sent_date'), '') != ?"
+  ).get(today) as { cnt: number };
+  if (stillRemaining.cnt === 0) {
+    db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
+  }
+
+  return sent === enabled.length;
 }
 
 /** 일운 캐시 사전 생성 (이메일 구독자 유무와 무관하게 매일 12별자리 캐시를 채운다)
@@ -286,7 +306,6 @@ export async function prewarmDailyCache(): Promise<void> {
 export function startDailyScheduler(): NodeJS.Timeout {
   // node-cron 대신 setInterval로 간단 구현 (매 분마다 체크)
   const CHECK_INTERVAL = 60_000; // 1분
-  let lastSentDate = '';
   let lastPrewarmDate = '';
   let lastCleanupDate = '';
 
@@ -311,15 +330,12 @@ export function startDailyScheduler(): NodeJS.Timeout {
       }
     }
 
-    if (hour >= 7 && lastSentDate !== today) {
-      try {
-        const allSent = await sendDailyNotifications();
-        if (allSent) {
-          lastSentDate = today;
-        }
-      } catch (err) {
-        logger.error('일운 발송 오류 — 재시도 대기', { error: String(err), date: today });
-      }
+    // 사용자별 notify_time에 맞춰 분 단위로 발송
+    const currentHHMM = String(hour).padStart(2, '0') + ':' + String(kstNow.getUTCMinutes()).padStart(2, '0');
+    try {
+      await sendDailyNotifications(currentHHMM);
+    } catch (err) {
+      logger.error('일운 발송 오류 — 재시도 대기', { error: String(err), date: today, time: currentHHMM });
     }
 
     // 매일 04:00(KST) 분석 이벤트 정리 (90일 이전 데이터 삭제)
@@ -334,6 +350,6 @@ export function startDailyScheduler(): NodeJS.Timeout {
     }
   }, CHECK_INTERVAL);
 
-  logger.info('일운 스케줄러 시작 — 매일 06:00 캐시 생성, 07:00 발송');
+  logger.info('일운 스케줄러 시작 — 매일 06:00 캐시 생성, 사용자별 notify_time 발송');
   return interval;
 }
