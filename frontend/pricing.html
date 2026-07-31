@@ -135,7 +135,9 @@
                     badge.textContent = '🆓 무료 플랜';
                     badge.className = 'inline-block px-4 py-2 rounded-full text-sm font-bold bg-gray-500/20 text-gray-400';
                 }
-            } catch (e) {}
+            } catch (e) {
+                showToast('구독 상태를 불러올 수 없습니다.');
+            }
         }
 
         let iamportLoaded = false;
@@ -188,7 +190,7 @@
                 merchant_uid: 'taronyang_' + Date.now(),
                 name: '타로냥 프리미엄 (월간)',
                 amount: 9900,
-                buyer_email: '',
+                buyer_email: (JSON.parse(localStorage.getItem('user') || '{}').email) || '',
             }, async function(rsp) {
                 if (rsp.success) {
                     try {
