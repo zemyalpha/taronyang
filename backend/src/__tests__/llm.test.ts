@@ -47,7 +47,7 @@ describe('callLlm', () => {
     expect(result).toBe('타로 해석 결과입니다');
   });
 
-  it('response with only reasoning_content (no content) — should NOT return reasoning (CoT leak prevention)', async () => {
+  it('response with only reasoning_content (no content) — should fall back to reasoning on final retry', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -56,7 +56,36 @@ describe('callLlm', () => {
       }),
     }) as unknown as typeof fetch;
 
-    await expect(callLlm([{ role: 'user', content: 'test' }])).rejects.toThrow();
+    const result = await callLlm([{ role: 'user', content: 'test' }]);
+    expect(result).toBe('추론 내용');
+  });
+
+  it('retry omits reasoning_effort when content is empty — model should produce content normally', async () => {
+    const mockFetch = jest.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          choices: [{ message: { content: '', reasoning_content: 'thinking...' } }],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          choices: [{ message: { content: '재시도 성공' } }],
+        }),
+      });
+    global.fetch = mockFetch as unknown as typeof fetch;
+
+    const result = await callLlm([{ role: 'user', content: 'test' }]);
+    expect(result).toBe('재시도 성공');
+
+    const firstBody = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+    expect(firstBody.reasoning_effort).toBe('none');
+
+    const secondBody = JSON.parse((mockFetch.mock.calls[1][1] as RequestInit).body as string);
+    expect(secondBody.reasoning_effort).toBeUndefined();
   });
 
   it('non-retryable error (400) — should throw immediately without retry', async () => {

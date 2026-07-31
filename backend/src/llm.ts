@@ -44,19 +44,23 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
     const timer = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS);
 
     try {
+      const reqBody: Record<string, unknown> = {
+        model: config.zaiModel,
+        messages,
+        max_tokens: maxTokens,
+        temperature,
+      };
+      if (attempt === 0) {
+        reqBody.reasoning_effort = 'none';
+      }
+
       const response = await fetch(config.zaiApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${config.zaiApiKey}`,
         },
-        body: JSON.stringify({
-          model: config.zaiModel,
-          messages,
-          max_tokens: maxTokens,
-          temperature,
-          reasoning_effort: 'none',
-        }),
+        body: JSON.stringify(reqBody),
         signal: controller.signal,
       });
 
@@ -93,8 +97,11 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
       }
       const reasoning = message.reasoning_content;
       if (typeof reasoning === 'string' && reasoning.length > 0) {
-        lastError = new Error('Z.ai API 응답 형식 오류: content 비어있음 (reasoning_content만 반환됨)');
-        continue;
+        if (attempt < MAX_RETRIES) {
+          lastError = new Error('Z.ai API 응답 형식 오류: content 비어있음 (reasoning_content만 반환됨)');
+          continue;
+        }
+        return reasoning;
       }
       throw new Error('Z.ai API 응답 형식 오류: content와 reasoning_content 모두 비어있음');
     } catch (err: unknown) {
