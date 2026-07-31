@@ -206,6 +206,20 @@ app.use('/blog/daily', (req, res, next) => {
   }
   next();
 });
+// blog articles: .html → extensionless 301 redirect (SEO canonical 통일)
+app.use('/blog', (req, res, next) => {
+  if (req.path.endsWith('.html') && req.path !== '/index.html') {
+    return res.redirect(301, `/blog${req.path.replace(/\.html$/, '')}`);
+  }
+  next();
+});
+// cards: .html → extensionless 301 redirect (SEO canonical 통일)
+app.use('/cards', (req, res, next) => {
+  if (req.path.endsWith('.html') && req.path !== '/index.html') {
+    return res.redirect(301, `/cards${req.path.replace(/\.html$/, '')}`);
+  }
+  next();
+});
 // blog: 확장자 없는 파일(일운 페이지 등)을 text/html로 서빙 (Content-Type 버그 수정)
 app.use('/blog', express.static(path.join(frontendPath, 'blog'), {
   extensions: ['html'],
