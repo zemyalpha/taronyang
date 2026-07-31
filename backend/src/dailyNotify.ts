@@ -199,8 +199,9 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
   }
 }
 
-/** 구독자 전체에게 일운 발송 */
-export async function sendDailyNotifications(): Promise<void> {
+/** 구독자 전체에게 일운 발송
+ *  @returns true if all emails sent successfully, false otherwise */
+export async function sendDailyNotifications(): Promise<boolean> {
   logger.info('일운 이메일 발송 시작');
 
   const db = getDb();
@@ -212,7 +213,7 @@ export async function sendDailyNotifications(): Promise<void> {
   ).get(today) as { cnt: number };
   if (alreadySent.cnt >= ZODIAC_SIGNS.length) {
     logger.info('오늘 이미 발송 완료 — 건너뜀', { date: today });
-    return;
+    return true;
   }
 
   // DB에서 알림 수신 명시적 동의한 사용자만 조회 (PIPA 준수 — opt-in)
@@ -224,7 +225,7 @@ export async function sendDailyNotifications(): Promise<void> {
 
   if (!enabled.length) {
     logger.info('구독자 없음 — 발송 건너뜀');
-    return;
+    return true;
   }
 
   const horoscopes = await generateAllHoroscopes();
@@ -255,8 +256,10 @@ export async function sendDailyNotifications(): Promise<void> {
 
   if (sent === enabled.length) {
     db.prepare('UPDATE daily_horoscopes SET email_sent = 1 WHERE date = ?').run(today);
+    return true;
   } else {
     logger.warn('일운 이메일 일부 발송 실패 — 재시도 허용을 위해 email_sent 미설정', { sent, total: enabled.length });
+    return false;
   }
 }
 
@@ -310,8 +313,10 @@ export function startDailyScheduler(): NodeJS.Timeout {
 
     if (hour >= 7 && lastSentDate !== today) {
       try {
-        await sendDailyNotifications();
-        lastSentDate = today;
+        const allSent = await sendDailyNotifications();
+        if (allSent) {
+          lastSentDate = today;
+        }
       } catch (err) {
         logger.error('일운 발송 오류 — 재시도 대기', { error: String(err), date: today });
       }
