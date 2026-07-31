@@ -51,6 +51,12 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+    <noscript>
+        <style>
+          .step { display: none !important; }
+          .js-required { display: block !important; }
+        </style>
+    </noscript>
 </head>
 <body class="bg-navy text-gray-100 font-sans min-h-screen">
     <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
@@ -70,6 +76,12 @@
 
     <main class="pt-20 pb-10 px-4 max-w-3xl mx-auto" id="main-content" tabindex="-1">
         <h1 class="sr-only">타로 상담</h1>
+
+        <div class="js-required hidden text-center py-20">
+            <p class="text-xl text-lavender mb-4">🔇 JavaScript가 필요해요</p>
+            <p class="text-gray-400 mb-6">타로냥 타로 상담은 JavaScript를 사용합니다.<br>브라우저 설정에서 JavaScript를 활성화해주세요.</p>
+            <a href="/" class="text-lavender hover:underline">← 홈으로 돌아가기</a>
+        </div>
 
         <!-- Step 1: 카테고리 선택 -->
         <div id="step-category" class="step">
