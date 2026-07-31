@@ -4,7 +4,7 @@
  * - API(/api/*): Network First, 실패 시 캐시 (있으면)
  */
 
-const SW_VERSION = "taronyang-sw-v8";
+const SW_VERSION = "taronyang-sw-v9";
 const STATIC_CACHE = `${SW_VERSION}-static`;
 const PAGE_CACHE = `${SW_VERSION}-pages`;
 const API_CACHE = `${SW_VERSION}-api`;
@@ -125,6 +125,8 @@ const SENSITIVE_API_PATHS = [
   "/api/readings",
   "/api/notifications",
   "/api/tarot",
+  "/api/analytics",
+  "/api/health/detail",
 ];
 
 function isCacheableApiRequest(url) {
