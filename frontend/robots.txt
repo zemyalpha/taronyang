@@ -1,6 +1,7 @@
 User-agent: Yeti
 Allow: /
 Disallow: /admin
+Disallow: /api/
 Disallow: /mypage
 Disallow: /history
 Disallow: /login
@@ -8,6 +9,7 @@ Disallow: /login
 User-agent: Googlebot
 Allow: /
 Disallow: /admin
+Disallow: /api/
 Disallow: /mypage
 Disallow: /history
 Disallow: /login
@@ -15,6 +17,7 @@ Disallow: /login
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /api/
 Disallow: /mypage
 Disallow: /history
 Disallow: /login
