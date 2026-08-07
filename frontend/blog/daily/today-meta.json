@@ -1,26 +1,26 @@
 {
-  "date": "2026-08-07",
-  "weekday": "금요일",
+  "date": "2026-08-08",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "세계",
-      "symbol": "🌍",
-      "slug": "21-world"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
+    },
+    {
+      "name": "매달린 사람",
+      "symbol": "🔄",
+      "slug": "12-hanged-man"
     },
     {
       "name": "죽음",
       "symbol": "🦋",
       "slug": "13-death"
-    },
-    {
-      "name": "정의",
-      "symbol": "⚖️",
-      "slug": "11-justice"
     }
   ],
-  "summary": "오늘은 「완성」의 에너지가 흐르는 날이에요. 하나의 큰 순환이 완성되고 있어요. 지금까지의 노력이 아름답게 완성될 거예요. 다만 「끝과시작」과 관련된 부분은 조심하고, 정의가…",
+  "summary": "오늘은 「부활」의 에너지가 흐르는 날이에요. 인생의 전환점이에요. 과거를 되돌아보고 새로운 소명을 따르세요. 다만 「희생」과 관련된 부분은 조심하고, 죽음이 주는 「끝과시작」…",
   "luckyColor": "로즈 골드",
   "luckyColorHex": "#f472b6",
   "luckyNumber": 9,
-  "url": "/blog/daily/2026-08-07.html"
+  "url": "/blog/daily/2026-08-08.html"
 }
