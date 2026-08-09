@@ -1,11 +1,11 @@
 {
-  "date": "2026-08-09",
-  "weekday": "일요일",
+  "date": "2026-08-10",
+  "weekday": "월요일",
   "cards": [
     {
-      "name": "죽음",
-      "symbol": "🦋",
-      "slug": "13-death"
+      "name": "은둔자",
+      "symbol": "🏔️",
+      "slug": "9-hermit"
     },
     {
       "name": "별",
@@ -13,14 +13,14 @@
       "slug": "17-star"
     },
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "매달린 사람",
+      "symbol": "🔄",
+      "slug": "12-hanged-man"
     }
   ],
-  "summary": "오늘은 「끝과시작」의 에너지가 흐르는 날이에요. 하나의 장이 끝나고 새로운 장이 시작돼요. 과거를 내려놓고 변화를 받아들이세요. 다만 「희망」과 관련된 부분은 조심하고, 황제…",
-  "luckyColor": "민트",
-  "luckyColorHex": "#34d399",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-08-09.html"
+  "summary": "오늘은 「성찰」의 에너지가 흐르는 날이에요. 혼자만의 시간이 필요해요. 내면을 깊이 들여다보며 답을 찾으세요. 다만 「희망」과 관련된 부분은 조심하고, 매달린 사람이 주는 「…",
+  "luckyColor": "선셋 오렌지",
+  "luckyColorHex": "#fb923c",
+  "luckyNumber": 2,
+  "url": "/blog/daily/2026-08-10.html"
 }
