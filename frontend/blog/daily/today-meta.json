@@ -1,26 +1,26 @@
 {
-  "date": "2026-08-12",
-  "weekday": "수요일",
+  "date": "2026-08-13",
+  "weekday": "목요일",
   "cards": [
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "운명의 수레바퀴",
+      "symbol": "🎡",
+      "slug": "10-wheel-of-fortune"
     },
     {
-      "name": "여황제",
-      "symbol": "👑",
-      "slug": "3-empress"
+      "name": "달",
+      "symbol": "🌕",
+      "slug": "18-moon"
     },
     {
-      "name": "은둔자",
-      "symbol": "🏔️",
-      "slug": "9-hermit"
+      "name": "여사제",
+      "symbol": "🌙",
+      "slug": "2-high-priestess"
     }
   ],
-  "summary": "오늘은 「권위」의 에너지가 흐르는 날이에요. 질서와 안정이 필요한 시기예요. 체계적으로 계획을 세워보세요. 다만 「과잉보호」와 관련된 부분은 조심하고, 은둔자가 주는 「성찰」…",
-  "luckyColor": "딥 네이비",
-  "luckyColorHex": "#6366f1",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-08-12.html"
+  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「환상」과 관련된 부분은 조심하고, 여사제가 주는 「직관」의…",
+  "luckyColor": "코랄 핑크",
+  "luckyColorHex": "#fb7185",
+  "luckyNumber": 1,
+  "url": "/blog/daily/2026-08-13.html"
 }
