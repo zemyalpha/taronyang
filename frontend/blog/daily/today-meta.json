@@ -1,26 +1,26 @@
 {
-  "date": "2026-08-14",
-  "weekday": "금요일",
+  "date": "2026-08-15",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "교황",
+      "symbol": "⛪",
+      "slug": "5-hierophant"
     },
     {
-      "name": "여사제",
-      "symbol": "🌙",
-      "slug": "2-high-priestess"
+      "name": "매달린 사람",
+      "symbol": "🔄",
+      "slug": "12-hanged-man"
     },
     {
-      "name": "절제",
-      "symbol": "🏺",
-      "slug": "14-temperance"
+      "name": "달",
+      "symbol": "🌕",
+      "slug": "18-moon"
     }
   ],
-  "summary": "오늘은 「용기」의 에너지가 흐르는 날이에요. 부드러운 힘이 필요한 시기예요. 인내와 용기로 극복할 수 있어요. 다만 「직관」과 관련된 부분은 조심하고, 절제가 주는 「균형」의…",
-  "luckyColor": "선셋 오렌지",
-  "luckyColorHex": "#fb923c",
-  "luckyNumber": 8,
-  "url": "/blog/daily/2026-08-14.html"
+  "summary": "오늘은 「전통」의 에너지가 흐르는 날이에요. 좋은 스승이나 멘토를 만날 수 있는 시기예요. 배움에 열려있으세요. 다만 「지연」과 관련된 부분은 조심하고, 달이 주는 「환상」의…",
+  "luckyColor": "로즈 골드",
+  "luckyColorHex": "#f472b6",
+  "luckyNumber": 9,
+  "url": "/blog/daily/2026-08-15.html"
 }
