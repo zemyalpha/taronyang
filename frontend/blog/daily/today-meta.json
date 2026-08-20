@@ -1,26 +1,26 @@
 {
-  "date": "2026-08-20",
-  "weekday": "목요일",
+  "date": "2026-08-21",
+  "weekday": "금요일",
   "cards": [
+    {
+      "name": "태양",
+      "symbol": "☀️",
+      "slug": "19-sun"
+    },
     {
       "name": "악마",
       "symbol": "😈",
       "slug": "15-devil"
     },
     {
-      "name": "여사제",
-      "symbol": "🌙",
-      "slug": "2-high-priestess"
-    },
-    {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
     }
   ],
-  "summary": "오늘은 「집착」의 에너지가 흐르는 날이에요. 무언가에 지나치게 집착하고 있을 수 있어요. 스스로를 옭아매는 것에서 벗어나세요. 다만 「직관」과 관련된 부분은 조심하고, 황제가…",
-  "luckyColor": "코랄 핑크",
-  "luckyColorHex": "#fb7185",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-08-20.html"
+  "summary": "오늘은 「성공」의 에너지가 흐르는 날이에요. 밝은 에너지가 가득해요! 지금 하는 일이 좋은 결과를 맺을 거예요. 다만 「해방」과 관련된 부분은 조심하고, 심판이 주는 「부활」…",
+  "luckyColor": "민트",
+  "luckyColorHex": "#34d399",
+  "luckyNumber": 5,
+  "url": "/blog/daily/2026-08-21.html"
 }
