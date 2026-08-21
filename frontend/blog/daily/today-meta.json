@@ -1,16 +1,16 @@
 {
-  "date": "2026-08-21",
-  "weekday": "금요일",
+  "date": "2026-08-22",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "태양",
-      "symbol": "☀️",
-      "slug": "19-sun"
+      "name": "운명의 수레바퀴",
+      "symbol": "🎡",
+      "slug": "10-wheel-of-fortune"
     },
     {
-      "name": "악마",
-      "symbol": "😈",
-      "slug": "15-devil"
+      "name": "여사제",
+      "symbol": "🌙",
+      "slug": "2-high-priestess"
     },
     {
       "name": "심판",
@@ -18,9 +18,9 @@
       "slug": "20-judgement"
     }
   ],
-  "summary": "오늘은 「성공」의 에너지가 흐르는 날이에요. 밝은 에너지가 가득해요! 지금 하는 일이 좋은 결과를 맺을 거예요. 다만 「해방」과 관련된 부분은 조심하고, 심판이 주는 「부활」…",
+  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「직관」과 관련된 부분은 조심하고, 심판이 주는 「부활」의 …",
   "luckyColor": "민트",
   "luckyColorHex": "#34d399",
-  "luckyNumber": 5,
-  "url": "/blog/daily/2026-08-21.html"
+  "luckyNumber": 3,
+  "url": "/blog/daily/2026-08-22.html"
 }
