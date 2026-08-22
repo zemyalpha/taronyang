@@ -1,6 +1,6 @@
 {
-  "date": "2026-08-22",
-  "weekday": "토요일",
+  "date": "2026-08-23",
+  "weekday": "일요일",
   "cards": [
     {
       "name": "운명의 수레바퀴",
@@ -8,19 +8,19 @@
       "slug": "10-wheel-of-fortune"
     },
     {
-      "name": "여사제",
-      "symbol": "🌙",
-      "slug": "2-high-priestess"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     },
     {
-      "name": "심판",
-      "symbol": "📯",
-      "slug": "20-judgement"
+      "name": "황제",
+      "symbol": "🏛️",
+      "slug": "4-emperor"
     }
   ],
-  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「직관」과 관련된 부분은 조심하고, 심판이 주는 「부활」의 …",
+  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「공정」과 관련된 부분은 조심하고, 황제가 주는 「권위」의 …",
   "luckyColor": "민트",
   "luckyColorHex": "#34d399",
-  "luckyNumber": 3,
-  "url": "/blog/daily/2026-08-22.html"
+  "luckyNumber": 1,
+  "url": "/blog/daily/2026-08-23.html"
 }
