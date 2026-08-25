@@ -1,26 +1,26 @@
 {
-  "date": "2026-08-25",
-  "weekday": "화요일",
+  "date": "2026-08-26",
+  "weekday": "수요일",
   "cards": [
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "바보",
+      "symbol": "🃏",
+      "slug": "0-fool"
     },
     {
-      "name": "은둔자",
-      "symbol": "🏔️",
-      "slug": "9-hermit"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     },
     {
-      "name": "연인",
-      "symbol": "💕",
-      "slug": "6-lovers"
+      "name": "운명의 수레바퀴",
+      "symbol": "🎡",
+      "slug": "10-wheel-of-fortune"
     }
   ],
-  "summary": "오늘은 「희생」의 에너지가 흐르는 날이에요. 다르게 바라볼 시간이에요. 기다림 속에서 새로운 깨달음을 얻을 거예요. 다만 「고립」과 관련된 부분은 조심하고, 연인이 주는 「사…",
-  "luckyColor": "스카이 블루",
-  "luckyColorHex": "#38bdf8",
-  "luckyNumber": 8,
-  "url": "/blog/daily/2026-08-25.html"
+  "summary": "오늘은 「새시작」의 에너지가 흐르는 날이에요. 새로운 시작과 무한한 가능성이 열려있어요. 두려움 없이 한 걸음 내디뎌보세요. 다만 「불공정」과 관련된 부분은 조심하고, 운명의…",
+  "luckyColor": "민트",
+  "luckyColorHex": "#34d399",
+  "luckyNumber": 6,
+  "url": "/blog/daily/2026-08-26.html"
 }
