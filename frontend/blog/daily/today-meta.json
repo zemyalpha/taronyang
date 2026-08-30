@@ -1,26 +1,26 @@
 {
-  "date": "2026-08-30",
-  "weekday": "일요일",
+  "date": "2026-08-31",
+  "weekday": "월요일",
   "cards": [
     {
-      "name": "심판",
-      "symbol": "📯",
-      "slug": "20-judgement"
+      "name": "운명의 수레바퀴",
+      "symbol": "🎡",
+      "slug": "10-wheel-of-fortune"
     },
     {
-      "name": "전차",
-      "symbol": "⚡",
-      "slug": "7-chariot"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     },
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "탑",
+      "symbol": "🗼",
+      "slug": "16-tower"
     }
   ],
-  "summary": "오늘은 「부활」의 에너지가 흐르는 날이에요. 인생의 전환점이에요. 과거를 되돌아보고 새로운 소명을 따르세요. 다만 「승리」와 관련된 부분은 조심하고, 황제가 주는 「권위」의 …",
-  "luckyColor": "소프트 그린",
-  "luckyColorHex": "#86efac",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-08-30.html"
+  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「용기」와 관련된 부분은 조심하고, 탑이 주는 「급변」의 메…",
+  "luckyColor": "스카이 블루",
+  "luckyColorHex": "#38bdf8",
+  "luckyNumber": 1,
+  "url": "/blog/daily/2026-08-31.html"
 }
