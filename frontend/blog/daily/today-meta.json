@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-03",
-  "weekday": "목요일",
+  "date": "2026-09-04",
+  "weekday": "금요일",
   "cards": [
     {
-      "name": "바보",
-      "symbol": "🃏",
-      "slug": "0-fool"
+      "name": "별",
+      "symbol": "⭐",
+      "slug": "17-star"
     },
     {
-      "name": "은둔자",
-      "symbol": "🏔️",
-      "slug": "9-hermit"
+      "name": "여황제",
+      "symbol": "👑",
+      "slug": "3-empress"
     },
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "악마",
+      "symbol": "😈",
+      "slug": "15-devil"
     }
   ],
-  "summary": "오늘은 「새시작」의 에너지가 흐르는 날이에요. 새로운 시작과 무한한 가능성이 열려있어요. 두려움 없이 한 걸음 내디뎌보세요. 다만 「성찰」과 관련된 부분은 조심하고, 황제가 …",
-  "luckyColor": "딥 네이비",
-  "luckyColorHex": "#6366f1",
+  "summary": "오늘은 「희망」의 에너지가 흐르는 날이에요. 희망의 빛이 비치고 있어요. 어려움 속에서도 빛은 항상 있어요. 다만 「과잉보호」와 관련된 부분은 조심하고, 악마가 주는 「집착」…",
+  "luckyColor": "스카이 블루",
+  "luckyColorHex": "#38bdf8",
   "luckyNumber": 3,
-  "url": "/blog/daily/2026-09-03.html"
+  "url": "/blog/daily/2026-09-04.html"
 }
