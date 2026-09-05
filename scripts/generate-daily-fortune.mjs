@@ -30,6 +30,7 @@ const __scriptDir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__scriptDir, '..');
 const DAILY_DIR = join(ROOT, 'frontend', 'blog', 'daily');
 const SITEMAP_PATH = join(ROOT, 'frontend', 'sitemap.xml');
+const RSS_PATH = join(ROOT, 'frontend', 'rss.xml');
 const SITE_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
 
 // ── Deterministic PRNG ────────────────────────────────────────────
@@ -655,6 +656,107 @@ function updateSitemapWithDailyFortunes(fortuneDates) {
   console.log(`  ✓ sitemap.xml updated with ${fortuneDates.length} daily fortune URLs`);
 }
 
+// ── RSS auto-update ────────────────────────────────────────────────
+
+function formatRssDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${days[date.getUTCDay()]}, ${String(d).padStart(2, '0')} ${months[date.getUTCMonth()]} ${y} 00:00:00 +0900`;
+}
+
+function escapeXml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
+function updateRssWithDailyFortunes(visibleFortunes) {
+  const today = todayKST();
+
+  const staticItems = [
+    {
+      title: '오늘의 운세 — 타로냥',
+      link: '/daily',
+      description: '매일 업데이트되는 AI 오늘의 운세. 오늘의 행운의 색, 추천 카드, 한 줄 조언을 확인하세요.',
+    },
+    {
+      title: '무료 AI 타로 상담 — 연애운',
+      link: '/tarot?cat=love',
+      description: '연애, 사랑, 인연, 관계에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 연애운을 해석합니다.',
+    },
+    {
+      title: '무료 AI 타로 상담 — 재물운',
+      link: '/tarot?cat=money',
+      description: '돈, 투자, 재산에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 재물운을 해석합니다.',
+    },
+    {
+      title: '무료 AI 타로 상담 — 직장운',
+      link: '/tarot?cat=career',
+      description: '커리어, 이직, 승진에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 직장운을 해석합니다.',
+    },
+    {
+      title: '무료 AI 타로 상담 — 종합운',
+      link: '/tarot?cat=general',
+      description: '전체적인 흐름에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 종합운을 해석합니다.',
+    },
+    {
+      title: '타로냥 요금제 안내',
+      link: '/pricing',
+      description: '타로냥 무료 및 프리미엄 요금제 안내. 매일 1회 무료 타로, 무제한 상담 프리미엄.',
+    },
+  ];
+
+  const recentFortunes = visibleFortunes.slice(0, 10);
+
+  const fortuneItems = recentFortunes.map((dateStr) => {
+    const cards = pickCardsForDate(dateStr);
+    const cardNames = cards.map((c) => c.name).join(' · ');
+    const weekday = getWeekday(dateStr);
+    const formatted = formatDateKorean(dateStr);
+    return [
+      '    <item>',
+      `      <title>${escapeXml(`${formatted} ${weekday} 오늘의 타로운세 — ${cardNames}`)}</title>`,
+      `      <link>${SITE_URL}/blog/daily/${dateStr}.html</link>`,
+      `      <description>${escapeXml(`${formatted} ${weekday}의 타로운세. ${cardNames} 카드로 보는 하루 운세와 행운의 색.`)}</description>`,
+      `      <pubDate>${formatRssDate(dateStr)}</pubDate>`,
+      `      <guid>${SITE_URL}/blog/daily/${dateStr}.html</guid>`,
+      '    </item>',
+    ].join('\n');
+  }).join('\n');
+
+  const allStaticItems = staticItems.map((item) => [
+    '    <item>',
+    `      <title>${escapeXml(item.title)}</title>`,
+    `      <link>${SITE_URL}${item.link}</link>`,
+    `      <description>${escapeXml(item.description)}</description>`,
+    `      <pubDate>${formatRssDate(today)}</pubDate>`,
+    `      <guid>${SITE_URL}${item.link}</guid>`,
+    '    </item>',
+  ].join('\n')).join('\n');
+
+  const rss = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<rss version="2.0">',
+    '  <channel>',
+    `    <title>타로냥 — 무료 AI 타로</title>`,
+    `    <link>${SITE_URL}</link>`,
+    `    <description>무료 AI 타로 서비스 타로냥. 연애운, 재물운, 직장운, 종합운을 카드로 해석하는 AI 타로. 매일 업데이트되는 오늘의 운세와 타로 상담.</description>`,
+    `    <language>ko</language>`,
+    `    <lastBuildDate>${formatRssDate(today)}</lastBuildDate>`,
+    `    <ttl>60</ttl>`,
+    '',
+    fortuneItems,
+    '',
+    allStaticItems,
+    '  </channel>',
+    '</rss>',
+    '',
+  ].join('\n');
+
+  writeFileSync(RSS_PATH, rss);
+  console.log(`  ✓ rss.xml updated with ${recentFortunes.length} daily fortune entries`);
+}
+
 // ── Main ───────────────────────────────────────────────────────────
 
 function main() {
@@ -708,6 +810,9 @@ function main() {
 
   // Auto-update sitemap.xml with visible daily fortune URLs (ZEMA-2676)
   updateSitemapWithDailyFortunes(visibleFortunes);
+
+  // Auto-update rss.xml with latest daily fortune entries
+  updateRssWithDailyFortunes(visibleFortunes);
 
   // Generate today-meta.json for homepage preview — prefer the most recent
   // actually-existing visible fortune so the preview never links to a page
