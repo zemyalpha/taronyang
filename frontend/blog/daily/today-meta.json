@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-05",
-  "weekday": "토요일",
+  "date": "2026-09-06",
+  "weekday": "일요일",
   "cards": [
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "여사제",
+      "symbol": "🌙",
+      "slug": "2-high-priestess"
     },
     {
-      "name": "심판",
-      "symbol": "📯",
-      "slug": "20-judgement"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     },
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "탑",
+      "symbol": "🗼",
+      "slug": "16-tower"
     }
   ],
-  "summary": "오늘은 「권위」의 에너지가 흐르는 날이에요. 질서와 안정이 필요한 시기예요. 체계적으로 계획을 세워보세요. 다만 「부활」과 관련된 부분은 조심하고, 힘이 주는 「용기」의 메시…",
-  "luckyColor": "민트",
-  "luckyColorHex": "#34d399",
-  "luckyNumber": 3,
-  "url": "/blog/daily/2026-09-05.html"
+  "summary": "오늘은 「직관」의 에너지가 흐르는 날이에요. 내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요. 다만 「불공정」과 관련된 부분은 조심하고, 탑이 주는 「급변」의 …",
+  "luckyColor": "소프트 그린",
+  "luckyColorHex": "#86efac",
+  "luckyNumber": 7,
+  "url": "/blog/daily/2026-09-06.html"
 }
