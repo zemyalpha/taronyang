@@ -186,7 +186,7 @@
             toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
         }
 
-        const API = ((window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) || window.location.origin).replace(/\/api\/?$/, '');
+        const API = (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) || (window.location.origin + '/api');
         const token = localStorage.getItem('token');
         const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
         let category = '';
@@ -209,9 +209,11 @@
             }
         })();
 
-        // API 기본 URL (필요시 수정)
+        // API 기본 URL (필요시 수정) — app.js와 동일하게 API는 전체 베이스를 의미하며,
+        // 하드코딩된 /api 접두사는 경로에서 제거하여 임의 apiBase 설정과 호환
         function apiUrl(path) {
-            return API + path;
+            const cleanPath = path.startsWith('/api') ? path.slice(4) : path;
+            return API.replace(/\/$/, '') + cleanPath;
         }
 
         // 에러 응답에서 detail 추출 (실패시 기본 메시지)
