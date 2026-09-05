@@ -23,7 +23,8 @@ test.describe('ZEMA-3181: Admin null token guard + error handling', () => {
 
     await page.goto('/admin/index.html');
 
-    await page.waitForTimeout(1500);
+    // 리다이렉트 완료를 웹 퍼스트 어설션으로 대기 (임의 sleep 제거)
+    await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
 
     expect(apiCalls).toEqual([]);
   });
