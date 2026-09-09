@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-09",
-  "weekday": "수요일",
+  "date": "2026-09-10",
+  "weekday": "목요일",
   "cards": [
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "여황제",
+      "symbol": "👑",
+      "slug": "3-empress"
     },
     {
-      "name": "절제",
-      "symbol": "🏺",
-      "slug": "14-temperance"
+      "name": "바보",
+      "symbol": "🃏",
+      "slug": "0-fool"
     },
     {
-      "name": "은둔자",
-      "symbol": "🏔️",
-      "slug": "9-hermit"
+      "name": "운명의 수레바퀴",
+      "symbol": "🎡",
+      "slug": "10-wheel-of-fortune"
     }
   ],
-  "summary": "오늘은 「권위」의 에너지가 흐르는 날이에요. 질서와 안정이 필요한 시기예요. 체계적으로 계획을 세워보세요. 다만 「과잉」과 관련된 부분은 조심하고, 은둔자가 주는 「성찰」의 …",
+  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「새시작」과 관련된 부분은 조심하고, 운명의 수레바퀴가…",
   "luckyColor": "선셋 오렌지",
   "luckyColorHex": "#fb923c",
   "luckyNumber": 9,
-  "url": "/blog/daily/2026-09-09.html"
+  "url": "/blog/daily/2026-09-10.html"
 }
