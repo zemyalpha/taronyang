@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-10",
-  "weekday": "목요일",
+  "date": "2026-09-11",
+  "weekday": "금요일",
   "cards": [
     {
-      "name": "여황제",
-      "symbol": "👑",
-      "slug": "3-empress"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
     },
     {
-      "name": "바보",
-      "symbol": "🃏",
-      "slug": "0-fool"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     },
     {
-      "name": "운명의 수레바퀴",
-      "symbol": "🎡",
-      "slug": "10-wheel-of-fortune"
+      "name": "전차",
+      "symbol": "⚡",
+      "slug": "7-chariot"
     }
   ],
-  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「새시작」과 관련된 부분은 조심하고, 운명의 수레바퀴가…",
-  "luckyColor": "선셋 오렌지",
-  "luckyColorHex": "#fb923c",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-09-10.html"
+  "summary": "오늘은 「부활」의 에너지가 흐르는 날이에요. 인생의 전환점이에요. 과거를 되돌아보고 새로운 소명을 따르세요. 다만 「나약함」과 관련된 부분은 조심하고, 전차가 주는 「승리」의…",
+  "luckyColor": "딥 네이비",
+  "luckyColorHex": "#6366f1",
+  "luckyNumber": 2,
+  "url": "/blog/daily/2026-09-11.html"
 }
