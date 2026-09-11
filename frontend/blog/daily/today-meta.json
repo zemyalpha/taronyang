@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-11",
-  "weekday": "금요일",
+  "date": "2026-09-12",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "심판",
-      "symbol": "📯",
-      "slug": "20-judgement"
+      "name": "죽음",
+      "symbol": "🦋",
+      "slug": "13-death"
     },
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "연인",
+      "symbol": "💕",
+      "slug": "6-lovers"
     },
     {
-      "name": "전차",
-      "symbol": "⚡",
-      "slug": "7-chariot"
+      "name": "달",
+      "symbol": "🌕",
+      "slug": "18-moon"
     }
   ],
-  "summary": "오늘은 「부활」의 에너지가 흐르는 날이에요. 인생의 전환점이에요. 과거를 되돌아보고 새로운 소명을 따르세요. 다만 「나약함」과 관련된 부분은 조심하고, 전차가 주는 「승리」의…",
-  "luckyColor": "딥 네이비",
-  "luckyColorHex": "#6366f1",
-  "luckyNumber": 2,
-  "url": "/blog/daily/2026-09-11.html"
+  "summary": "오늘은 「끝과시작」의 에너지가 흐르는 날이에요. 하나의 장이 끝나고 새로운 장이 시작돼요. 과거를 내려놓고 변화를 받아들이세요. 다만 「갈등」과 관련된 부분은 조심하고, 달이…",
+  "luckyColor": "골드",
+  "luckyColorHex": "#fbbf24",
+  "luckyNumber": 3,
+  "url": "/blog/daily/2026-09-12.html"
 }
