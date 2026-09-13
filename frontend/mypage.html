@@ -130,8 +130,11 @@
         .toggle-switch input:checked + .slider:before { transform: translateX(22px); }
     </style>
 
+    <script src="/static/js/config.js"></script>
     <script>
-        const API = window.location.origin + '/api';
+        const getApiBase = () =>
+            (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
+            (window.location.origin + '/api');
         const token = localStorage.getItem('token');
         if (!token) { location.href = '/login'; }
         const headers = { 'Authorization': 'Bearer ' + token };
@@ -157,7 +160,7 @@
 
         async function loadProfile() {
             try {
-                const res = await fetch(API + '/auth/me', { headers });
+                const res = await fetch(getApiBase() + '/auth/me', { headers });
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         localStorage.removeItem('token');
@@ -178,21 +181,21 @@
 
         async function loadNotifications() {
             try {
-                const res = await fetch(API + '/notifications/settings', { headers });
-                if (!res.ok) return;
+                const res = await fetch(getApiBase() + '/notifications/settings', { headers });
+                if (!res.ok) throw new Error();
                 const data = await res.json();
                 document.getElementById('notify_enabled').checked = data.daily_email !== false;
                 document.getElementById('notify_time').value = data.notify_time || '07:00';
                 if (data.zodiac_sign) {
                     document.getElementById('zodiac_sign').value = data.zodiac_sign;
                 }
-            } catch(e) { console.error(e); }
+            } catch { showToast('알림 설정을 불러오지 못했습니다.'); }
         }
 
         async function loadSubscription() {
             const el = document.getElementById('plan_status');
             try {
-                const res = await fetch(API + '/payment/status', { headers });
+                const res = await fetch(getApiBase() + '/payment/status', { headers });
                 if (!res.ok) {
                     el.textContent = '⚠️ 구독 정보를 불러올 수 없습니다';
                     return;
@@ -204,8 +207,7 @@
                     el.textContent = '🆓 무료 플랜';
                     document.getElementById('premium_btn').classList.remove('hidden');
                 }
-            } catch(e) {
-                console.error(e);
+            } catch {
                 el.textContent = '⚠️ 구독 정보를 불러올 수 없습니다';
             }
         }
@@ -213,7 +215,7 @@
         async function loadHistory() {
             const list = document.getElementById('history_list');
             try {
-                const res = await fetch(API + '/readings', { headers });
+                const res = await fetch(getApiBase() + '/readings', { headers });
                 if (!res.ok) {
                     list.innerHTML = '<p class="text-red-400 text-sm">상담 기록을 불러오지 못했습니다</p>';
                     return;
@@ -238,8 +240,7 @@
                         <p class="text-gray-300 text-sm">${escapeHtml(r.question || '(질문 없음)')}</p>
                     </div>`;
                 }).join('');
-            } catch(e) {
-                console.error(e);
+            } catch {
                 list.innerHTML = '<p class="text-red-400 text-sm">상담 기록을 불러오지 못했습니다</p>';
             }
         }
@@ -254,7 +255,7 @@
                     return;
                 }
 
-                const res = await fetch(API + '/auth/me', {
+                const res = await fetch(getApiBase() + '/auth/me', {
                     method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nickname })
                 });
@@ -267,7 +268,7 @@
                 } catch {}
 
                 if (zodiac !== undefined && zodiac !== null) {
-                    const zodiacRes = await fetch(API + '/notifications/zodiac', {
+                    const zodiacRes = await fetch(getApiBase() + '/notifications/zodiac', {
                         method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ zodiac_sign: zodiac })
                     });
@@ -282,7 +283,7 @@
 
         async function saveNotification() {
             try {
-                const res = await fetch(API + '/notifications/settings', {
+                const res = await fetch(getApiBase() + '/notifications/settings', {
                     method: 'PUT',
                     headers: { ...headers, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -306,7 +307,6 @@
         }
     </script>
 
-    <script src="/static/js/config.js"></script>
     <script src="/static/js/analytics.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
