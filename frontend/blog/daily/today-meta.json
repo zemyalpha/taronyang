@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-14",
-  "weekday": "월요일",
+  "date": "2026-09-15",
+  "weekday": "화요일",
   "cards": [
     {
-      "name": "연인",
-      "symbol": "💕",
-      "slug": "6-lovers"
+      "name": "태양",
+      "symbol": "☀️",
+      "slug": "19-sun"
     },
     {
-      "name": "전차",
-      "symbol": "⚡",
-      "slug": "7-chariot"
+      "name": "바보",
+      "symbol": "🃏",
+      "slug": "0-fool"
     },
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     }
   ],
-  "summary": "오늘은 「사랑」의 에너지가 흐르는 날이에요. 중요한 선택의 순간이에요. 마음이 이끄는 대로 선택하세요. 다만 「승리」와 관련된 부분은 조심하고, 매달린 사람이 주는 「희생」의…",
+  "summary": "오늘은 「성공」의 에너지가 흐르는 날이에요. 밝은 에너지가 가득해요! 지금 하는 일이 좋은 결과를 맺을 거예요. 다만 「새시작」과 관련된 부분은 조심하고, 힘이 주는 「용기」…",
   "luckyColor": "딥 네이비",
   "luckyColorHex": "#6366f1",
-  "luckyNumber": 4,
-  "url": "/blog/daily/2026-09-14.html"
+  "luckyNumber": 6,
+  "url": "/blog/daily/2026-09-15.html"
 }
