@@ -5,6 +5,16 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
+    # ZEMA-3811: Daily Fortune auto-publish PRs are opened by GITHUB_TOKEN
+    # (github-actions[bot]) and merged within seconds. GitHub creates CI runs
+    # for such bot-opened PRs in an approval-required state that no one can
+    # approve in time, so they finalize as 0-job workflow failures (daily red X).
+    # These PRs only touch generated files, so skip them. Human PRs touching
+    # any source file still run CI normally.
+    paths-ignore:
+      - 'frontend/blog/daily/**'
+      - 'frontend/rss.xml'
+      - 'frontend/sitemap.xml'
 
 jobs:
   backend:
