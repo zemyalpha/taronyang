@@ -24,6 +24,11 @@ on:
         required: false
         type: string
         default: '3'
+  # Second line of defense (ZEMA-3778): external systems can fire this workflow
+  # via POST /repos/zemyalpha/taronyang/dispatches with event type
+  # "daily-fortune", independent of schedule delivery and workflow_dispatch.
+  repository_dispatch:
+    types: [daily-fortune]
 
 permissions:
   contents: write
@@ -48,12 +53,20 @@ jobs:
           node-version: '20'
 
       - name: Generate daily fortune
+        env:
+          # workflow_dispatch inputs take precedence; repository_dispatch
+          # payloads map from github.event.client_payload.* (ZEMA-3778).
+          # Env indirection also avoids injecting untrusted payload values
+          # directly into the shell script.
+          INPUT_DATE: ${{ inputs.date || github.event.client_payload.date || '' }}
+          INPUT_DAYS: ${{ inputs.days || github.event.client_payload.days || '' }}
+          INPUT_AHEAD: ${{ inputs.ahead || github.event.client_payload.ahead || '' }}
         run: |
           ARGS=""
-          if [ -n "${{ inputs.date }}" ]; then ARGS="${{ inputs.date }}"; fi
-          if [ -n "${{ inputs.days }}" ]; then ARGS="$ARGS --days ${{ inputs.days }}"; fi
-          if [ -n "${{ inputs.ahead }}" ]; then ARGS="$ARGS --ahead ${{ inputs.ahead }}"; fi
-          # For scheduled (cron) runs, inputs.* are empty — default to
+          if [ -n "$INPUT_DATE" ]; then ARGS="$INPUT_DATE"; fi
+          if [ -n "$INPUT_DAYS" ]; then ARGS="$ARGS --days $INPUT_DAYS"; fi
+          if [ -n "$INPUT_AHEAD" ]; then ARGS="$ARGS --ahead $INPUT_AHEAD"; fi
+          # For scheduled (cron) runs, inputs are empty — default to
           # backfill 1 + forward-fill 3 days so a missed cron never causes 404s.
           if [ -z "$ARGS" ]; then ARGS="--days 1 --ahead 3"; fi
           echo "Running: node scripts/generate-daily-fortune.mjs $ARGS"
