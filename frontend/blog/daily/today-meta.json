@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-15",
-  "weekday": "화요일",
+  "date": "2026-09-16",
+  "weekday": "수요일",
   "cards": [
     {
-      "name": "태양",
-      "symbol": "☀️",
-      "slug": "19-sun"
+      "name": "여사제",
+      "symbol": "🌙",
+      "slug": "2-high-priestess"
     },
     {
-      "name": "바보",
-      "symbol": "🃏",
-      "slug": "0-fool"
+      "name": "절제",
+      "symbol": "🏺",
+      "slug": "14-temperance"
     },
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     }
   ],
-  "summary": "오늘은 「성공」의 에너지가 흐르는 날이에요. 밝은 에너지가 가득해요! 지금 하는 일이 좋은 결과를 맺을 거예요. 다만 「새시작」과 관련된 부분은 조심하고, 힘이 주는 「용기」…",
-  "luckyColor": "딥 네이비",
-  "luckyColorHex": "#6366f1",
-  "luckyNumber": 6,
-  "url": "/blog/daily/2026-09-15.html"
+  "summary": "오늘은 「직관」의 에너지가 흐르는 날이에요. 내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요. 다만 「과잉」과 관련된 부분은 조심하고, 정의가 주는 「공정」의 …",
+  "luckyColor": "스카이 블루",
+  "luckyColorHex": "#38bdf8",
+  "luckyNumber": 3,
+  "url": "/blog/daily/2026-09-16.html"
 }
