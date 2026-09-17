@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-17",
-  "weekday": "목요일",
+  "date": "2026-09-18",
+  "weekday": "금요일",
   "cards": [
     {
-      "name": "악마",
-      "symbol": "😈",
-      "slug": "15-devil"
+      "name": "여황제",
+      "symbol": "👑",
+      "slug": "3-empress"
     },
     {
-      "name": "죽음",
-      "symbol": "🦋",
-      "slug": "13-death"
+      "name": "태양",
+      "symbol": "☀️",
+      "slug": "19-sun"
     },
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "전차",
+      "symbol": "⚡",
+      "slug": "7-chariot"
     }
   ],
-  "summary": "오늘은 「집착」의 에너지가 흐르는 날이에요. 무언가에 지나치게 집착하고 있을 수 있어요. 스스로를 옭아매는 것에서 벗어나세요. 다만 「저항」과 관련된 부분은 조심하고, 매달린…",
-  "luckyColor": "딥 네이비",
-  "luckyColorHex": "#6366f1",
-  "luckyNumber": 6,
-  "url": "/blog/daily/2026-09-17.html"
+  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「성공」과 관련된 부분은 조심하고, 전차가 주는 「승리…",
+  "luckyColor": "로즈 골드",
+  "luckyColorHex": "#f472b6",
+  "luckyNumber": 5,
+  "url": "/blog/daily/2026-09-18.html"
 }
