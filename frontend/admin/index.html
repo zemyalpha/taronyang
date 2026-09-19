@@ -95,6 +95,10 @@
 
     <script>
         const token = localStorage.getItem('token');
+        if (!token || token === 'null' || token === 'undefined') {
+            window.location.href = '/login';
+            throw new Error('No auth token — redirecting to login');
+        }
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
         function escapeHtml(str) {
@@ -126,7 +130,12 @@
                 document.getElementById('stat-premium').textContent = data.premium_users;
                 document.getElementById('stat-readings').textContent = data.total_readings;
                 document.getElementById('stat-today').textContent = data.today_new_users;
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('stat-users').textContent = '오류';
+                document.getElementById('stat-premium').textContent = '오류';
+                document.getElementById('stat-readings').textContent = '오류';
+                document.getElementById('stat-today').textContent = '오류';
+            }
         }
 
         async function loadUsers() {
@@ -135,6 +144,8 @@
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         window.location.href = '/';
+                    } else {
+                        document.getElementById('users-table').innerHTML = '<tr><td colspan="4" class="py-4 text-center text-red-400">불러오지 못했습니다</td></tr>';
                     }
                     return;
                 }
@@ -147,7 +158,9 @@
                         <td>${u.subscription_status === 'premium' ? '<span class="text-lavender">💎</span>' : '<span class="text-gray-500">무료</span>'}</td>
                     </tr>
                 `).join('');
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('users-table').innerHTML = '<tr><td colspan="4" class="py-4 text-center text-red-400">불러오지 못했습니다</td></tr>';
+            }
         }
 
         async function loadReadings() {
@@ -156,6 +169,8 @@
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         window.location.href = '/';
+                    } else {
+                        document.getElementById('readings-table').innerHTML = '<tr><td colspan="4" class="py-4 text-center text-red-400">불러오지 못했습니다</td></tr>';
                     }
                     return;
                 }
@@ -169,7 +184,9 @@
                         <td class="text-gray-400">${r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '-'}</td>
                     </tr>
                 `).join('');
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('readings-table').innerHTML = '<tr><td colspan="4" class="py-4 text-center text-red-400">불러오지 못했습니다</td></tr>';
+            }
         }
 
         function showAdminTab(tab) {
