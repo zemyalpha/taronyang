@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-20",
-  "weekday": "일요일",
+  "date": "2026-09-21",
+  "weekday": "월요일",
   "cards": [
-    {
-      "name": "여사제",
-      "symbol": "🌙",
-      "slug": "2-high-priestess"
-    },
     {
       "name": "여황제",
       "symbol": "👑",
       "slug": "3-empress"
     },
     {
-      "name": "달",
-      "symbol": "🌕",
-      "slug": "18-moon"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
+    },
+    {
+      "name": "탑",
+      "symbol": "🗼",
+      "slug": "16-tower"
     }
   ],
-  "summary": "오늘은 「직관」의 에너지가 흐르는 날이에요. 내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요. 다만 「과잉보호」와 관련된 부분은 조심하고, 달이 주는 「환상」의…",
-  "luckyColor": "소프트 그린",
-  "luckyColorHex": "#86efac",
-  "luckyNumber": 1,
-  "url": "/blog/daily/2026-09-20.html"
+  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「자기의심」과 관련된 부분은 조심하고, 탑이 주는 「급…",
+  "luckyColor": "로즈 골드",
+  "luckyColorHex": "#f472b6",
+  "luckyNumber": 7,
+  "url": "/blog/daily/2026-09-21.html"
 }
