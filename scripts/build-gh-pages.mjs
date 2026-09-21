@@ -27,7 +27,25 @@ const ROOT = join(__scriptDir, '..');
 const FRONTEND = join(ROOT, 'frontend');
 const BUILD = join(ROOT, 'gh-pages-build');
 const BASE_PATH = '/taronyang';
-const TUNNEL_URL = process.env.TUNNEL_URL || '';
+const TUNNEL_URL = (process.env.TUNNEL_URL || '').replace(/\/$/, '');
+
+// ZEMA-3955: api-beacon.json is machine-maintained by tunnel-url-watcher.sh and
+// tracks quick-tunnel rotations within minutes. The TUNNEL_URL env (repo variable
+// vars.TUNNEL_URL in deploy-pages.yml) is manual and goes stale after rotations,
+// so every daily deploy baked a dead fallback URL into config.js. The beacon now
+// takes precedence; TUNNEL_URL remains as fallback when the beacon is absent.
+function readBeaconApiUrl() {
+  try {
+    const beaconPath = join(ROOT, 'api-beacon.json');
+    if (!existsSync(beaconPath)) return '';
+    const beacon = JSON.parse(readFileSync(beaconPath, 'utf-8'));
+    return typeof beacon.apiUrl === 'string' ? beacon.apiUrl.trim().replace(/\/$/, '') : '';
+  } catch {
+    return '';
+  }
+}
+const BEACON_API_URL = readBeaconApiUrl();
+const EFFECTIVE_TUNNEL_URL = BEACON_API_URL || TUNNEL_URL;
 
 // SEO / Analytics injection (ZEMA-2794) — env-var based, optional.
 // Values provided at deploy time by the board (Google accounts).
@@ -367,8 +385,8 @@ console.log('[build] Generating card interpretation pages...');
 generateCardPages(BUILD);
 
 // 4. Generate config.js with runtime API discovery
-console.log(`[build] Generating config.js (TUNNEL_URL=${TUNNEL_URL || 'none'})...`);
-writeFileSync(join(BUILD, 'static', 'js', 'config.js'), generateConfigJs(TUNNEL_URL));
+console.log(`[build] Generating config.js (beacon=${BEACON_API_URL || 'none'}, TUNNEL_URL=${TUNNEL_URL || 'none'} → effective=${EFFECTIVE_TUNNEL_URL || 'none'})...`);
+writeFileSync(join(BUILD, 'static', 'js', 'config.js'), generateConfigJs(EFFECTIVE_TUNNEL_URL));
 
 // 4.5 Copy api-beacon.json (runtime API discovery — ZEMA-2620)
 const beaconSrc = join(ROOT, 'api-beacon.json');
@@ -378,7 +396,7 @@ if (existsSync(beaconSrc)) {
 } else {
   // 빌드 시점에 비컨이 없으면 임시 비컨 생성
   const fallbackBeacon = {
-    apiUrl: TUNNEL_URL ? TUNNEL_URL.replace(/\/$/, '') : '',
+    apiUrl: EFFECTIVE_TUNNEL_URL,
     source: 'build-fallback',
     updatedAt: new Date().toISOString(),
   };
@@ -491,7 +509,7 @@ console.log('[build] ✅ Build complete!');
 console.log(`  Output: ${relative(ROOT, BUILD)}/`);
 console.log(`  HTML files: ${allFiles.length}`);
 console.log(`  Base path: ${BASE_PATH}`);
-console.log(`  API base: ${TUNNEL_URL ? TUNNEL_URL + '/api' : '(same-origin)'}`);
+console.log(`  API base: ${EFFECTIVE_TUNNEL_URL ? EFFECTIVE_TUNNEL_URL + '/api' : '(same-origin)'}`);
 console.log(`  GSC verification: ${GSC_VERIFICATION_CODE ? '✓ injected' : '(not set)'}`);
 console.log(`  GA4 gtag: ${GA4_MEASUREMENT_ID ? '✓ injected' : '(not set)'}`);
 console.log('');
