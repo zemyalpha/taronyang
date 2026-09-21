@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-21",
-  "weekday": "월요일",
+  "date": "2026-09-22",
+  "weekday": "화요일",
   "cards": [
     {
-      "name": "여황제",
-      "symbol": "👑",
-      "slug": "3-empress"
+      "name": "운명의 수레바퀴",
+      "symbol": "🎡",
+      "slug": "10-wheel-of-fortune"
     },
     {
-      "name": "심판",
-      "symbol": "📯",
-      "slug": "20-judgement"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     },
     {
-      "name": "탑",
-      "symbol": "🗼",
-      "slug": "16-tower"
+      "name": "교황",
+      "symbol": "⛪",
+      "slug": "5-hierophant"
     }
   ],
-  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「자기의심」과 관련된 부분은 조심하고, 탑이 주는 「급…",
-  "luckyColor": "로즈 골드",
-  "luckyColorHex": "#f472b6",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-09-21.html"
+  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「불공정」과 관련된 부분은 조심하고, 교황이 주는 「전통」의…",
+  "luckyColor": "라벤더 퍼플",
+  "luckyColorHex": "#a78bfa",
+  "luckyNumber": 3,
+  "url": "/blog/daily/2026-09-22.html"
 }
