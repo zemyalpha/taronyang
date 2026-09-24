@@ -1,6 +1,6 @@
 {
-  "apiUrl": "https://taronyang.zemystudio.com",
-  "source": "tunnel-named-permanent",
-  "updatedAt": "2026-09-24T12:40:00Z",
-  "note": "Named tunnel (cloudflared e078aef5) via zemystudio.com zone — permanent URL, no more quick-tunnel churn. Hotfix: quick tunnel decommissioned, previous beacon URL dead."
+  "apiUrl": "https://relying-periods-distinct-cities.trycloudflare.com",
+  "source": "tunnel-quick",
+  "updatedAt": "2026-09-24T12:40:29Z",
+  "note": "Quick Tunnel URL — 자동 업데이트됨 (tunnel-url-watcher.sh)"
 }
