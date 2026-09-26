@@ -29,11 +29,13 @@ const BUILD = join(ROOT, 'gh-pages-build');
 const BASE_PATH = '/taronyang';
 const TUNNEL_URL = (process.env.TUNNEL_URL || '').replace(/\/$/, '');
 
-// ZEMA-3955: api-beacon.json is machine-maintained by tunnel-url-watcher.sh and
-// tracks quick-tunnel rotations within minutes. The TUNNEL_URL env (repo variable
-// vars.TUNNEL_URL in deploy-pages.yml) is manual and goes stale after rotations,
-// so every daily deploy baked a dead fallback URL into config.js. The beacon now
-// takes precedence; TUNNEL_URL remains as fallback when the beacon is absent.
+// ZEMA-3955: api-beacon.json is committed to the repo (visible, versioned) and is
+// updated by hotfix commits (e.g. c107ac6) when the API URL changes. The TUNNEL_URL
+// env (repo variable vars.TUNNEL_URL in deploy-pages.yml) lives in GitHub settings —
+// invisible and easy to leave stale after a URL change (it previously baked a dead
+// quick-tunnel fallback into config.js on every daily deploy). The beacon takes
+// precedence; TUNNEL_URL remains as fallback when the beacon is absent. Since the
+// permanent named tunnel (taronyang.zemystudio.com) both values should agree.
 function readBeaconApiUrl() {
   try {
     const beaconPath = join(ROOT, 'api-beacon.json');
