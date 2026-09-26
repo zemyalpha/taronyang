@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-26",
-  "weekday": "토요일",
+  "date": "2026-09-27",
+  "weekday": "일요일",
   "cards": [
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "별",
+      "symbol": "⭐",
+      "slug": "17-star"
     },
     {
-      "name": "운명의 수레바퀴",
-      "symbol": "🎡",
-      "slug": "10-wheel-of-fortune"
+      "name": "세계",
+      "symbol": "🌍",
+      "slug": "21-world"
     },
     {
-      "name": "전차",
-      "symbol": "⚡",
-      "slug": "7-chariot"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     }
   ],
-  "summary": "오늘은 「희생」의 에너지가 흐르는 날이에요. 다르게 바라볼 시간이에요. 기다림 속에서 새로운 깨달음을 얻을 거예요. 다만 「변화」와 관련된 부분은 조심하고, 전차가 주는 「승…",
-  "luckyColor": "민트",
-  "luckyColorHex": "#34d399",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-09-26.html"
+  "summary": "오늘은 「희망」의 에너지가 흐르는 날이에요. 희망의 빛이 비치고 있어요. 어려움 속에서도 빛은 항상 있어요. 다만 「완성」과 관련된 부분은 조심하고, 힘이 주는 「용기」의 메…",
+  "luckyColor": "코랄 핑크",
+  "luckyColorHex": "#fb7185",
+  "luckyNumber": 9,
+  "url": "/blog/daily/2026-09-27.html"
 }
