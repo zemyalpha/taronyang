@@ -1,26 +1,26 @@
 {
-  "date": "2026-09-28",
-  "weekday": "월요일",
+  "date": "2026-09-29",
+  "weekday": "화요일",
   "cards": [
     {
-      "name": "여사제",
-      "symbol": "🌙",
-      "slug": "2-high-priestess"
+      "name": "교황",
+      "symbol": "⛪",
+      "slug": "5-hierophant"
     },
     {
-      "name": "바보",
-      "symbol": "🃏",
-      "slug": "0-fool"
+      "name": "연인",
+      "symbol": "💕",
+      "slug": "6-lovers"
     },
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "절제",
+      "symbol": "🏺",
+      "slug": "14-temperance"
     }
   ],
-  "summary": "오늘은 「직관」의 에너지가 흐르는 날이에요. 내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요. 다만 「새시작」과 관련된 부분은 조심하고, 황제가 주는 「권위」의…",
-  "luckyColor": "민트",
-  "luckyColorHex": "#34d399",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-09-28.html"
+  "summary": "오늘은 「전통」의 에너지가 흐르는 날이에요. 좋은 스승이나 멘토를 만날 수 있는 시기예요. 배움에 열려있으세요. 다만 「갈등」과 관련된 부분은 조심하고, 절제가 주는 「균형」…",
+  "luckyColor": "선셋 오렌지",
+  "luckyColorHex": "#fb923c",
+  "luckyNumber": 1,
+  "url": "/blog/daily/2026-09-29.html"
 }
