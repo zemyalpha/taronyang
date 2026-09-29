@@ -2,293 +2,124 @@
 <rss version="2.0">
   <channel>
     <title>타로냥 — 무료 AI 타로</title>
-    <link>https://taronyang.com</link>
+    <link>https://zemyalpha.github.io/taronyang</link>
     <description>무료 AI 타로 서비스 타로냥. 연애운, 재물운, 직장운, 종합운을 카드로 해석하는 AI 타로. 매일 업데이트되는 오늘의 운세와 타로 상담.</description>
     <language>ko</language>
-    <lastBuildDate>Fri, 31 Jul 2026 00:00:00 +0900</lastBuildDate>
+    <lastBuildDate>Wed, 30 Sep 2026 00:00:00 +0900</lastBuildDate>
     <ttl>60</ttl>
 
     <item>
-      <title>2026년 7월 31일 금요일 오늘의 타로운세 — 세계 · 힘 · 매달린 사람</title>
-      <link>https://taronyang.com/blog/daily/2026-07-31</link>
-      <description>2026년 7월 31일 금요일의 타로운세. 세계 · 힘 · 매달린 사람 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-31</guid>
+      <title>2026년 9월 30일 수요일 오늘의 타로운세 — 악마 · 매달린 사람 · 연인</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-30.html</link>
+      <description>2026년 9월 30일 수요일의 타로운세. 악마 · 매달린 사람 · 연인 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Wed, 30 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-30.html</guid>
     </item>
     <item>
-      <title>2026년 7월 30일 목요일 오늘의 타로운세 — 별 · 마법사 · 전차</title>
-      <link>https://taronyang.com/blog/daily/2026-07-30</link>
-      <description>2026년 7월 30일 목요일의 타로운세. 별 · 마법사 · 전차 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Thu, 30 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-30</guid>
+      <title>2026년 9월 29일 화요일 오늘의 타로운세 — 교황 · 연인 · 절제</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-29.html</link>
+      <description>2026년 9월 29일 화요일의 타로운세. 교황 · 연인 · 절제 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Tue, 29 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-29.html</guid>
     </item>
     <item>
-      <title>2026년 7월 29일 수요일 오늘의 타로운세 — 심판 · 운명의 수레바퀴 · 달</title>
-      <link>https://taronyang.com/blog/daily/2026-07-29</link>
-      <description>2026년 7월 29일 수요일의 타로운세. 심판 · 운명의 수레바퀴 · 달 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Wed, 29 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-29</guid>
+      <title>2026년 9월 28일 월요일 오늘의 타로운세 — 여사제 · 바보 · 황제</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-28.html</link>
+      <description>2026년 9월 28일 월요일의 타로운세. 여사제 · 바보 · 황제 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-28.html</guid>
     </item>
     <item>
-      <title>2026년 7월 28일 화요일 오늘의 타로운세 — 세계 · 여사제 · 마법사</title>
-      <link>https://taronyang.com/blog/daily/2026-07-28</link>
-      <description>2026년 7월 28일 화요일의 타로운세. 세계 · 여사제 · 마법사 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Tue, 28 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-28</guid>
+      <title>2026년 9월 27일 일요일 오늘의 타로운세 — 별 · 세계 · 힘</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-27.html</link>
+      <description>2026년 9월 27일 일요일의 타로운세. 별 · 세계 · 힘 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Sun, 27 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-27.html</guid>
     </item>
     <item>
-      <title>2026년 7월 27일 월요일 오늘의 타로운세 — 전차 · 세계 · 탑</title>
-      <link>https://taronyang.com/blog/daily/2026-07-27</link>
-      <description>2026년 7월 27일 월요일의 타로운세. 전차 · 세계 · 탑 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Mon, 27 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-27</guid>
+      <title>2026년 9월 26일 토요일 오늘의 타로운세 — 매달린 사람 · 운명의 수레바퀴 · 전차</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-26.html</link>
+      <description>2026년 9월 26일 토요일의 타로운세. 매달린 사람 · 운명의 수레바퀴 · 전차 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-26.html</guid>
     </item>
     <item>
-      <title>2026년 7월 26일 일요일 오늘의 타로운세 — 교황 · 힘 · 정의</title>
-      <link>https://taronyang.com/blog/daily/2026-07-26</link>
-      <description>2026년 7월 26일 일요일의 타로운세. 교황 · 힘 · 정의 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Sun, 26 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-26</guid>
+      <title>2026년 9월 25일 금요일 오늘의 타로운세 — 세계 · 죽음 · 교황</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-25.html</link>
+      <description>2026년 9월 25일 금요일의 타로운세. 세계 · 죽음 · 교황 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Fri, 25 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-25.html</guid>
     </item>
     <item>
-      <title>2026년 7월 25일 토요일 오늘의 타로운세 — 매달린 사람 · 달 · 절제</title>
-      <link>https://taronyang.com/blog/daily/2026-07-25</link>
-      <description>2026년 7월 25일 토요일의 타로운세. 매달린 사람 · 달 · 절제 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Sat, 25 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-25</guid>
+      <title>2026년 9월 24일 목요일 오늘의 타로운세 — 힘 · 심판 · 황제</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-24.html</link>
+      <description>2026년 9월 24일 목요일의 타로운세. 힘 · 심판 · 황제 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Thu, 24 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-24.html</guid>
     </item>
     <item>
-      <title>2026년 7월 24일 금요일 오늘의 타로운세 — 여사제 · 매달린 사람 · 죽음</title>
-      <link>https://taronyang.com/blog/daily/2026-07-24</link>
-      <description>2026년 7월 24일 금요일의 타로운세. 여사제 · 매달린 사람 · 죽음 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Fri, 24 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-24</guid>
+      <title>2026년 9월 23일 수요일 오늘의 타로운세 — 전차 · 힘 · 여사제</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-23.html</link>
+      <description>2026년 9월 23일 수요일의 타로운세. 전차 · 힘 · 여사제 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Wed, 23 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-23.html</guid>
     </item>
     <item>
-      <title>2026년 7월 23일 목요일 오늘의 타로운세 — 여황제 · 달 · 마법사</title>
-      <link>https://taronyang.com/blog/daily/2026-07-23</link>
-      <description>2026년 7월 23일 목요일의 타로운세. 여황제 · 달 · 마법사 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Thu, 23 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-23</guid>
+      <title>2026년 9월 22일 화요일 오늘의 타로운세 — 운명의 수레바퀴 · 정의 · 교황</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-22.html</link>
+      <description>2026년 9월 22일 화요일의 타로운세. 운명의 수레바퀴 · 정의 · 교황 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Tue, 22 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-22.html</guid>
     </item>
     <item>
-      <title>2026년 7월 22일 수요일 오늘의 타로운세 — 여황제 · 황제 · 태양</title>
-      <link>https://taronyang.com/blog/daily/2026-07-22</link>
-      <description>2026년 7월 22일 수요일의 타로운세. 여황제 · 황제 · 태양 카드로 보는 하루 운세와 행운의 색.</description>
-      <pubDate>Wed, 22 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily/2026-07-22</guid>
+      <title>2026년 9월 21일 월요일 오늘의 타로운세 — 여황제 · 심판 · 탑</title>
+      <link>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-21.html</link>
+      <description>2026년 9월 21일 월요일의 타로운세. 여황제 · 심판 · 탑 카드로 보는 하루 운세와 행운의 색.</description>
+      <pubDate>Mon, 21 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/blog/daily/2026-09-21.html</guid>
     </item>
 
     <item>
       <title>오늘의 운세 — 타로냥</title>
-      <link>https://taronyang.com/daily</link>
+      <link>https://zemyalpha.github.io/taronyang/daily</link>
       <description>매일 업데이트되는 AI 오늘의 운세. 오늘의 행운의 색, 추천 카드, 한 줄 조언을 확인하세요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/daily</guid>
+      <pubDate>Wed, 30 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/daily</guid>
     </item>
     <item>
       <title>무료 AI 타로 상담 — 연애운</title>
-      <link>https://taronyang.com/tarot?cat=love</link>
+      <link>https://zemyalpha.github.io/taronyang/tarot?cat=love</link>
       <description>연애, 사랑, 인연, 관계에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 연애운을 해석합니다.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/tarot?cat=love</guid>
+      <pubDate>Wed, 30 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/tarot?cat=love</guid>
     </item>
     <item>
       <title>무료 AI 타로 상담 — 재물운</title>
-      <link>https://taronyang.com/tarot?cat=money</link>
+      <link>https://zemyalpha.github.io/taronyang/tarot?cat=money</link>
       <description>돈, 투자, 재산에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 재물운을 해석합니다.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/tarot?cat=money</guid>
+      <pubDate>Wed, 30 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/tarot?cat=money</guid>
     </item>
     <item>
       <title>무료 AI 타로 상담 — 직장운</title>
-      <link>https://taronyang.com/tarot?cat=career</link>
+      <link>https://zemyalpha.github.io/taronyang/tarot?cat=career</link>
       <description>커리어, 이직, 승진에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 직장운을 해석합니다.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/tarot?cat=career</guid>
+      <pubDate>Wed, 30 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/tarot?cat=career</guid>
     </item>
     <item>
       <title>무료 AI 타로 상담 — 종합운</title>
-      <link>https://taronyang.com/tarot?cat=general</link>
+      <link>https://zemyalpha.github.io/taronyang/tarot?cat=general</link>
       <description>전체적인 흐름에 대한 무료 AI 타로 상담. 카드 3장으로 당신의 종합운을 해석합니다.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/tarot?cat=general</guid>
+      <pubDate>Wed, 30 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/tarot?cat=general</guid>
     </item>
     <item>
       <title>타로냥 요금제 안내</title>
-      <link>https://taronyang.com/pricing</link>
+      <link>https://zemyalpha.github.io/taronyang/pricing</link>
       <description>타로냥 무료 및 프리미엄 요금제 안내. 매일 1회 무료 타로, 무제한 상담 프리미엄.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/pricing</guid>
-    </item>
-
-    <item>
-      <title>직장운 타로 — 이직·승진·커리어 방향을 알려주는 카드와 해석법 | 타로냥</title>
-      <link>https://taronyang.com/blog/career-fortune-tarot</link>
-      <description>직장운 타로에서 이직, 승진, 커리어 전환을 알려주는 카드와 해석법을 정리했어요. 직장운에 좋은 카드와 주의 카드, 질문 만드는 법까지. 무료 직장운 타로 바로 보기.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/career-fortune-tarot</guid>
-    </item>
-    <item>
-      <title>오늘의 타로운세 — 일운 타로로 하루를 여는 활용법 | 타로냥</title>
-      <link>https://taronyang.com/blog/daily-tarot-fortune</link>
-      <description>오늘의 타로운세, 어떻게 활용하면 좋을까? 일운 타로로 하루의 흐름을 읽고 작은 결심을 세우는 방법을 정리했어요. 매일 무료로 오늘의 운세와 타로를 확인해 보세요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/daily-tarot-fortune</guid>
-    </item>
-    <item>
-      <title>무료 타로점 사이트 추천 — 믿을 수 있는 무료 타로 보는 곳 | 타로냥</title>
-      <link>https://taronyang.com/blog/free-tarot-reading-sites</link>
-      <description>무료로 타로점을 볼 수 있는 사이트들을 비교해 봤어요. 회원가입 없이 바로 보는 무료 타로, AI 타로, 연애운·재물운까지. 무료타로 사이트 선택 기준과 타로냥 활용법까지 정리했어요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/free-tarot-reading-sites</guid>
-    </item>
-    <item>
-      <title>건강운 타로 — 몸·마음 컨디션 회복 흐름 보는 법과 주의 카드 | 타로냥</title>
-      <link>https://taronyang.com/blog/health-fortune-tarot</link>
-      <description>건강운 타로로 몸과 마음의 컨디션 흐름을 알아봐요. 회복을 알리는 긍정 카드와 주의가 필요한 카드, 건강운에서 절대 빠뜨리면 안 되는 주의사항까지 정리했어요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/health-fortune-tarot</guid>
-    </item>
-    <item>
-      <title>타로 마스터 되는 법 — 초보에서 리더로 실력 키우는 단계별 가이드 | 타로냥</title>
-      <link>https://taronyang.com/blog/how-to-master-tarot</link>
-      <description>타로를 잘 보고 싶다면? 카드 외우기부터 직관 훈련, 실전 리딩, 타로 리더가 되는 길까지 단계별로 정리했어요. 매일 10분 루틴과 흔한 실수까지 알려드려요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/how-to-master-tarot</guid>
-    </item>
-    <item>
-      <title>타로 점 보는 법 완벽 가이드 — 초보자도 처음부터 끝까지 | 타로냥</title>
-      <link>https://taronyang.com/blog/how-to-read-tarot-beginner</link>
-      <description>타로 점 보는 법을 처음부터 끝까지 알려드려요. 준비물, 질문 정리, 카드 뽑기, 스프레드 선택, 해석법까지 초보자도 단계별로 따라 할 수 있는 완벽 가이드.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/how-to-read-tarot-beginner</guid>
-    </item>
-    <item>
-      <title>연애운 타로 — 좋은 사랑을 알려주는 카드와 해석법 | 타로냥</title>
-      <link>https://taronyang.com/blog/love-fortune-tarot</link>
-      <description>연애운 타로에서 좋은 사랑을 알려주는 카드는 따로 있어요. 연인·여황제·태양 카드의 의미부터 주의 카드까지, 타로연애운 해석법을 쉽게 정리했어요. 무료 연애운 타로 바로 보기.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/love-fortune-tarot</guid>
-    </item>
-    <item>
-      <title>대아르카나 22장 완벽 가이드 — 메이저 아르카나 의미 총정리 | 타로냥</title>
-      <link>https://taronyang.com/blog/major-arcana-guide</link>
-      <description>타로 대아르카나 22장의 의미를 테마별로 정리했어요. 바보부터 세계까지, 각 카드의 정방향·역방향 의미와 연애·재물·직장 해석을 한눈에 확인하세요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/major-arcana-guide</guid>
-    </item>
-    <item>
-      <title>소아르카나 56장 완벽 가이드 — 마이너 아르카나 문양별 의미 총정리 | 타로냥</title>
-      <link>https://taronyang.com/blog/minor-arcana-guide</link>
-      <description>타로 소아르카나 56장의 의미를 4가지 문양(컵·검·지팡이·펜타클)별로 정리했어요. 각 문양이 다루는 주제와 14장 카드의 핵심 의미를 한눈에 확인하세요. 대아르카나와 짝을 이루는 완벽 가이드.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/minor-arcana-guide</guid>
-    </item>
-    <item>
-      <title>재물운 타로 — 금전운을 알려주는 카드와 해석법 | 타로냥</title>
-      <link>https://taronyang.com/blog/money-fortune-tarot</link>
-      <description>재물운 타로에서 돈이 들어오고 나가는 흐름을 알려주는 카드와 해석법을 정리했어요. 투자, 수입, 지출 관리까지. 재물운에 좋은 카드와 주의 카드, 무료 재물운 타로 바로 보기.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/money-fortune-tarot</guid>
-    </item>
-    <item>
-      <title>월운세·주간운세 타로 — 한 달·일 주일 운세 보는 법 | 타로냥</title>
-      <link>https://taronyang.com/blog/monthly-weekly-fortune-tarot</link>
-      <description>월운세·주간운세 타로로 한 달과 일 주일의 흐름을 읽는 법을 정리했어요. 주간 운세 스프레드와 매일 보는 팁까지. 무료 주간·월간 운세 타로 바로 보기.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/monthly-weekly-fortune-tarot</guid>
-    </item>
-    <item>
-      <title>재회운 타로 — 헤어진 사람 다시 만날 수 있을까 해석법 | 타로냥</title>
-      <link>https://taronyang.com/blog/reconciliation-fortune-tarot</link>
-      <description>재회운 타로에서 헤어진 사람과 다시 만날 수 있는지 알려주는 카드와 주의 카드를 정리했어요. 재회 타로 질문법과 해석법까지. 무료 재회운 타로 바로 보기.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/reconciliation-fortune-tarot</guid>
-    </item>
-    <item>
-      <title>솔로운 타로 — 언제쯤 연애할까, 인연이 다가오는 시기 보는 법 | 타로냥</title>
-      <link>https://taronyang.com/blog/single-fortune-tarot</link>
-      <description>솔로운 타로로 언제쯤 연애가 시작될지, 어떤 사람이 내 인연인지 알아봐요. 솔로운에서 긍정적인 카드와 주의 카드, 질문 잘하는 법까지 정리했어요. 무료 솔로운 타로 바로 보기.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/single-fortune-tarot</guid>
-    </item>
-    <item>
-      <title>학업운·시험합격 타로 — 합격을 부르는 카드와 공부 운세 | 타로냥</title>
-      <link>https://taronyang.com/blog/study-exam-fortune-tarot</link>
-      <description>학업운·시험합격 타로에서 합격을 알려주는 카드와 주의 카드를 정리했어요. 수능·공시·자격증 수험생을 위한 학업운 타로 질문법까지. 무료 학업운 타로 바로 보기.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/study-exam-fortune-tarot</guid>
-    </item>
-    <item>
-      <title>타로운세 보는법 완벽 가이드 — 초보자도 쉽게 타로점 보는 법 | 타로냥</title>
-      <link>https://taronyang.com/blog/taro-fortune-guide</link>
-      <description>타로운세가 궁금하다면? 타로운세 보는법, 카드를 뽑는 순서, 질문 고르는 법을 초보자도 이해하기 쉽게 정리했어요. 무료 AI 타로로 지금 바로 타로점을 확인하세요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/taro-fortune-guide</guid>
-    </item>
-    <item>
-      <title>타로 카드 해석 기초 — 메이저·마이너 아르카나와 정·역방향 읽는 법 | 타로냥</title>
-      <link>https://taronyang.com/blog/tarot-card-interpretation-basics</link>
-      <description>타로 카드 해석의 기초를 알기 쉽게 정리했어요. 메이저 아르카나와 마이너 아르카나의 차이, 정방향과 역방향 해석법, 카드 조합 읽기, 초보자가 알아야 할 해석 원칙까지. 무료 타로로 직접 해석해 보세요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/tarot-card-interpretation-basics</guid>
-    </item>
-    <item>
-      <title>타로카드 의미 총정리 — 78장 완벽 해설 가이드 | 타로냥</title>
-      <link>https://taronyang.com/blog/tarot-card-meanings-guide</link>
-      <description>타로카드 78장의 의미를 한눈에! 대아르카나 22장부터 소아르카나 56장(컵·검·지팡이·펜타클)까지 모든 카드의 정방향·역방향 의미와 해석을 정리했어요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/tarot-card-meanings-guide</guid>
-    </item>
-    <item>
-      <title>타로 덱 종류·추천 — 라이더웨이트·마르세유·토트, 초보자가 고르는 법 | 타로냥</title>
-      <link>https://taronyang.com/blog/tarot-deck-guide</link>
-      <description>타로 덱 종류와 초보자 추천을 정리했어요. 라이더웨이트·마르세유·토트의 차이와 처음 타로덱을 고를 때 보는 기준, 정품·호환 덱 구별법까지 알려드려요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/tarot-deck-guide</guid>
-    </item>
-    <item>
-      <title>타로 질문 잘하는 법 — 정확한 리딩을 위한 질문 작성법 | 타로냥</title>
-      <link>https://taronyang.com/blog/tarot-question-guide</link>
-      <description>타로 점이 정확해지는 질문 잘하는 법을 정리했어요. 좋은 질문과 피해야 할 질문, 예시까지. 타로 질문 고민 없이 바로 뽑아보세요. 무료 AI 타로 보기.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/tarot-question-guide</guid>
-    </item>
-    <item>
-      <title>타로 리버스(역방향) 의미 총정리 — 정방향 vs 역방향 해석법 | 타로냥</title>
-      <link>https://taronyang.com/blog/tarot-reverse-meaning</link>
-      <description>타로 리버스(역방향) 카드의 의미가 궁금하다면? 정방향과 역방향의 차이, 주요 카드 10개의 리버스 의미, 거꾸로 나온 카드 읽는 법을 알기 쉽게 정리했어요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/tarot-reverse-meaning</guid>
-    </item>
-    <item>
-      <title>타로 금기·주의사항 — 보기 전에 꼭 알아야 할 점 (시간·횟수·마음가짐) | 타로냥</title>
-      <link>https://taronyang.com/blog/tarot-rules-and-precautions</link>
-      <description>타로 보기 전 알아야 할 금기와 주의사항을 정리했어요. 밤에 봐도 되는지, 같은 질문 몇 번까지 되는지, 타로 카드 관리법까지. 정확한 리딩을 위한 기본 수칙이에요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/tarot-rules-and-precautions</guid>
-    </item>
-    <item>
-      <title>타로 스프레드 완벽 가이드 — 7가지 카드 배치법 총정리 | 타로냥</title>
-      <link>https://taronyang.com/blog/tarot-spreads-guide</link>
-      <description>타로 스프레드를 완벽하게 정리했어요. 원카드, 3카드, 셀틱 크로스, 관계 스프레드, 별 스프레드 등 7가지 카드 배치법의 의미와 사용법을 알기 쉽게 설명해요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/tarot-spreads-guide</guid>
-    </item>
-    <item>
-      <title>예스오아노 타로 — 한 장으로 YES NO 보는 법과 정확도 | 타로냥</title>
-      <link>https://taronyang.com/blog/yes-no-tarot</link>
-      <description>예스오아노 타로는 한 장의 카드로 YES 또는 NO를 알려줘요. 어떤 카드가 YES인지 NO인지, 헷갈릴 때 해석하는 법까지 정리했어요. 무료 예스오아노 타로 바로 보기.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/yes-no-tarot</guid>
-    </item>
-    <item>
-      <title>타로로 보는 12별자리 궁합 — 별자리별 추천 타로 카드 | 타로냥</title>
-      <link>https://taronyang.com/blog/zodiac-tarot-compatibility</link>
-      <description>양자리부터 물고기자리까지 12별자리 궁합과 추천 타로 카드를 정리했어요. 내 별자리에 맞는 타로 카드와 성향을 확인하고, 타로로 관계를 읽어보세요.</description>
-      <pubDate>Fri, 31 Jul 2026 00:00:00 +0900</pubDate>
-      <guid>https://taronyang.com/blog/zodiac-tarot-compatibility</guid>
+      <pubDate>Wed, 30 Sep 2026 00:00:00 +0900</pubDate>
+      <guid>https://zemyalpha.github.io/taronyang/pricing</guid>
     </item>
   </channel>
 </rss>
