@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-01",
-  "weekday": "목요일",
+  "date": "2026-10-02",
+  "weekday": "금요일",
   "cards": [
     {
-      "name": "절제",
-      "symbol": "🏺",
-      "slug": "14-temperance"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     },
     {
       "name": "태양",
@@ -13,14 +13,14 @@
       "slug": "19-sun"
     },
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "세계",
+      "symbol": "🌍",
+      "slug": "21-world"
     }
   ],
-  "summary": "오늘은 「균형」의 에너지가 흐르는 날이에요. 모든 것의 균형이 필요한 시기예요. 극단을 피하고 중용을 지키세요. 다만 「일시적침체」와 관련된 부분은 조심하고, 힘이 주는 「용…",
-  "luckyColor": "골드",
-  "luckyColorHex": "#fbbf24",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-10-01.html"
+  "summary": "오늘은 「용기」의 에너지가 흐르는 날이에요. 부드러운 힘이 필요한 시기예요. 인내와 용기로 극복할 수 있어요. 다만 「성공」과 관련된 부분은 조심하고, 세계가 주는 「완성」의…",
+  "luckyColor": "로즈 골드",
+  "luckyColorHex": "#f472b6",
+  "luckyNumber": 7,
+  "url": "/blog/daily/2026-10-02.html"
 }
