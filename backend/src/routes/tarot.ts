@@ -19,7 +19,7 @@ tarotRouter.get('/categories', (_req: Request, res: Response) => {
 
 /** 카드 셔플 */
 tarotRouter.get('/shuffle', (req: Request, res: Response) => {
-  const count = Math.min(Math.max(parseInt(req.query.count as string) || 10, 3), 20);
+  const count = Math.min(Math.max(parseInt(String(req.query.count ?? ''), 10) || 10, 3), 20);
   // Fisher-Yates 셔플 (편향 없는 무작위)
   const deck = [...ALL_CARDS];
   for (let i = deck.length - 1; i > 0; i--) {
