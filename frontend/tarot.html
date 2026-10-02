@@ -166,17 +166,8 @@
 
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
 
+    <script src="/static/js/utils.js"></script>
     <script>
-        function escapeHtml(str) {
-            if (str == null) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
         let toastTimeout;
         function showToast(msg) {
             const t = document.getElementById('toast');
