@@ -16,8 +16,8 @@ function makeToken(userId: string): string {
   return jwt.sign({ user_id: userId }, config.jwtSecret, { expiresIn: '7d' });
 }
 
-function createAdminUser(email: string, password: string): User | null {
-  const user = createUser(email, password);
+async function createAdminUser(email: string, password: string): Promise<User | null> {
+  const user = await createUser(email, password);
   if (user) {
     getDb().prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(user.id);
     user.is_admin = 1;
@@ -61,7 +61,7 @@ describe('GET /api/health/detail', () => {
   });
 
   it('should return 403 with non-admin user', async () => {
-    const user = createUser('healthuser@test.com', 'password123');
+    const user = await createUser('healthuser@test.com', 'password123');
     const token = makeToken(user!.id);
 
     const res = await request(app)
@@ -72,7 +72,7 @@ describe('GET /api/health/detail', () => {
   });
 
   it('should return detailed health info for admin user', async () => {
-    const admin = createAdminUser('admin-test@taronyang.com', 'password123');
+    const admin = await createAdminUser('admin-test@taronyang.com', 'password123');
     const token = makeToken(admin!.id);
 
     const res = await request(app)
@@ -93,10 +93,10 @@ describe('GET /api/health/detail', () => {
   });
 
   it('should count users and readings in database', async () => {
-    createUser('counter1@test.com', 'password123');
-    createUser('counter2@test.com', 'password123');
+    await createUser('counter1@test.com', 'password123');
+    await createUser('counter2@test.com', 'password123');
 
-    const admin = createAdminUser('admin-test@taronyang.com', 'password123');
+    const admin = await createAdminUser('admin-test@taronyang.com', 'password123');
     const token = makeToken(admin!.id);
 
     const res = await request(app)

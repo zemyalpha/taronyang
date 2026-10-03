@@ -13,25 +13,25 @@
  * base path (/taronyang/...) during the build.
  */
 
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { MAJOR_ARCANA, MINOR_ARCANA, ALL_CARDS, getNextCard, getPrevCard } from './card-data.mjs';
 
 const __scriptDir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__scriptDir, '..');
-const SITE_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
+const SITE_URL = (process.env.SITE_URL || 'https://taronyang.com').replace(/\/$/, '');
 
 function slugify(card) {
   return `${card.id}-${card.slug}`;
 }
 
 function cardUrl(card) {
-  return `/cards/${slugify(card)}.html`;
+  return `/cards/${slugify(card)}`;
 }
 
 function cardFullUrl(card) {
-  return `${SITE_URL}/cards/${slugify(card)}.html`;
+  return `${SITE_URL}/cards/${slugify(card)}`;
 }
 
 function escapeHtml(str) {
@@ -95,6 +95,9 @@ function generateCardPage(card, allCards) {
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}">
@@ -127,6 +130,10 @@ function generateCardPage(card, allCards) {
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="타로냥">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
@@ -248,7 +255,7 @@ function generateCardPage(card, allCards) {
         </article>
 
         <footer class="footer">
-            <p><a href="/cards/">메이저 아르카나 전체 보기</a> · <a href="/">타로냥 홈</a></p>
+            <p><a href="/cards/">메이저 아르카나 전체 보기</a> · <a href="/">타로냥 홈</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
         </footer>
     </div>
@@ -309,6 +316,9 @@ function generateIndexPage(cards) {
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}">
@@ -338,6 +348,10 @@ function generateIndexPage(cards) {
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="타로냥">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
@@ -384,7 +398,7 @@ function generateIndexPage(cards) {
 
         <footer class="footer">
             <p>타로냥 © 2026</p>
-            <p><a href="/">홈으로</a> · <a href="/tarot">타로 보기</a></p>
+            <p><a href="/">홈으로</a> · <a href="/tarot">타로 보기</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
         </footer>
     </div>
@@ -410,6 +424,42 @@ function generateIndexPage(cards) {
 </html>`;
 }
 
+function updateSitemapWithCards(outputDir) {
+  const sitemapPath = join(outputDir, 'sitemap.xml');
+  if (!existsSync(sitemapPath)) {
+    console.log('  ⚠ sitemap.xml not found — skipping sitemap update');
+    return;
+  }
+
+  let sitemap = readFileSync(sitemapPath, 'utf-8');
+  const today = new Date().toISOString().split('T')[0];
+
+  sitemap = sitemap.replace(/\r?\n[ \t]*<!-- card-pages-start -->[\s\S]*?<!-- card-pages-end -->[ \t]*(\r?\n)?/g, '');
+
+  const indexUrl = [
+    '  <url>',
+    `    <loc>${SITE_URL}/cards/</loc>`,
+    `    <lastmod>${today}</lastmod>`,
+    '    <changefreq>monthly</changefreq>',
+    '    <priority>0.8</priority>',
+    '  </url>',
+  ].join('\n');
+
+  const cardUrls = ALL_CARDS.map((card) => [
+    '  <url>',
+    `    <loc>${SITE_URL}/cards/${slugify(card)}</loc>`,
+    `    <lastmod>${today}</lastmod>`,
+    '    <changefreq>monthly</changefreq>',
+    '    <priority>0.7</priority>',
+    '  </url>',
+  ].join('\n')).join('\n');
+
+  const injection = `\n  <!-- card-pages-start -->\n${indexUrl}\n${cardUrls}\n  <!-- card-pages-end -->`;
+  sitemap = sitemap.replace('</urlset>', `${injection}\n</urlset>`);
+  writeFileSync(sitemapPath, sitemap);
+  console.log(`  ✓ sitemap.xml updated with ${ALL_CARDS.length + 1} card URLs`);
+}
+
 export function generateCardPages(outputDir) {
   const cardsDir = join(outputDir, 'cards');
   mkdirSync(cardsDir, { recursive: true });
@@ -425,6 +475,8 @@ export function generateCardPages(outputDir) {
   const indexHtml = generateIndexPage(ALL_CARDS);
   writeFileSync(join(cardsDir, 'index.html'), indexHtml);
   console.log('  ✓ cards/index.html');
+
+  updateSitemapWithCards(outputDir);
 
   console.log(`[card-pages] ✅ Generated ${ALL_CARDS.length} card pages + index`);
 }
