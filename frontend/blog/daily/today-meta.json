@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-04",
-  "weekday": "일요일",
+  "date": "2026-10-05",
+  "weekday": "월요일",
   "cards": [
     {
       "name": "정의",
@@ -8,19 +8,19 @@
       "slug": "11-justice"
     },
     {
-      "name": "악마",
-      "symbol": "😈",
-      "slug": "15-devil"
+      "name": "황제",
+      "symbol": "🏛️",
+      "slug": "4-emperor"
     },
     {
-      "name": "여황제",
-      "symbol": "👑",
-      "slug": "3-empress"
+      "name": "탑",
+      "symbol": "🗼",
+      "slug": "16-tower"
     }
   ],
-  "summary": "오늘은 「공정」의 에너지가 흐르는 날이에요. 정의로운 결과가 따를 거예요. 정직하게 행동하면 좋은 결실이 있어요. 다만 「해방」과 관련된 부분은 조심하고, 여황제가 주는 「풍…",
-  "luckyColor": "선셋 오렌지",
-  "luckyColorHex": "#fb923c",
-  "luckyNumber": 6,
-  "url": "/blog/daily/2026-10-04.html"
+  "summary": "오늘은 「공정」의 에너지가 흐르는 날이에요. 정의로운 결과가 따를 거예요. 정직하게 행동하면 좋은 결실이 있어요. 다만 「독재」와 관련된 부분은 조심하고, 탑이 주는 「급변」…",
+  "luckyColor": "소프트 그린",
+  "luckyColorHex": "#86efac",
+  "luckyNumber": 5,
+  "url": "/blog/daily/2026-10-05.html"
 }
