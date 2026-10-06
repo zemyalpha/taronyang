@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-06",
-  "weekday": "화요일",
+  "date": "2026-10-07",
+  "weekday": "수요일",
   "cards": [
     {
-      "name": "절제",
-      "symbol": "🏺",
-      "slug": "14-temperance"
+      "name": "태양",
+      "symbol": "☀️",
+      "slug": "19-sun"
     },
     {
       "name": "전차",
@@ -13,14 +13,14 @@
       "slug": "7-chariot"
     },
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "교황",
+      "symbol": "⛪",
+      "slug": "5-hierophant"
     }
   ],
-  "summary": "오늘은 「균형」의 에너지가 흐르는 날이에요. 모든 것의 균형이 필요한 시기예요. 극단을 피하고 중용을 지키세요. 다만 「승리」와 관련된 부분은 조심하고, 황제가 주는 「권위」…",
+  "summary": "오늘은 「성공」의 에너지가 흐르는 날이에요. 밝은 에너지가 가득해요! 지금 하는 일이 좋은 결과를 맺을 거예요. 다만 「승리」와 관련된 부분은 조심하고, 교황이 주는 「전통」…",
   "luckyColor": "코랄 핑크",
   "luckyColorHex": "#fb7185",
-  "luckyNumber": 3,
-  "url": "/blog/daily/2026-10-06.html"
+  "luckyNumber": 4,
+  "url": "/blog/daily/2026-10-07.html"
 }
