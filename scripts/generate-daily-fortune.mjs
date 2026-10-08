@@ -31,7 +31,7 @@ const ROOT = join(__scriptDir, '..');
 const DAILY_DIR = join(ROOT, 'frontend', 'blog', 'daily');
 const SITEMAP_PATH = join(ROOT, 'frontend', 'sitemap.xml');
 const RSS_PATH = join(ROOT, 'frontend', 'rss.xml');
-const SITE_URL = (process.env.SITE_URL || 'https://taronyang.com').replace(/\/$/, '');
+const SITE_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
 
 // ── Deterministic PRNG ────────────────────────────────────────────
 
