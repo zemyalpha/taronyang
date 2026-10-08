@@ -1,4 +1,5 @@
 import { initDb, getDb, createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, User } from '../database';
+import { getKstDateString } from '../datetime';
 
 function makeFreeUser(overrides: Partial<User> = {}): User {
   return {
@@ -53,7 +54,7 @@ describe('checkAndIncrementFreeQuota', () => {
   });
 
   it('free user second read after exhausting limit — should deny (returns false)', () => {
-    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const todayStr = getKstDateString();
 
     const user = insertUser(makeFreeUser({ free_count_today: 1, free_reset_date: todayStr }));
     const result = checkAndIncrementFreeQuota(user);
@@ -62,7 +63,7 @@ describe('checkAndIncrementFreeQuota', () => {
   });
 
   it('premium user — should always allow regardless of count', () => {
-    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const todayStr = getKstDateString();
 
     const user = insertUser(makeFreeUser({
       subscription_status: 'premium',
@@ -84,7 +85,7 @@ describe('checkAndIncrementFreeQuota', () => {
     expect(user.free_count_today).toBe(1);
 
     const dbUser = getUserById(user.id);
-    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const todayStr = getKstDateString();
     expect(dbUser!.free_reset_date).toBe(todayStr);
     expect(dbUser!.free_count_today).toBe(1);
   });
@@ -100,7 +101,7 @@ describe('checkAndIncrementFreeQuota', () => {
   });
 
   it('free user at limit with today date — should deny and not increment', () => {
-    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const todayStr = getKstDateString();
 
     const user = insertUser(makeFreeUser({
       free_count_today: 1,
@@ -128,7 +129,7 @@ describe('FIX (ZEMA-3023): free_reset_date updated in user object after reset', 
     checkAndIncrementFreeQuota(user);
 
     const dbUser = getUserById(user.id);
-    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const todayStr = getKstDateString();
 
     expect(dbUser!.free_reset_date).toBe(todayStr);
     expect(user.free_count_today).toBe(1);
@@ -165,7 +166,7 @@ describe('getRemainingFreeCount', () => {
   });
 
   it('free user used all today — should return 0', () => {
-    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const todayStr = getKstDateString();
 
     const user = insertUser(makeFreeUser({ free_count_today: 1, free_reset_date: todayStr }));
     expect(getRemainingFreeCount(user)).toBe(0);
@@ -177,7 +178,7 @@ describe('getRemainingFreeCount', () => {
   });
 
   it('free user with negative-ish overflow — should not go below 0', () => {
-    const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const todayStr = getKstDateString();
 
     const user = insertUser(makeFreeUser({ free_count_today: 99, free_reset_date: todayStr }));
     expect(getRemainingFreeCount(user)).toBe(0);
