@@ -1,7 +1,7 @@
 /** 결제 API 라우터 */
 import { Router, Request, Response } from 'express';
 import { config } from '../config';
-import { getDb, getUserById } from '../database';
+import { getDb, getUserById, type User } from '../database';
 import { authMiddleware } from './auth';
 import { paymentVerifySchema } from '../validation';
 import { logger } from '../logger';
@@ -25,6 +25,25 @@ async function getPortOneToken(): Promise<string> {
     throw new Error('포트원 토큰이 응답에 없습니다');
   }
   return tokenResponse.access_token;
+}
+
+/**
+ * Expired premium subscription auto-downgrade.
+ * If the subscription has expired, updates the DB and mutates the user object.
+ * Returns true if the subscription was expired (and thus downgraded).
+ */
+function expireIfNeeded(user: User): boolean {
+  if ((user.subscription_status === 'premium' || user.subscription_status === 'cancelling') && user.subscription_expires_at) {
+    if (new Date(user.subscription_expires_at) < new Date()) {
+      const db = getDb();
+      db.prepare("UPDATE users SET subscription_status = 'free', subscription_expires_at = NULL WHERE id = ?")
+        .run(user.id);
+      user.subscription_status = 'free';
+      user.subscription_expires_at = null;
+      return true;
+    }
+  }
+  return false;
 }
 
 /** 요금 정보 */
@@ -94,17 +113,8 @@ paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {
     return;
   }
 
-  let status = user.subscription_status;
-  if ((status === 'premium' || status === 'cancelling') && user.subscription_expires_at) {
-    if (new Date(user.subscription_expires_at) < new Date()) {
-      const db = getDb();
-      db.prepare("UPDATE users SET subscription_status = 'free', subscription_expires_at = NULL WHERE id = ?")
-        .run(user.id);
-      user.subscription_status = 'free';
-      user.subscription_expires_at = null;
-      status = 'free';
-    }
-  }
+  expireIfNeeded(user);
+  const status = user.subscription_status;
 
   res.json({ status, expires_at: user.subscription_expires_at });
 });
@@ -113,15 +123,7 @@ paymentRouter.get('/status', authMiddleware, (req: Request, res: Response) => {
 paymentRouter.post('/cancel', authMiddleware, (req: Request, res: Response) => {
   const user = req.user!;
 
-  if ((user.subscription_status === 'premium' || user.subscription_status === 'cancelling') && user.subscription_expires_at) {
-    if (new Date(user.subscription_expires_at) < new Date()) {
-      const db = getDb();
-      db.prepare("UPDATE users SET subscription_status = 'free', subscription_expires_at = NULL WHERE id = ?")
-        .run(user.id);
-      user.subscription_status = 'free';
-      user.subscription_expires_at = null;
-    }
-  }
+  expireIfNeeded(user);
 
   if (user.subscription_status !== 'premium') {
     res.status(400).json({ detail: '활성 프리미엄 구독이 없습니다.' });
