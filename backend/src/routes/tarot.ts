@@ -7,7 +7,7 @@ import { saveReading } from './readings';
 import { tarotReadSchema, tarotChatSchema } from '../validation';
 import { logger } from '../logger';
 import { config } from '../config';
-import { checkAndIncrementFreeQuota, getRemainingFreeCount, User } from '../database';
+import { checkAndIncrementFreeQuota, getRemainingFreeCount } from '../database';
 import { authMiddleware } from './auth';
 
 export const tarotRouter = Router();
@@ -56,7 +56,7 @@ tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) =>
   }
 
   // 무료 할당량 검사 (프리미엄 제외)
-  const user = (req as any).user as User;
+  const user = req.user!;
   if (!checkAndIncrementFreeQuota(user)) {
     res.status(429).json({
       detail: '오늘의 무료 타로 횟수를 모두 사용했어요. 내일 다시 이용하거나 프리미엄으로 업그레이드해주세요.',
@@ -123,7 +123,7 @@ tarotRouter.post('/chat', authMiddleware, async (req: Request, res: Response) =>
   }
   const { question, chat_history, category, cards_summary, previous_reading } = parsed.data;
 
-  const user = (req as any).user as User;
+  const user = req.user!;
 
   // 추가 질문 수 제한 (프리미엄 제외)
   if (user.subscription_status !== 'premium') {
