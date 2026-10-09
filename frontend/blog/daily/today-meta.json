@@ -1,26 +1,26 @@
 {
-  "date": "2026-10-09",
-  "weekday": "금요일",
+  "date": "2026-10-10",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "여사제",
-      "symbol": "🌙",
-      "slug": "2-high-priestess"
+      "name": "절제",
+      "symbol": "🏺",
+      "slug": "14-temperance"
     },
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "마법사",
+      "symbol": "🧙",
+      "slug": "1-magician"
     },
     {
-      "name": "바보",
-      "symbol": "🃏",
-      "slug": "0-fool"
+      "name": "세계",
+      "symbol": "🌍",
+      "slug": "21-world"
     }
   ],
-  "summary": "오늘은 「직관」의 에너지가 흐르는 날이에요. 내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요. 다만 「희생」과 관련된 부분은 조심하고, 바보가 주는 「새시작」의…",
-  "luckyColor": "코랄 핑크",
-  "luckyColorHex": "#fb7185",
-  "luckyNumber": 6,
-  "url": "/blog/daily/2026-10-09.html"
+  "summary": "오늘은 「균형」의 에너지가 흐르는 날이에요. 모든 것의 균형이 필요한 시기예요. 극단을 피하고 중용을 지키세요. 다만 「창조」와 관련된 부분은 조심하고, 세계가 주는 「완성」…",
+  "luckyColor": "선셋 오렌지",
+  "luckyColorHex": "#fb923c",
+  "luckyNumber": 4,
+  "url": "/blog/daily/2026-10-10.html"
 }
