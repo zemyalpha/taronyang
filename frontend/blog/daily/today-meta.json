@@ -1,26 +1,26 @@
 {
-  "date": "2026-10-10",
-  "weekday": "토요일",
+  "date": "2026-10-11",
+  "weekday": "일요일",
   "cards": [
     {
-      "name": "절제",
-      "symbol": "🏺",
-      "slug": "14-temperance"
+      "name": "매달린 사람",
+      "symbol": "🔄",
+      "slug": "12-hanged-man"
     },
     {
-      "name": "마법사",
-      "symbol": "🧙",
-      "slug": "1-magician"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
     },
     {
-      "name": "세계",
-      "symbol": "🌍",
-      "slug": "21-world"
+      "name": "죽음",
+      "symbol": "🦋",
+      "slug": "13-death"
     }
   ],
-  "summary": "오늘은 「균형」의 에너지가 흐르는 날이에요. 모든 것의 균형이 필요한 시기예요. 극단을 피하고 중용을 지키세요. 다만 「창조」와 관련된 부분은 조심하고, 세계가 주는 「완성」…",
+  "summary": "오늘은 「희생」의 에너지가 흐르는 날이에요. 다르게 바라볼 시간이에요. 기다림 속에서 새로운 깨달음을 얻을 거예요. 다만 「부활」과 관련된 부분은 조심하고, 죽음이 주는 「끝…",
   "luckyColor": "선셋 오렌지",
   "luckyColorHex": "#fb923c",
-  "luckyNumber": 4,
-  "url": "/blog/daily/2026-10-10.html"
+  "luckyNumber": 9,
+  "url": "/blog/daily/2026-10-11.html"
 }
