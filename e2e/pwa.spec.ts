@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+// 이 스펙은 Service Worker 동작 자체를 검증하므로 config의 기본 차단을 허용으로 되돌린다.
+test.use({ serviceWorkers: 'allow' });
+
 test.describe('PWA — Web App Manifest', () => {
   test('manifest.json이 올바른 Content-Type으로 로드됨', async ({ page, request }) => {
     const response = await request.get('/manifest.json');
@@ -60,7 +63,7 @@ test.describe('PWA — Service Worker', () => {
     expect(ct).toContain('javascript');
   });
 
-  test('Service Worker 등록 및 활성화', async ({ page }) => {
+  test('Service Worker 등록 및 활성화', async ({ page, context }) => {
     const errors: string[] = [];
     page.on('console', msg => {
       if (msg.type() === 'error') errors.push(msg.text());
@@ -68,9 +71,14 @@ test.describe('PWA — Service Worker', () => {
 
     await page.goto('/');
     await page.evaluate(() => navigator.serviceWorker.ready);
+    // SW 활성화 시 clients.claim()이 controllerchange를 유발하고 app.js가 일회성
+    // 리로드를 수행한다. 이 리로드와 경쟁하지 않도록, SW가 처음부터 제어하는 새
+    // 페이지(controller 전환이 없어 리로드도 없음)에서 등록 상태를 검증한다.
+    const stablePage = await context.newPage();
+    await stablePage.goto('/');
 
     // SW 등록 확인
-    const swState = await page.evaluate(async () => {
+    const swState = await stablePage.evaluate(async () => {
       const reg = await navigator.serviceWorker.getRegistration();
       if (!reg) return { registered: false };
       const sw = reg.active || reg.installing || reg.waiting;
@@ -80,6 +88,7 @@ test.describe('PWA — Service Worker', () => {
         scope: reg.scope,
       };
     });
+    await stablePage.close();
 
     expect(swState.registered).toBeTruthy();
     expect(swState.scope).toContain('localhost:8000');
@@ -90,18 +99,14 @@ test.describe('PWA — Service Worker', () => {
     await page.goto('/');
     await page.evaluate(() => navigator.serviceWorker.ready);
 
-    // 오프라인 모드 전환
+    // 오프라인 모드 전환 (컨텍스트에 즉시 적용되므로 별도 대기 불필요)
     await context.setOffline(true);
-    await page.waitForTimeout(500);
 
     // 새로고침 — 오프라인 폴백 페이지 또는 캐시된 페이지 표시되어야 함
-    const response = await page.reload();
-    await page.waitForTimeout(2000);
+    await page.reload();
 
-    // 크래시하지 않고 페이지가 로드되어야 함
-    const bodyText = await page.locator('body').textContent();
-    expect(bodyText).toBeTruthy();
-    expect(bodyText!.length).toBeGreaterThan(0);
+    // 크래시하지 않고 페이지가 로드되어야 함 (web-first assertion이 재시도하며 검증)
+    await expect(page.locator('body')).toHaveText(/\S/);
 
     await context.setOffline(false);
   });
@@ -155,7 +160,8 @@ test.describe('PWA — 콘솔 에러 검증', () => {
     page.on('pageerror', err => errors.push(err.message));
 
     await page.goto('/');
-    await page.waitForTimeout(4000);
+    // 페이지가 완전히 settle할 때까지 대기 (SW 등록 에러 등 비동기 에러는 이 시점 전에 콘솔에 수집됨)
+    await page.waitForLoadState('networkidle');
 
     // SW 등록 실패 등 치명적 에러가 없어야 함
     const criticalErrors = errors.filter(e =>
@@ -171,7 +177,6 @@ test.describe('PWA — 설치 배너', () => {
   test('beforeinstallprompt 이벤트 처리 코드 존재', async ({ page }) => {
     // app.js에 beforeinstallprompt 리스너가 있는지 확인 (간접 검증)
     const response = await page.goto('/');
-    await page.waitForTimeout(1000);
 
     // app.js 소스 확인
     const appJs = await page.evaluate(async () => {
