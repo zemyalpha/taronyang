@@ -29,8 +29,14 @@ readingsRouter.get('/', authMiddleware, (req: Request, res: Response) => {
   res.json(rows);
 });
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** 상담 기록 상세 */
 readingsRouter.get('/:readingId', authMiddleware, (req: Request, res: Response) => {
+  if (!UUID_RE.test(req.params.readingId)) {
+    res.status(400).json({ detail: '잘못된 기록 ID입니다' });
+    return;
+  }
   const db = getDb();
   const row = db.prepare(
     'SELECT id, category, question, cards_drawn, interpretation, created_at FROM readings WHERE id = ? AND user_id = ?'
@@ -45,8 +51,16 @@ readingsRouter.get('/:readingId', authMiddleware, (req: Request, res: Response) 
 
 /** 상담 기록 삭제 */
 readingsRouter.delete('/:readingId', authMiddleware, (req: Request, res: Response) => {
+  if (!UUID_RE.test(req.params.readingId)) {
+    res.status(400).json({ detail: '잘못된 기록 ID입니다' });
+    return;
+  }
   const db = getDb();
-  db.prepare('DELETE FROM readings WHERE id = ? AND user_id = ?').run(req.params.readingId, req.user!.id);
+  const result = db.prepare('DELETE FROM readings WHERE id = ? AND user_id = ?').run(req.params.readingId, req.user!.id);
 
+  if (result.changes === 0) {
+    res.status(404).json({ detail: '기록을 찾을 수 없습니다' });
+    return;
+  }
   res.json({ ok: true });
 });

@@ -1,8 +1,10 @@
 /** Analytics — 사용자 행동 이벤트 수집 및 요약 (ZEMA-2638) */
 import { Router, Request, Response } from 'express';
+import crypto from 'crypto';
 import { getDb } from '../database';
 import { logger } from '../logger';
 import { authMiddleware, adminMiddleware } from './auth';
+import { analyticsBatchSchema } from '../validation';
 
 export const analyticsRouter = Router();
 
@@ -21,16 +23,14 @@ interface AnalyticsEvent {
  * No auth required (anonymous events). Rate-limited at the app level.
  */
 analyticsRouter.post('/event', (req: Request, res: Response) => {
-  const { events } = req.body as { events?: AnalyticsEvent[] };
-
-  if (!Array.isArray(events) || events.length === 0) {
-    return res.status(400).json({ error: 'events array required' });
+  const parsed = analyticsBatchSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0]?.message || 'events array required' });
   }
 
-  // Cap batch size to prevent abuse
-  const batch = events.slice(0, 20);
+  const batch = parsed.data.events;
   const db = getDb();
-  const ip = (req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || '').split(',')[0].trim();
+  const ip = (String(req.headers['x-forwarded-for'] ?? '') || req.socket.remoteAddress || '').split(',')[0].trim();
   const ua = req.headers['user-agent'] || '';
 
   const insert = db.prepare(`
@@ -40,9 +40,9 @@ analyticsRouter.post('/event', (req: Request, res: Response) => {
 
   const insertMany = db.transaction((rows: AnalyticsEvent[]) => {
     for (const ev of rows) {
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const id = crypto.randomUUID();
       const propsJson = (() => {
-        try { return JSON.stringify(ev.props || {}); } catch { return '{}'; }
+        try { return JSON.stringify(ev.props || {}).slice(0, 4096); } catch { return '{}'; }
       })();
       insert.run(
         id,
@@ -67,6 +67,18 @@ analyticsRouter.post('/event', (req: Request, res: Response) => {
   logger.debug('Analytics events stored', { count: batch.length });
   return res.status(201).json({ stored: batch.length });
 });
+
+/** 오래된 분석 이벤트 정리 (90일 이상) */
+export function cleanupOldAnalyticsEvents(): number {
+  const db = getDb();
+  const result = db.prepare(
+    "DELETE FROM analytics_events WHERE created_at < datetime('now', '-90 days')"
+  ).run();
+  if (result.changes > 0) {
+    logger.info('Analytics events cleaned up', { deleted: result.changes });
+  }
+  return result.changes;
+}
 
 /**
  * GET /api/analytics/summary
