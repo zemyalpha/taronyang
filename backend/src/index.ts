@@ -178,10 +178,12 @@ if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-produc
   process.exit(1);
 }
 
-// 서버 시작
-app.listen(config.port, config.host, () => {
-  logger.info('타로냥 API 서버 시작', { host: config.host, port: config.port, env: config.nodeEnv });
-  startDailyScheduler();
-});
+// 서버 시작 (테스트 환경에서는 앱 임포트만 수행 — 리스닝/스케줄러 미실행)
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(config.port, config.host, () => {
+    logger.info('타로냥 API 서버 시작', { host: config.host, port: config.port, env: config.nodeEnv });
+    startDailyScheduler();
+  });
+}
 
 export default app;
