@@ -1,26 +1,26 @@
 {
-  "date": "2026-10-12",
-  "weekday": "월요일",
+  "date": "2026-10-13",
+  "weekday": "화요일",
   "cards": [
     {
-      "name": "별",
-      "symbol": "⭐",
-      "slug": "17-star"
+      "name": "여사제",
+      "symbol": "🌙",
+      "slug": "2-high-priestess"
     },
     {
-      "name": "태양",
-      "symbol": "☀️",
-      "slug": "19-sun"
+      "name": "절제",
+      "symbol": "🏺",
+      "slug": "14-temperance"
     },
     {
-      "name": "달",
-      "symbol": "🌕",
-      "slug": "18-moon"
+      "name": "마법사",
+      "symbol": "🧙",
+      "slug": "1-magician"
     }
   ],
-  "summary": "오늘은 「희망」의 에너지가 흐르는 날이에요. 희망의 빛이 비치고 있어요. 어려움 속에서도 빛은 항상 있어요. 다만 「성공」과 관련된 부분은 조심하고, 달이 주는 「환상」의 메…",
-  "luckyColor": "골드",
-  "luckyColorHex": "#fbbf24",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-10-12.html"
+  "summary": "오늘은 「직관」의 에너지가 흐르는 날이에요. 내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요. 다만 「균형」과 관련된 부분은 조심하고, 마법사가 주는 「창조」의…",
+  "luckyColor": "스카이 블루",
+  "luckyColorHex": "#38bdf8",
+  "luckyNumber": 7,
+  "url": "/blog/daily/2026-10-13.html"
 }
