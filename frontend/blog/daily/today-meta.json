@@ -1,26 +1,26 @@
 {
-  "date": "2026-10-14",
-  "weekday": "수요일",
+  "date": "2026-10-15",
+  "weekday": "목요일",
   "cards": [
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "마법사",
+      "symbol": "🧙",
+      "slug": "1-magician"
     },
     {
-      "name": "악마",
-      "symbol": "😈",
-      "slug": "15-devil"
+      "name": "탑",
+      "symbol": "🗼",
+      "slug": "16-tower"
     },
     {
-      "name": "세계",
-      "symbol": "🌍",
-      "slug": "21-world"
+      "name": "죽음",
+      "symbol": "🦋",
+      "slug": "13-death"
     }
   ],
-  "summary": "오늘은 「용기」의 에너지가 흐르는 날이에요. 부드러운 힘이 필요한 시기예요. 인내와 용기로 극복할 수 있어요. 다만 「해방」과 관련된 부분은 조심하고, 세계가 주는 「완성」의…",
-  "luckyColor": "골드",
-  "luckyColorHex": "#fbbf24",
-  "luckyNumber": 1,
-  "url": "/blog/daily/2026-10-14.html"
+  "summary": "오늘은 「창조」의 에너지가 흐르는 날이에요. 당신에게 필요한 모든 것이 이미 갖춰져 있어요. 능력을 믿고 행동하세요. 다만 「급변」과 관련된 부분은 조심하고, 죽음이 주는 「…",
+  "luckyColor": "선셋 오렌지",
+  "luckyColorHex": "#fb923c",
+  "luckyNumber": 7,
+  "url": "/blog/daily/2026-10-15.html"
 }
