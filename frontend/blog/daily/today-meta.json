@@ -1,26 +1,26 @@
 {
-  "date": "2026-10-16",
-  "weekday": "금요일",
+  "date": "2026-10-17",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "여사제",
-      "symbol": "🌙",
-      "slug": "2-high-priestess"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
     },
     {
-      "name": "바보",
-      "symbol": "🃏",
-      "slug": "0-fool"
+      "name": "마법사",
+      "symbol": "🧙",
+      "slug": "1-magician"
     },
     {
-      "name": "전차",
-      "symbol": "⚡",
-      "slug": "7-chariot"
+      "name": "달",
+      "symbol": "🌕",
+      "slug": "18-moon"
     }
   ],
-  "summary": "오늘은 「직관」의 에너지가 흐르는 날이에요. 내면의 목소리에 귀를 기울이세요. 답은 이미 당신 안에 있어요. 다만 「새시작」과 관련된 부분은 조심하고, 전차가 주는 「승리」의…",
-  "luckyColor": "스카이 블루",
-  "luckyColorHex": "#38bdf8",
-  "luckyNumber": 3,
-  "url": "/blog/daily/2026-10-16.html"
+  "summary": "오늘은 「부활」의 에너지가 흐르는 날이에요. 인생의 전환점이에요. 과거를 되돌아보고 새로운 소명을 따르세요. 다만 「창조」와 관련된 부분은 조심하고, 달이 주는 「환상」의 메…",
+  "luckyColor": "라벤더 퍼플",
+  "luckyColorHex": "#a78bfa",
+  "luckyNumber": 7,
+  "url": "/blog/daily/2026-10-17.html"
 }
