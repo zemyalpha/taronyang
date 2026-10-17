@@ -46,16 +46,12 @@ for (const pageCase of PAGES) {
 
     test('skip-nav link becomes visible on focus', async ({ page }) => {
       await page.goto(pageCase.path, { waitUntil: 'load' });
-      // Let any page-load JS that auto-focuses elements settle first
-      await page.waitForTimeout(500);
 
       const skipLink = page.locator('a.skip-nav');
 
       // Before focus: CSS top is -100px (off-screen)
-      const topBefore = await skipLink.evaluate(
-        (el) => getComputedStyle(el).top
-      );
-      expect(topBefore).toBe('-100px');
+      // (web-first assertion이 재시도하므로 페이지 로드 JS가 settle할 때까지 자동 대기)
+      await expect(skipLink).toHaveCSS('top', '-100px');
 
       // Focus the skip-nav link directly (tab-order varies by page)
       await skipLink.focus();
