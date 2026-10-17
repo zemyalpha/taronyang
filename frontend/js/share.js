@@ -43,7 +43,7 @@
               }
             });
           } else {
-            window.open('https://sharer.kakao.com/talk/friends/picker/link?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(title), '_blank', 'noopener');
+            window.open('https://sharer.kakao.com/talk/friends/picker/link?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(title), '_blank', 'noopener,noreferrer');
           }
         });
       }
@@ -77,7 +77,7 @@
     textarea.style.opacity = '0';
     document.body.appendChild(textarea);
     textarea.select();
-    try { document.execCommand('copy'); } catch (e) {}
+    try { if (document.execCommand) document.execCommand('copy'); } catch (e) {}
     document.body.removeChild(textarea);
     btn.classList.add('share-btn-copied');
     btn.innerHTML = '<span class="share-btn-icon" aria-hidden="true">✓</span> 복사됨';

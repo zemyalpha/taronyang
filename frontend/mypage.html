@@ -2,20 +2,16 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지 — 타로냥</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: { extend: {
-                colors: { navy: '#0a0a2e', 'dark-purple': '#1a1a3e', lavender: '#a78bfa', gold: '#fbbf24' },
-                fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Noto Sans KR', 'sans-serif'] }
-            }}
-        }
-    </script>
+    <link rel="stylesheet" href="/static/css/tailwind.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -29,17 +25,19 @@
 </head>
 <body class="bg-navy text-gray-100 font-sans min-h-screen">
 
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="/" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
             <div class="flex items-center gap-4 text-sm">
                 <a href="/" class="text-gray-400 hover:text-lavender transition">← 홈으로</a>
                 <a href="/pricing" class="text-gray-400 hover:text-lavender transition">요금제</a>
+                <button type="button" onclick="logout()" class="text-gray-400 hover:text-lavender transition">로그아웃</button>
             </div>
         </div>
     </nav>
 
-    <main class="pt-20 pb-10 px-4 max-w-xl mx-auto">
+    <main id="main-content" class="pt-20 pb-10 px-4 max-w-xl mx-auto">
         <h1 class="font-serif text-2xl text-center text-lavender mb-8">🐱 마이페이지</h1>
 
         <div class="space-y-6">
@@ -47,15 +45,15 @@
                 <h3 class="font-serif text-lg text-lavender mb-4">프로필</h3>
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-gray-400 text-xs mb-1">이메일</label>
+                        <label for="email" class="block text-gray-400 text-xs mb-1">이메일</label>
                         <input type="email" id="email" disabled class="w-full bg-dark-purple/80 border border-lavender/15 rounded-xl px-4 py-3 text-gray-400 cursor-not-allowed">
                     </div>
                     <div>
-                        <label class="block text-gray-400 text-xs mb-1">닉네임</label>
-                        <input type="text" id="nickname" placeholder="닉네임을 입력하세요" class="w-full bg-dark-purple/80 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
+                        <label for="nickname" class="block text-gray-400 text-xs mb-1">닉네임</label>
+                        <input type="text" id="nickname" autocomplete="nickname" placeholder="닉네임을 입력하세요" class="w-full bg-dark-purple/80 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:border-lavender/60 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-gray-400 text-xs mb-1">별자리</label>
+                        <label for="zodiac_sign" class="block text-gray-400 text-xs mb-1">별자리</label>
                         <select id="zodiac_sign" class="w-full bg-dark-purple/80 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 focus:border-lavender/60 focus:outline-none">
                             <option value="">선택하세요</option>
                             <option value="양자리">♈ 양자리 (3/21~4/19)</option>
@@ -80,13 +78,13 @@
                 <h3 class="font-serif text-lg text-lavender mb-4">📧 일운 알림</h3>
                 <div class="flex items-center gap-3 mb-4">
                     <label class="toggle-switch">
-                        <input type="checkbox" id="notify_enabled" checked>
+                        <input type="checkbox" id="notify_enabled" aria-label="매일 아침 운세 이메일 받기" checked>
                         <span class="slider"></span>
                     </label>
                     <span class="text-gray-200 text-sm">매일 아침 운세 이메일 받기</span>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-400 text-xs mb-1">발송 시간</label>
+                    <label for="notify_time" class="block text-gray-400 text-xs mb-1">발송 시간</label>
                     <select id="notify_time" class="w-full bg-dark-purple/80 border border-lavender/20 rounded-xl px-4 py-3 text-gray-100 focus:border-lavender/60 focus:outline-none">
                         <option value="06:00">오전 6시</option>
                         <option value="07:00" selected>오전 7시</option>
@@ -130,11 +128,11 @@
         .toggle-switch input:checked + .slider:before { transform: translateX(22px); }
     </style>
 
+    <script src="/static/js/utils.js"></script>
     <script>
         const API = window.location.origin + '/api';
-        const token = localStorage.getItem('token');
-        if (!token) { location.href = '/login'; }
-        const headers = { 'Authorization': 'Bearer ' + token };
+        if (!localStorage.getItem('user')) { location.href = '/login?redirect=/mypage'; }
+        const headers = {};
 
         function escapeHtml(str) {
             if (str == null) return '';
@@ -146,22 +144,13 @@
                 .replace(/'/g, '&#039;');
         }
 
-        let toastTimeout;
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.remove('opacity-0', 'pointer-events-none');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
-        }
-
         async function loadProfile() {
             try {
                 const res = await fetch(API + '/auth/me', { headers });
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
-                        localStorage.removeItem('token');
-                        location.href = '/login';
+                        localStorage.removeItem('user');
+                        location.href = '/login?redirect=/mypage';
                     } else {
                         showToast('프로필을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
                     }
@@ -183,9 +172,6 @@
                 const data = await res.json();
                 document.getElementById('notify_enabled').checked = data.daily_email !== false;
                 document.getElementById('notify_time').value = data.notify_time || '07:00';
-                if (data.zodiac_sign) {
-                    document.getElementById('zodiac_sign').value = data.zodiac_sign;
-                }
             } catch(e) { console.error(e); }
         }
 
@@ -298,7 +284,7 @@
             }
         }
 
-        if (token) {
+        if (localStorage.getItem('user')) {
             loadProfile();
             loadNotifications();
             loadSubscription();

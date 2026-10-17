@@ -29,7 +29,7 @@ test.describe('PR #34 — 프론트엔드 UI 누락 수정', () => {
       }));
       await page.goto('/', { waitUntil: 'domcontentloaded' });
       await page.evaluate(() => {
-        localStorage.setItem('token', 'fake-test-token');
+        localStorage.setItem('user', JSON.stringify({ id: 'test', email: 'test@test.com', nickname: '테스트' }));
       });
       await page.goto('/mypage', { waitUntil: 'domcontentloaded' });
       const nav = page.locator('nav');
@@ -59,7 +59,7 @@ test.describe('PR #34 — 프론트엔드 UI 누락 수정', () => {
       }));
       await page.goto('/', { waitUntil: 'domcontentloaded' });
       await page.evaluate(() => {
-        localStorage.setItem('token', 'fake-test-token');
+        localStorage.setItem('user', JSON.stringify({ id: 'test', email: 'test@test.com', nickname: '테스트' }));
       });
       await page.goto('/mypage', { waitUntil: 'domcontentloaded' });
       await expect(page.locator('#email')).toBeVisible();
@@ -88,7 +88,7 @@ test.describe('PR #34 — 프론트엔드 UI 누락 수정', () => {
       }));
       await page.goto('/', { waitUntil: 'domcontentloaded' });
       await page.evaluate(() => {
-        localStorage.setItem('token', 'fake-test-token');
+        localStorage.setItem('user', JSON.stringify({ id: 'test', email: 'test@test.com', nickname: '테스트' }));
       });
       await page.goto('/mypage', { waitUntil: 'domcontentloaded' });
       const toast = page.locator('#toast');
