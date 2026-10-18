@@ -1,26 +1,26 @@
 {
-  "date": "2026-10-18",
-  "weekday": "일요일",
+  "date": "2026-10-19",
+  "weekday": "월요일",
   "cards": [
+    {
+      "name": "별",
+      "symbol": "⭐",
+      "slug": "17-star"
+    },
     {
       "name": "전차",
       "symbol": "⚡",
       "slug": "7-chariot"
     },
     {
-      "name": "운명의 수레바퀴",
-      "symbol": "🎡",
-      "slug": "10-wheel-of-fortune"
-    },
-    {
-      "name": "연인",
-      "symbol": "💕",
-      "slug": "6-lovers"
+      "name": "절제",
+      "symbol": "🏺",
+      "slug": "14-temperance"
     }
   ],
-  "summary": "오늘은 「승리」의 에너지가 흐르는 날이에요. 강한 의지로 목표를 향해 전진할 때예요. 승리는 가까워요. 다만 「역경」과 관련된 부분은 조심하고, 연인이 주는 「사랑」의 메시지…",
-  "luckyColor": "로즈 골드",
-  "luckyColorHex": "#f472b6",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-10-18.html"
+  "summary": "오늘은 「희망」의 에너지가 흐르는 날이에요. 희망의 빛이 비치고 있어요. 어려움 속에서도 빛은 항상 있어요. 다만 「패배감」과 관련된 부분은 조심하고, 절제가 주는 「균형」의…",
+  "luckyColor": "스카이 블루",
+  "luckyColorHex": "#38bdf8",
+  "luckyNumber": 2,
+  "url": "/blog/daily/2026-10-19.html"
 }
