@@ -1,16 +1,16 @@
 {
-  "date": "2026-10-21",
-  "weekday": "수요일",
+  "date": "2026-10-22",
+  "weekday": "목요일",
   "cards": [
     {
-      "name": "정의",
-      "symbol": "⚖️",
-      "slug": "11-justice"
+      "name": "연인",
+      "symbol": "💕",
+      "slug": "6-lovers"
     },
     {
-      "name": "황제",
-      "symbol": "🏛️",
-      "slug": "4-emperor"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     },
     {
       "name": "세계",
@@ -18,9 +18,9 @@
       "slug": "21-world"
     }
   ],
-  "summary": "오늘은 「공정」의 에너지가 흐르는 날이에요. 정의로운 결과가 따를 거예요. 정직하게 행동하면 좋은 결실이 있어요. 다만 「권위」와 관련된 부분은 조심하고, 세계가 주는 「완성…",
-  "luckyColor": "민트",
-  "luckyColorHex": "#34d399",
-  "luckyNumber": 3,
-  "url": "/blog/daily/2026-10-21.html"
+  "summary": "오늘은 「사랑」의 에너지가 흐르는 날이에요. 중요한 선택의 순간이에요. 마음이 이끄는 대로 선택하세요. 다만 「용기」와 관련된 부분은 조심하고, 세계가 주는 「완성」의 메시지…",
+  "luckyColor": "골드",
+  "luckyColorHex": "#fbbf24",
+  "luckyNumber": 8,
+  "url": "/blog/daily/2026-10-22.html"
 }
