@@ -4,6 +4,7 @@ import os from 'os';
 import { config } from '../config';
 import { getDb } from '../database';
 import { authMiddleware, adminMiddleware } from './auth';
+import { logger } from '../logger';
 
 export const healthRouter = Router();
 
@@ -22,13 +23,15 @@ healthRouter.get('/detail', authMiddleware, adminMiddleware, (_req, res) => {
   let dbSize = 0;
   let userCount = 0;
   let readingCount = 0;
+  let dbError = false;
   try {
     const stat = db.prepare('SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()').get() as { size: number };
     dbSize = stat.size;
     userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number }).c;
     readingCount = (db.prepare('SELECT COUNT(*) as c FROM readings').get() as { c: number }).c;
-  } catch {
-    // DB 접근 불가 시 기본값
+  } catch (e) {
+    dbError = true;
+    logger.error('Health detail DB query failed', { error: String(e) });
   }
 
   res.json({
@@ -53,6 +56,7 @@ healthRouter.get('/detail', authMiddleware, adminMiddleware, (_req, res) => {
       size: `${Math.round(dbSize / 1024)}KB`,
       users: userCount,
       readings: readingCount,
+      db_error: dbError,
     },
   });
 });

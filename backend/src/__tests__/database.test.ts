@@ -1,4 +1,4 @@
-import { initDb, getDb, createUser, verifyUser, getUserById, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, User } from '../database';
+import { initDb, getDb, createUser, verifyUser, getUserById, getUserByIdSafe, getUserByEmail, findOrCreateOAuthUser, checkAndIncrementFreeQuota, getRemainingFreeCount, isPremiumUser, closeDb, User } from '../database';
 
 function makeFreeUser(overrides: Partial<User> = {}): User {
   return {
@@ -17,6 +17,9 @@ function makeFreeUser(overrides: Partial<User> = {}): User {
     subscription_expires_at: null,
     settings: '{}',
     is_admin: 0,
+    token_version: 0,
+    chat_count_today: 0,
+    chat_reset_date: null,
     ...overrides,
   };
 }
@@ -192,32 +195,32 @@ describe('createUser — admin bootstrap', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('regular email — should create user with is_admin=0', () => {
-    const user = createUser('normal@test.com', 'password123');
+  it('regular email — should create user with is_admin=0', async () => {
+    const user = await createUser('normal@test.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(0);
   });
 
-  it('configured admin email — should create user with is_admin=1', () => {
-    const user = createUser('admin-test@taronyang.com', 'password123');
+  it('configured admin email — should create user with is_admin=1', async () => {
+    const user = await createUser('admin-test@taronyang.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(1);
   });
 
-  it('second configured admin email — should also get is_admin=1', () => {
-    const user = createUser('root@taronyang.com', 'password123');
+  it('second configured admin email — should also get is_admin=1', async () => {
+    const user = await createUser('root@taronyang.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(1);
   });
 
-  it('email with different case — should still match (case-insensitive check)', () => {
-    const user = createUser('Admin-Test@taronyang.com', 'password123');
+  it('email with different case — should still match (case-insensitive check)', async () => {
+    const user = await createUser('Admin-Test@taronyang.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(1);
   });
 
-  it('email that partially matches admin — should NOT get admin', () => {
-    const user = createUser('notadmin-test@taronyang.com', 'password123');
+  it('email that partially matches admin — should NOT get admin', async () => {
+    const user = await createUser('notadmin-test@taronyang.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.is_admin).toBe(0);
   });
@@ -280,20 +283,20 @@ describe('createUser — error and edge cases', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('duplicate email — should return null', () => {
-    createUser('dup@test.com', 'password123');
-    const second = createUser('dup@test.com', 'different456');
+  it('duplicate email — should return null', async () => {
+    await createUser('dup@test.com', 'password123');
+    const second = await createUser('dup@test.com', 'different456');
     expect(second).toBeNull();
   });
 
-  it('with nickname — should use provided nickname', () => {
-    const user = createUser('nick@test.com', 'password123', 'MyNick');
+  it('with nickname — should use provided nickname', async () => {
+    const user = await createUser('nick@test.com', 'password123', 'MyNick');
     expect(user).not.toBeNull();
     expect(user!.nickname).toBe('MyNick');
   });
 
-  it('without nickname — should use email prefix as nickname', () => {
-    const user = createUser('alice@example.com', 'password123');
+  it('without nickname — should use email prefix as nickname', async () => {
+    const user = await createUser('alice@example.com', 'password123');
     expect(user).not.toBeNull();
     expect(user!.nickname).toBe('alice');
   });
@@ -307,32 +310,32 @@ describe('verifyUser', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('correct email and password — should return user', () => {
-    createUser('verify@test.com', 'mypassword');
-    const user = verifyUser('verify@test.com', 'mypassword');
+  it('correct email and password — should return user', async () => {
+    await createUser('verify@test.com', 'mypassword');
+    const user = await verifyUser('verify@test.com', 'mypassword');
     expect(user).not.toBeNull();
     expect(user!.email).toBe('verify@test.com');
   });
 
-  it('correct email but wrong password — should return null', () => {
-    createUser('verify2@test.com', 'mypassword');
-    const user = verifyUser('verify2@test.com', 'wrongpassword');
+  it('correct email but wrong password — should return null', async () => {
+    await createUser('verify2@test.com', 'mypassword');
+    const user = await verifyUser('verify2@test.com', 'wrongpassword');
     expect(user).toBeNull();
   });
 
-  it('non-existent email — should return null', () => {
-    const user = verifyUser('nobody@test.com', 'password123');
+  it('non-existent email — should return null', async () => {
+    const user = await verifyUser('nobody@test.com', 'password123');
     expect(user).toBeNull();
   });
 
-  it('OAuth-only user — should not be found by verifyUser (queries email provider only)', () => {
+  it('OAuth-only user — should not be found by verifyUser (queries email provider only)', async () => {
     findOrCreateOAuthUser({
       provider: 'kakao',
       provider_id: 'kakao-nopass',
       email: 'oauth-only@test.com',
       nickname: 'OAuthUser',
     });
-    const user = verifyUser('oauth-only@test.com', 'anything');
+    const user = await verifyUser('oauth-only@test.com', 'anything');
     expect(user).toBeNull();
   });
 });
@@ -345,8 +348,8 @@ describe('getUserById', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('existing user — should return user', () => {
-    const created = createUser('byid@test.com', 'password123');
+  it('existing user — should return user', async () => {
+    const created = await createUser('byid@test.com', 'password123');
     const found = getUserById(created!.id);
     expect(found).not.toBeNull();
     expect(found!.email).toBe('byid@test.com');
@@ -366,8 +369,8 @@ describe('getUserByEmail', () => {
     db.prepare('DELETE FROM users').run();
   });
 
-  it('existing email — should return user', () => {
-    createUser('byemail@test.com', 'password123');
+  it('existing email — should return user', async () => {
+    await createUser('byemail@test.com', 'password123');
     const found = getUserByEmail('byemail@test.com');
     expect(found).not.toBeNull();
     expect(found!.email).toBe('byemail@test.com');
@@ -404,18 +407,17 @@ describe('findOrCreateOAuthUser — merge and existing-match paths', () => {
     expect(second.email).toBe('merge1@test.com');
   });
 
-  it('existing email with different provider — should merge (update provider + provider_id)', () => {
-    createUser('merge2@test.com', 'password123');
+  it('existing email with different provider — should NOT merge (account hijack prevention)', async () => {
+    await createUser('merge2@test.com', 'password123');
     const oauthUser = findOrCreateOAuthUser({
       provider: 'kakao',
       provider_id: 'kakao-merge-2',
       email: 'merge2@test.com',
       nickname: 'OAuthMerged',
     });
-    const byEmail = getUserByEmail('merge2@test.com');
-    expect(byEmail!.id).toBe(oauthUser.id);
-    expect(byEmail!.provider).toBe('kakao');
-    expect(byEmail!.provider_id).toBe('kakao-merge-2');
+    expect(oauthUser.id).toBeDefined();
+    expect(oauthUser.provider).toBe('kakao');
+    expect(oauthUser.provider_id).toBe('kakao-merge-2');
   });
 
   it('no nickname, no email — should default nickname to "사용자"', () => {
@@ -445,5 +447,157 @@ describe('findOrCreateOAuthUser — merge and existing-match paths', () => {
     const found = getUserById(user.id);
     expect(found).not.toBeNull();
     expect(found!.provider).toBe('google');
+  });
+});
+
+describe('isPremiumUser — subscription enforcement', () => {
+  beforeEach(() => {
+    initDb();
+  });
+
+  function insertUser(user: User): void {
+    const db = getDb();
+    db.prepare(
+      'INSERT INTO users (id, provider, provider_id, email, password_hash, nickname, birth_date, zodiac_sign, created_at, free_count_today, free_reset_date, subscription_status, subscription_expires_at, settings, is_admin, token_version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).run(user.id, user.provider, user.provider_id, user.email, user.password_hash, user.nickname, user.birth_date, user.zodiac_sign, user.created_at, user.free_count_today, user.free_reset_date, user.subscription_status, user.subscription_expires_at, user.settings || '{}', user.is_admin ? 1 : 0, user.token_version || 0);
+  }
+
+  it('returns true for active premium with future expiry', () => {
+    const user = makeFreeUser({
+      subscription_status: 'premium',
+      subscription_expires_at: new Date(Date.now() + 86400000).toISOString(),
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(true);
+  });
+
+  it('returns true for premium with null expiry (lifetime)', () => {
+    const user = makeFreeUser({
+      subscription_status: 'premium',
+      subscription_expires_at: null,
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(true);
+  });
+
+  it('returns true for cancelling status with future expiry', () => {
+    const user = makeFreeUser({
+      subscription_status: 'cancelling',
+      subscription_expires_at: new Date(Date.now() + 86400000).toISOString(),
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(true);
+  });
+
+  it('returns false and lazily downgrades expired premium', () => {
+    const user = makeFreeUser({
+      subscription_status: 'premium',
+      subscription_expires_at: new Date(Date.now() - 86400000).toISOString(),
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(false);
+    expect(user.subscription_status).toBe('free');
+    expect(user.subscription_expires_at).toBeNull();
+    const dbUser = getUserById(user.id);
+    expect(dbUser!.subscription_status).toBe('free');
+  });
+
+  it('returns false and downgrades expired cancelling', () => {
+    const user = makeFreeUser({
+      subscription_status: 'cancelling',
+      subscription_expires_at: new Date(Date.now() - 86400000).toISOString(),
+    });
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(false);
+    expect(user.subscription_status).toBe('free');
+  });
+
+  it('returns false for free user', () => {
+    const user = makeFreeUser();
+    insertUser(user);
+    expect(isPremiumUser(user)).toBe(false);
+  });
+});
+
+describe('getUserByIdSafe (ZEMA-3412)', () => {
+  beforeEach(() => {
+    initDb();
+    getDb().prepare('DELETE FROM users').run();
+  });
+
+  it('returns token_version so middleware can validate versioned tokens', async () => {
+    const user = (await createUser('safe-tv@example.com', 'password123', 'safeuser'))!;
+    const safe = getUserByIdSafe(user.id);
+    expect(safe).not.toBeNull();
+    expect(safe!.token_version).toBe(user.token_version);
+    expect(safe!.chat_count_today).toBe(0);
+    expect(safe!.chat_reset_date).toBeNull();
+  });
+
+  it('never leaks password_hash', async () => {
+    const user = (await createUser('safe-hash@example.com', 'password123', 'hashuser'))!;
+    const safe = getUserByIdSafe(user.id)!;
+    expect((safe as Record<string, unknown>).password_hash).toBeUndefined();
+  });
+});
+
+describe('findOrCreateOAuthUser — email merge edge cases', () => {
+  beforeAll(() => initDb());
+
+  beforeEach(() => {
+    const db = getDb();
+    db.prepare('DELETE FROM users').run();
+  });
+
+  it('merges OAuth into existing passwordless account with same email', () => {
+    const existing = insertUser(makeFreeUser({
+      email: 'merge@test.com',
+      provider: 'email',
+      password_hash: null,
+    }));
+
+    const merged = findOrCreateOAuthUser({
+      provider: 'kakao',
+      provider_id: 'kakao-merge-1',
+      email: 'merge@test.com',
+      nickname: 'MergedUser',
+    });
+
+    expect(merged.id).toBe(existing.id);
+    expect(merged.provider).toBe('kakao');
+    expect(merged.provider_id).toBe('kakao-merge-1');
+  });
+
+  it('does NOT merge when existing account has password_hash (email conflict)', () => {
+    insertUser(makeFreeUser({
+      email: 'conflict@test.com',
+      provider: 'email',
+      password_hash: 'hashed_password_here',
+    }));
+
+    const user = findOrCreateOAuthUser({
+      provider: 'google',
+      provider_id: 'google-conflict-1',
+      email: 'conflict@test.com',
+      nickname: 'ConflictUser',
+    });
+
+    expect(user.id).not.toBe(getUserByEmail('conflict@test.com')?.id);
+    expect(user.email).toBeNull();
+    expect(user.provider).toBe('google');
+  });
+});
+
+describe('closeDb', () => {
+  it('closes the database connection safely', () => {
+    initDb();
+    const db = getDb();
+    expect(db).toBeDefined();
+
+    closeDb();
+
+    initDb();
+    const reopened = getDb();
+    expect(reopened).toBeDefined();
   });
 });

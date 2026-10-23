@@ -19,17 +19,23 @@ function makeToken(userId: string): string {
   return jwt.sign({ user_id: userId }, config.jwtSecret, { expiresIn: '7d' });
 }
 
-function createAdminUser(email: string, password: string): User | null {
-  const user = createUser(email, password);
+async function createAdminUser(email: string, password: string): Promise<User | null> {
+  const user = await createUser(email, password);
   if (user) {
     getDb().prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(user.id);
     user.is_admin = 1;
+    // adminMiddleware now checks config.adminEmails live — register the email
+    const normalized = email.trim().toLowerCase();
+    if (!config.adminEmails.includes(normalized)) {
+      config.adminEmails.push(normalized);
+    }
   }
   return user;
 }
 
 describe('admin routes', () => {
   let app: Express;
+  const originalAdminEmails = [...config.adminEmails];
 
   beforeEach(() => {
     initDb();
@@ -37,7 +43,13 @@ describe('admin routes', () => {
     db.prepare('DELETE FROM daily_horoscopes').run();
     db.prepare('DELETE FROM readings').run();
     db.prepare('DELETE FROM users').run();
+    // adminMiddleware reads config.adminEmails live — start each test clean
+    config.adminEmails = [];
     app = createApp();
+  });
+
+  afterAll(() => {
+    config.adminEmails = originalAdminEmails;
   });
 
   // --- AdminMiddleware ---
@@ -63,11 +75,31 @@ describe('admin routes', () => {
 
     it('rejects non-admin user (403)', async () => {
       const mwApp = createMiddlewareApp();
-      const user = createUser('regular-user@test.com', 'pass123');
+      const user = await createUser('regular-user@test.com', 'pass123');
       const res = await request(mwApp)
         .get('/admin-only')
         .set('Authorization', `Bearer ${makeToken(user!.id)}`);
       expect(res.status).toBe(403);
+    });
+
+    it('rejects user with is_admin=1 but email not in ADMIN_EMAILS (revocation)', async () => {
+      const mwApp = createMiddlewareApp();
+      const user = await createUser('revoked@test.com', 'pass123');
+      getDb().prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(user!.id);
+      const res = await request(mwApp)
+        .get('/admin-only')
+        .set('Authorization', `Bearer ${makeToken(user!.id)}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('accepts user whose email is in ADMIN_EMAILS even if is_admin=0 (live grant)', async () => {
+      const mwApp = createMiddlewareApp();
+      const user = await createUser('root@taronyang.com', 'pass123');
+      config.adminEmails.push('root@taronyang.com');
+      const res = await request(mwApp)
+        .get('/admin-only')
+        .set('Authorization', `Bearer ${makeToken(user!.id)}`);
+      expect(res.status).toBe(200);
     });
   });
 
@@ -75,9 +107,9 @@ describe('admin routes', () => {
 
   describe('GET /admin/stats', () => {
     it('returns dashboard stats for admin', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
-      createUser('normal1@test.com', 'pass123');
-      createUser('normal2@test.com', 'pass123');
+      const admin = await createAdminUser('admin-test@taronyang.com', 'pass123');
+      await createUser('normal1@test.com', 'pass123');
+      await createUser('normal2@test.com', 'pass123');
 
       const res = await request(app)
         .get('/admin/stats')
@@ -95,9 +127,9 @@ describe('admin routes', () => {
 
   describe('GET /admin/users', () => {
     it('returns paginated user list', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
-      createUser('user1@test.com', 'pass123');
-      createUser('user2@test.com', 'pass123');
+      const admin = await createAdminUser('admin-test@taronyang.com', 'pass123');
+      await createUser('user1@test.com', 'pass123');
+      await createUser('user2@test.com', 'pass123');
 
       const res = await request(app)
         .get('/admin/users')
@@ -110,9 +142,9 @@ describe('admin routes', () => {
     });
 
     it('respects limit param', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
+      const admin = await createAdminUser('admin-test@taronyang.com', 'pass123');
       for (let i = 0; i < 5; i++) {
-        createUser(`limit${i}@test.com`, 'pass123');
+        await createUser(`limit${i}@test.com`, 'pass123');
       }
 
       const res = await request(app)
@@ -130,8 +162,8 @@ describe('admin routes', () => {
 
   describe('GET /admin/readings', () => {
     it('returns paginated readings', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
-      const author = createUser('author@test.com', 'pass123');
+      const admin = await createAdminUser('admin-test@taronyang.com', 'pass123');
+      const author = await createUser('author@test.com', 'pass123');
       saveReading(author!.id, 'love', '질문1', [], '해석1');
       saveReading(author!.id, 'career', '질문2', [], '해석2');
 
@@ -150,8 +182,8 @@ describe('admin routes', () => {
 
   describe('DELETE /admin/users/:id', () => {
     it('cascades delete user and related data', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
-      const target = createUser('delete-me@test.com', 'pass123');
+      const admin = await createAdminUser('admin-test@taronyang.com', 'pass123');
+      const target = await createUser('delete-me@test.com', 'pass123');
       saveReading(target!.id, 'love', '질문', [], '해석');
 
       const res = await request(app)
