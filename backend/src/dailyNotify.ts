@@ -225,20 +225,26 @@ export function startDailyScheduler(): void {
   // node-cron 대신 setInterval로 간단 구현 (매 분마다 체크, 07:00에 실행)
   const CHECK_INTERVAL = 60_000; // 1분
   let lastSentDate = '';
+  let isRunning = false;
 
   setInterval(async () => {
-    const now = new Date();
-    const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    const today = kstNow.toISOString().split('T')[0];
-    const hour = kstNow.getUTCHours();
+    try {
+      const now = new Date();
+      const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      const today = kstNow.toISOString().split('T')[0];
+      const hour = kstNow.getUTCHours();
 
-    if (hour >= 7 && lastSentDate !== today) {
-      lastSentDate = today;
-      try {
-        await sendDailyNotifications();
-      } catch (err) {
-        logger.error('일운 발송 오류', { error: String(err) });
+      if (hour >= 7 && lastSentDate !== today && !isRunning) {
+        isRunning = true;
+        try {
+          await sendDailyNotifications();
+          lastSentDate = today;
+        } finally {
+          isRunning = false;
+        }
       }
+    } catch (err) {
+      logger.error('일운 스케줄러 오류', { error: err instanceof Error ? err.stack : String(err) });
     }
   }, CHECK_INTERVAL);
 
