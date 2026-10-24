@@ -87,8 +87,8 @@ tarotRouter.post('/read', authMiddleware, async (req: Request, res: Response) =>
     // 기록 저장
     try {
       saveReading(user.id, category, question, cards, interpretation);
-    } catch {
-      /* 기록 저장 실패는 무시 */
+    } catch (err) {
+      logger.error('상담 기록 저장 실패', { userId: user.id, error: err instanceof Error ? err.stack : String(err) });
     }
 
     res.json({
