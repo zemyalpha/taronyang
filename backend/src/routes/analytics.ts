@@ -3,6 +3,7 @@ import { Router, Request, Response } from 'express';
 import { getDb } from '../database';
 import { logger } from '../logger';
 import { authMiddleware, adminMiddleware } from './auth';
+import { analyticsBatchSchema } from '../validation';
 
 export const analyticsRouter = Router();
 
@@ -21,16 +22,14 @@ interface AnalyticsEvent {
  * No auth required (anonymous events). Rate-limited at the app level.
  */
 analyticsRouter.post('/event', (req: Request, res: Response) => {
-  const { events } = req.body as { events?: AnalyticsEvent[] };
-
-  if (!Array.isArray(events) || events.length === 0) {
-    return res.status(400).json({ error: 'events array required' });
+  const parsed = analyticsBatchSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0]?.message || 'events array required' });
   }
 
-  // Cap batch size to prevent abuse
-  const batch = events.slice(0, 20);
+  const batch = parsed.data.events.slice(0, 20);
   const db = getDb();
-  const ip = (req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || '').split(',')[0].trim();
+  const ip = (String(req.headers['x-forwarded-for'] ?? '') || req.socket.remoteAddress || '').split(',')[0].trim();
   const ua = req.headers['user-agent'] || '';
 
   const insert = db.prepare(`
