@@ -1,26 +1,26 @@
 {
-  "date": "2026-10-25",
-  "weekday": "일요일",
+  "date": "2026-10-26",
+  "weekday": "월요일",
   "cards": [
     {
-      "name": "마법사",
-      "symbol": "🧙",
-      "slug": "1-magician"
-    },
-    {
-      "name": "여황제",
-      "symbol": "👑",
-      "slug": "3-empress"
+      "name": "전차",
+      "symbol": "⚡",
+      "slug": "7-chariot"
     },
     {
       "name": "절제",
       "symbol": "🏺",
       "slug": "14-temperance"
+    },
+    {
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     }
   ],
-  "summary": "오늘은 「창조」의 에너지가 흐르는 날이에요. 당신에게 필요한 모든 것이 이미 갖춰져 있어요. 능력을 믿고 행동하세요. 다만 「풍요」와 관련된 부분은 조심하고, 절제가 주는 「…",
-  "luckyColor": "딥 네이비",
-  "luckyColorHex": "#6366f1",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-10-25.html"
+  "summary": "오늘은 「승리」의 에너지가 흐르는 날이에요. 강한 의지로 목표를 향해 전진할 때예요. 승리는 가까워요. 다만 「균형」과 관련된 부분은 조심하고, 정의가 주는 「공정」의 메시지…",
+  "luckyColor": "소프트 그린",
+  "luckyColorHex": "#86efac",
+  "luckyNumber": 1,
+  "url": "/blog/daily/2026-10-26.html"
 }
