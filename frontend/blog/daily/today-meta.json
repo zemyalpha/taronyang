@@ -1,26 +1,26 @@
 {
-  "date": "2026-10-30",
-  "weekday": "금요일",
+  "date": "2026-10-31",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "정의",
-      "symbol": "⚖️",
-      "slug": "11-justice"
+      "name": "바보",
+      "symbol": "🃏",
+      "slug": "0-fool"
     },
     {
-      "name": "은둔자",
-      "symbol": "🏔️",
-      "slug": "9-hermit"
+      "name": "교황",
+      "symbol": "⛪",
+      "slug": "5-hierophant"
     },
     {
-      "name": "연인",
-      "symbol": "💕",
-      "slug": "6-lovers"
+      "name": "태양",
+      "symbol": "☀️",
+      "slug": "19-sun"
     }
   ],
-  "summary": "오늘은 「공정」의 에너지가 흐르는 날이에요. 정의로운 결과가 따를 거예요. 정직하게 행동하면 좋은 결실이 있어요. 다만 「고립」과 관련된 부분은 조심하고, 연인이 주는 「사랑…",
-  "luckyColor": "민트",
-  "luckyColorHex": "#34d399",
-  "luckyNumber": 4,
-  "url": "/blog/daily/2026-10-30.html"
+  "summary": "오늘은 「새시작」의 에너지가 흐르는 날이에요. 새로운 시작과 무한한 가능성이 열려있어요. 두려움 없이 한 걸음 내디뎌보세요. 다만 「구습」과 관련된 부분은 조심하고, 태양이 …",
+  "luckyColor": "딥 네이비",
+  "luckyColorHex": "#6366f1",
+  "luckyNumber": 6,
+  "url": "/blog/daily/2026-10-31.html"
 }
