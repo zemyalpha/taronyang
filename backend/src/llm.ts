@@ -1,7 +1,7 @@
 /** Z.ai GLM API 클라이언트 */
 import { config } from './config';
 
-const LLM_TIMEOUT_MS = 60000;
+const LLM_TIMEOUT_MS = 30000;
 const MAX_RETRIES = 2;
 const RETRY_BASE_DELAY_MS = 2000;
 
@@ -44,18 +44,23 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
     const timer = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS);
 
     try {
+      const reqBody: Record<string, unknown> = {
+        model: config.zaiModel,
+        messages,
+        max_tokens: maxTokens,
+        temperature,
+      };
+      if (attempt === 0) {
+        reqBody.reasoning_effort = 'none';
+      }
+
       const response = await fetch(config.zaiApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${config.zaiApiKey}`,
         },
-        body: JSON.stringify({
-          model: config.zaiModel,
-          messages,
-          max_tokens: maxTokens,
-          temperature,
-        }),
+        body: JSON.stringify(reqBody),
         signal: controller.signal,
       });
 
@@ -66,7 +71,7 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
 
         if (isRetryableStatus(status) && attempt < MAX_RETRIES) {
           lastError = status === 429 ? new RateLimitError(errorMsg) : new Error(errorMsg);
-          const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+          const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt) * (0.5 + Math.random() * 0.5);
           await sleep(delay);
           continue;
         }
@@ -92,6 +97,10 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
       }
       const reasoning = message.reasoning_content;
       if (typeof reasoning === 'string' && reasoning.length > 0) {
+        if (attempt < MAX_RETRIES) {
+          lastError = new Error('Z.ai API 응답 형식 오류: content 비어있음 (reasoning_content만 반환됨)');
+          continue;
+        }
         return reasoning;
       }
       throw new Error('Z.ai API 응답 형식 오류: content와 reasoning_content 모두 비어있음');
@@ -107,7 +116,7 @@ export async function callLlm(messages: ChatMessage[], maxTokens = 4000, tempera
 
       if (attempt < MAX_RETRIES) {
         lastError = error;
-        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt) * (0.5 + Math.random() * 0.5);
         await sleep(delay);
         continue;
       }
