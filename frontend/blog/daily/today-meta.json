@@ -1,26 +1,26 @@
 {
-  "date": "2026-11-03",
-  "weekday": "화요일",
+  "date": "2026-11-04",
+  "weekday": "수요일",
   "cards": [
     {
-      "name": "은둔자",
-      "symbol": "🏔️",
-      "slug": "9-hermit"
+      "name": "달",
+      "symbol": "🌕",
+      "slug": "18-moon"
     },
     {
-      "name": "마법사",
-      "symbol": "🧙",
-      "slug": "1-magician"
+      "name": "악마",
+      "symbol": "😈",
+      "slug": "15-devil"
     },
     {
-      "name": "태양",
-      "symbol": "☀️",
-      "slug": "19-sun"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
     }
   ],
-  "summary": "오늘은 「성찰」의 에너지가 흐르는 날이에요. 혼자만의 시간이 필요해요. 내면을 깊이 들여다보며 답을 찾으세요. 다만 「조작」과 관련된 부분은 조심하고, 태양이 주는 「성공」의…",
-  "luckyColor": "골드",
-  "luckyColorHex": "#fbbf24",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-11-03.html"
+  "summary": "오늘은 「환상」의 에너지가 흐르는 날이에요. 상황이 불명확하고 혼란스러울 수 있어요. 시간이 지나면 진실이 드러날 거예요. 다만 「집착」과 관련된 부분은 조심하고, 심판이 주…",
+  "luckyColor": "민트",
+  "luckyColorHex": "#34d399",
+  "luckyNumber": 4,
+  "url": "/blog/daily/2026-11-04.html"
 }
