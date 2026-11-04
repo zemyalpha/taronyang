@@ -1,26 +1,26 @@
 {
-  "date": "2026-11-04",
-  "weekday": "수요일",
+  "date": "2026-11-05",
+  "weekday": "목요일",
   "cards": [
     {
-      "name": "달",
-      "symbol": "🌕",
-      "slug": "18-moon"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     },
     {
-      "name": "악마",
-      "symbol": "😈",
-      "slug": "15-devil"
+      "name": "연인",
+      "symbol": "💕",
+      "slug": "6-lovers"
     },
     {
-      "name": "심판",
-      "symbol": "📯",
-      "slug": "20-judgement"
+      "name": "교황",
+      "symbol": "⛪",
+      "slug": "5-hierophant"
     }
   ],
-  "summary": "오늘은 「환상」의 에너지가 흐르는 날이에요. 상황이 불명확하고 혼란스러울 수 있어요. 시간이 지나면 진실이 드러날 거예요. 다만 「집착」과 관련된 부분은 조심하고, 심판이 주…",
-  "luckyColor": "민트",
-  "luckyColorHex": "#34d399",
-  "luckyNumber": 4,
-  "url": "/blog/daily/2026-11-04.html"
+  "summary": "오늘은 「공정」의 에너지가 흐르는 날이에요. 정의로운 결과가 따를 거예요. 정직하게 행동하면 좋은 결실이 있어요. 다만 「사랑」과 관련된 부분은 조심하고, 교황이 주는 「전통…",
+  "luckyColor": "스카이 블루",
+  "luckyColorHex": "#38bdf8",
+  "luckyNumber": 3,
+  "url": "/blog/daily/2026-11-05.html"
 }
