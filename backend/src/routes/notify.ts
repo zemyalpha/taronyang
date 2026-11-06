@@ -1,9 +1,11 @@
 /** 알림 설정 API 라우터 */
 import { Router, Request, Response } from 'express';
+import { asyncHandler } from '../utils/asyncHandler';
 import { getDb } from '../database';
 import { authMiddleware } from './auth';
 import { generateDailyHoroscope } from '../dailyNotify';
 import { notifySettingsSchema, zodiacSchema } from '../validation';
+import { logger } from '../logger';
 
 export const notifyRouter = Router();
 
@@ -15,7 +17,7 @@ interface UserSettings {
 
 function getSettings(user: { settings: string | null }): UserSettings {
   try { return JSON.parse(user.settings || '{}'); }
-  catch { return {}; }
+  catch (e) { logger.warn('Failed to parse user settings JSON', { error: String(e) }); return {}; }
 }
 
 /** 알림 설정 조회 */
@@ -23,7 +25,7 @@ notifyRouter.get('/settings', authMiddleware, (req: Request, res: Response) => {
   const user = req.user!;
   const settings = getSettings(user);
   res.json({
-    daily_email: settings.daily_email !== 0,
+    daily_email: settings.daily_email === 1,
     notify_time: settings.notify_time || '07:00',
     notify_channel: settings.notify_channel || 'email',
     zodiac_sign: user.zodiac_sign || '',
@@ -76,7 +78,7 @@ notifyRouter.put('/zodiac', authMiddleware, (req: Request, res: Response) => {
 });
 
 /** 오늘의 운세 조회 (공개) */
-notifyRouter.get('/horoscope/:sign', async (req: Request, res: Response) => {
+notifyRouter.get('/horoscope/:sign', asyncHandler(async (req: Request, res: Response) => {
   const sign = req.params.sign;
   const validSigns = [
     '양자리', '황소자리', '쌍둥이자리', '게자리', '사자자리', '처녀자리',
@@ -91,10 +93,11 @@ notifyRouter.get('/horoscope/:sign', async (req: Request, res: Response) => {
   try {
     const horoscope = await generateDailyHoroscope(sign, today);
     res.json({ zodiac_sign: sign, date: today, horoscope });
-  } catch {
+  } catch (err) {
+    logger.error('운세 생성 실패', { sign, date: today, error: String(err) });
     res.status(500).json({ detail: '운세 생성에 실패했습니다' });
   }
-});
+}));
 
 /** KST 기준 오늘 날짜 반환 */
 export function getKstDate(): string {

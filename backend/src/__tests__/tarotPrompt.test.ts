@@ -1,4 +1,4 @@
-import { buildReadingPrompt, SYSTEM_PROMPT, READING_PROMPT, DAILY_PROMPT } from '../tarotPrompt';
+import { buildReadingPrompt, buildDailyPrompt, SYSTEM_PROMPT, READING_PROMPT, DAILY_PROMPT } from '../tarotPrompt';
 
 describe('buildReadingPrompt', () => {
   const validCards = [
@@ -86,5 +86,19 @@ describe('exported prompt constants', () => {
   it('DAILY_PROMPT should contain zodiac and date placeholders', () => {
     expect(DAILY_PROMPT).toContain('{zodiac}');
     expect(DAILY_PROMPT).toContain('{date}');
+  });
+});
+
+describe('buildDailyPrompt', () => {
+  it('should fill in zodiac sign and date', () => {
+    const result = buildDailyPrompt('양자리', '2026-07-27');
+    expect(result).toContain('양자리');
+    expect(result).toContain('2026-07-27');
+  });
+
+  it('should not contain unresolved placeholders', () => {
+    const result = buildDailyPrompt('황소자리', '2026-01-15');
+    expect(result).not.toMatch(/\{zodiac\}/);
+    expect(result).not.toMatch(/\{date\}/);
   });
 });

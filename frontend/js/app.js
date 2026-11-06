@@ -4,8 +4,6 @@ const API_BASE =
   (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.apiBase) ||
   (window.location.origin + '/api');
 
-console.log('🔮 타로냥 로딩 완료');
-
 // === PWA: Service Worker 등록 ===
 if ('serviceWorker' in navigator) {
   // 새로운 서비스 워커가 제어권을 잡으면 페이지를 새로고침하여 최신 에셋 반영
@@ -111,11 +109,11 @@ function injectInstallStyles() {
     #taronyang-install-banner .ti-install{
       background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;
       padding:9px 16px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;
-      white-space:nowrap;
+      white-space:nowrap;min-height:44px;
     }
     #taronyang-install-banner .ti-close{
       background:transparent;color:#94a3b8;border:none;font-size:22px;line-height:1;
-      cursor:pointer;padding:0 4px;
+      cursor:pointer;padding:0 8px;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;
     }
     @media(prefers-color-scheme:light){
       #taronyang-install-banner{background:#fff;border-color:rgba(124,58,237,.2);}
