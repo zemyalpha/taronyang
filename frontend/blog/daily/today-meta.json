@@ -1,26 +1,26 @@
 {
-  "date": "2026-11-06",
-  "weekday": "금요일",
+  "date": "2026-11-07",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "별",
-      "symbol": "⭐",
-      "slug": "17-star"
+      "name": "여황제",
+      "symbol": "👑",
+      "slug": "3-empress"
     },
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "황제",
+      "symbol": "🏛️",
+      "slug": "4-emperor"
     },
     {
-      "name": "운명의 수레바퀴",
-      "symbol": "🎡",
-      "slug": "10-wheel-of-fortune"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     }
   ],
-  "summary": "오늘은 「희망」의 에너지가 흐르는 날이에요. 희망의 빛이 비치고 있어요. 어려움 속에서도 빛은 항상 있어요. 다만 「지연」과 관련된 부분은 조심하고, 운명의 수레바퀴가 주는 …",
-  "luckyColor": "라벤더 퍼플",
-  "luckyColorHex": "#a78bfa",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-11-06.html"
+  "summary": "오늘은 「풍요」의 에너지가 흐르는 날이에요. 풍요와 성장의 에너지가 가득해요. 당신의 노력이 열매를 맺을 거예요. 다만 「권위」와 관련된 부분은 조심하고, 정의가 주는 「공정…",
+  "luckyColor": "선셋 오렌지",
+  "luckyColorHex": "#fb923c",
+  "luckyNumber": 1,
+  "url": "/blog/daily/2026-11-07.html"
 }
