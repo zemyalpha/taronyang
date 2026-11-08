@@ -1,26 +1,26 @@
 {
-  "date": "2026-11-08",
-  "weekday": "일요일",
+  "date": "2026-11-09",
+  "weekday": "월요일",
   "cards": [
     {
-      "name": "운명의 수레바퀴",
-      "symbol": "🎡",
-      "slug": "10-wheel-of-fortune"
+      "name": "연인",
+      "symbol": "💕",
+      "slug": "6-lovers"
     },
     {
-      "name": "별",
-      "symbol": "⭐",
-      "slug": "17-star"
+      "name": "마법사",
+      "symbol": "🧙",
+      "slug": "1-magician"
     },
     {
-      "name": "매달린 사람",
-      "symbol": "🔄",
-      "slug": "12-hanged-man"
+      "name": "은둔자",
+      "symbol": "🏔️",
+      "slug": "9-hermit"
     }
   ],
-  "summary": "오늘은 「변화」의 에너지가 흐르는 날이에요. 운이 바뀌고 있어요. 좋은 흐름이 오고 있으니 기회를 잡으세요. 다만 「희망」과 관련된 부분은 조심하고, 매달린 사람이 주는 「희…",
-  "luckyColor": "스카이 블루",
-  "luckyColorHex": "#38bdf8",
-  "luckyNumber": 8,
-  "url": "/blog/daily/2026-11-08.html"
+  "summary": "오늘은 「사랑」의 에너지가 흐르는 날이에요. 중요한 선택의 순간이에요. 마음이 이끄는 대로 선택하세요. 다만 「조작」과 관련된 부분은 조심하고, 은둔자가 주는 「성찰」의 메시…",
+  "luckyColor": "코랄 핑크",
+  "luckyColorHex": "#fb7185",
+  "luckyNumber": 1,
+  "url": "/blog/daily/2026-11-09.html"
 }
