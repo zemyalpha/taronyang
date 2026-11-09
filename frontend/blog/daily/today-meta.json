@@ -1,26 +1,26 @@
 {
-  "date": "2026-11-09",
-  "weekday": "월요일",
+  "date": "2026-11-10",
+  "weekday": "화요일",
   "cards": [
+    {
+      "name": "죽음",
+      "symbol": "🦋",
+      "slug": "13-death"
+    },
     {
       "name": "연인",
       "symbol": "💕",
       "slug": "6-lovers"
     },
     {
-      "name": "마법사",
-      "symbol": "🧙",
-      "slug": "1-magician"
-    },
-    {
-      "name": "은둔자",
-      "symbol": "🏔️",
-      "slug": "9-hermit"
+      "name": "여황제",
+      "symbol": "👑",
+      "slug": "3-empress"
     }
   ],
-  "summary": "오늘은 「사랑」의 에너지가 흐르는 날이에요. 중요한 선택의 순간이에요. 마음이 이끄는 대로 선택하세요. 다만 「조작」과 관련된 부분은 조심하고, 은둔자가 주는 「성찰」의 메시…",
-  "luckyColor": "코랄 핑크",
-  "luckyColorHex": "#fb7185",
-  "luckyNumber": 1,
-  "url": "/blog/daily/2026-11-09.html"
+  "summary": "오늘은 「끝과시작」의 에너지가 흐르는 날이에요. 하나의 장이 끝나고 새로운 장이 시작돼요. 과거를 내려놓고 변화를 받아들이세요. 다만 「사랑」과 관련된 부분은 조심하고, 여황…",
+  "luckyColor": "라벤더 퍼플",
+  "luckyColorHex": "#a78bfa",
+  "luckyNumber": 5,
+  "url": "/blog/daily/2026-11-10.html"
 }
