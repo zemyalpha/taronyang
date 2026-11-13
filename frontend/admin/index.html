@@ -95,7 +95,8 @@
 
     <script>
         const token = localStorage.getItem('token');
-        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        // OAuth 세션은 HttpOnly 쿠키 기반 (GitHub #296)
+        const headers = { ...(token ? { 'Authorization': `Bearer ${token}` } : {}), 'Content-Type': 'application/json' };
 
         function escapeHtml(str) {
             if (str == null) return '';

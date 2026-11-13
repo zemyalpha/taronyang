@@ -16,6 +16,12 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'change-me-in-production',
   jwtExpireDays: parseInt(process.env.JWT_EXPIRE_DAYS || '7', 10),
 
+  // 인증 쿠키 SameSite — 기본 'lax' (동일 오리진 배포).
+  // GH Pages 등 크로스 오리진 프론트엔드에서 쿠키 인증을 쓰려면 'none'으로 설정 (Secure 필수 → 프로덕션만 유효)
+  cookieSameSite: (['lax', 'strict', 'none'].includes(process.env.COOKIE_SAMESITE || '')
+    ? process.env.COOKIE_SAMESITE
+    : 'lax') as 'lax' | 'strict' | 'none',
+
   // 관리자
   adminEmails: (process.env.ADMIN_EMAILS || '').split(',').filter(Boolean),
 
