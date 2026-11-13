@@ -2,7 +2,7 @@ import express, { Express } from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { initDb, getDb, createUser, User } from '../database';
-import { analyticsRouter } from '../routes/analytics';
+import { analyticsRouter, cleanupOldAnalyticsEvents } from '../routes/analytics';
 import { config } from '../config';
 
 function createApp(): Express {
@@ -16,8 +16,8 @@ function makeToken(userId: string): string {
   return jwt.sign({ user_id: userId }, config.jwtSecret, { expiresIn: '7d' });
 }
 
-function createAdminUser(email: string, password: string): User | null {
-  const user = createUser(email, password);
+async function createAdminUser(email: string, password: string): Promise<User | null> {
+  const user = await createUser(email, password);
   if (user) {
     getDb().prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(user.id);
     user.is_admin = 1;
@@ -74,7 +74,7 @@ describe('analytics routes', () => {
       expect(res.status).toBe(400);
     });
 
-    it('caps batch size at 20 events', async () => {
+    it('rejects batch size over 20 events', async () => {
       const events = Array.from({ length: 25 }, (_, i) => ({
         name: `event_${i}`,
         path: '/test',
@@ -84,12 +84,7 @@ describe('analytics routes', () => {
         .post('/api/analytics/event')
         .send({ events });
 
-      expect(res.status).toBe(201);
-      expect(res.body.stored).toBe(20);
-
-      const db = getDb();
-      const count = db.prepare('SELECT COUNT(*) as n FROM analytics_events').get() as { n: number };
-      expect(count.n).toBe(20);
+      expect(res.status).toBe(400);
     });
 
     it('persists single event fields correctly', async () => {
@@ -136,7 +131,7 @@ describe('analytics routes', () => {
     });
 
     it('rejects non-admin user (403)', async () => {
-      const user = createUser('regular@test.com', 'pass123');
+      const user = await createUser('regular@test.com', 'pass123');
       expect(user).not.toBeNull();
       const res = await request(app)
         .get('/api/analytics/summary')
@@ -146,7 +141,7 @@ describe('analytics routes', () => {
     });
 
     it('returns summary data for admin', async () => {
-      const admin = createAdminUser('admin-test@taronyang.com', 'pass123');
+      const admin = await createAdminUser('admin-test@taronyang.com', 'pass123');
       expect(admin).not.toBeNull();
 
       const db = getDb();
@@ -173,6 +168,160 @@ describe('analytics routes', () => {
       const pageView = res.body.topEvents.find((e: { name: string }) => e.name === 'page_view');
       expect(pageView).toBeDefined();
       expect(pageView.count).toBe(2);
+    });
+
+    it('accepts custom days parameter (clamped to 90)', async () => {
+      const admin = (await createAdminUser('admin-test@taronyang.com', 'pass123'))!;
+      const res = await request(app)
+        .get('/api/analytics/summary?days=30')
+        .set('Authorization', `Bearer ${makeToken(admin.id)}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.days).toBe(30);
+    });
+
+    it('clamps days parameter above 90', async () => {
+      const admin = (await createAdminUser('admin-test@taronyang.com', 'pass123'))!;
+      const res = await request(app)
+        .get('/api/analytics/summary?days=500')
+        .set('Authorization', `Bearer ${makeToken(admin.id)}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.days).toBe(90);
+    });
+
+    it('defaults days to 7 for invalid input', async () => {
+      const admin = (await createAdminUser('admin-test@taronyang.com', 'pass123'))!;
+      const res = await request(app)
+        .get('/api/analytics/summary?days=abc')
+        .set('Authorization', `Bearer ${makeToken(admin.id)}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.days).toBe(7);
+    });
+  });
+
+  // --- cleanupOldAnalyticsEvents ---
+
+  describe('cleanupOldAnalyticsEvents', () => {
+    it('deletes events older than 90 days', () => {
+      const db = getDb();
+      db.prepare(`
+        INSERT INTO analytics_events (id, name, props, path, referrer, session_id, ip, user_agent, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '-100 days'))
+      `).run('old-1', 'page_view', '{}', '/', '', '', '', '');
+      db.prepare(`
+        INSERT INTO analytics_events (id, name, props, path, referrer, session_id, ip, user_agent, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `).run('new-1', 'page_view', '{}', '/', '', '', '', '');
+
+      const deleted = cleanupOldAnalyticsEvents();
+      expect(deleted).toBe(1);
+
+      const remaining = db.prepare('SELECT id FROM analytics_events').all() as { id: string }[];
+      expect(remaining).toHaveLength(1);
+      expect(remaining[0].id).toBe('new-1');
+    });
+
+    it('returns 0 when no old events exist', () => {
+      const db = getDb();
+      db.prepare(`
+        INSERT INTO analytics_events (id, name, props, path, referrer, session_id, ip, user_agent, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `).run('recent-1', 'page_view', '{}', '/', '', '', '', '');
+
+      const deleted = cleanupOldAnalyticsEvents();
+      expect(deleted).toBe(0);
+    });
+  });
+
+  // --- POST /api/analytics/event — edge cases ---
+
+  describe('POST /api/analytics/event — edge cases', () => {
+    it('handles events with missing optional fields gracefully', async () => {
+      const res = await request(app)
+        .post('/api/analytics/event')
+        .send({
+          events: [{ name: 'minimal_event' }],
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.stored).toBe(1);
+
+      const db = getDb();
+      const row = db.prepare('SELECT * FROM analytics_events WHERE name = ?').get('minimal_event') as {
+        path: string; referrer: string; session_id: string; props: string;
+      };
+      expect(row.path).toBe('');
+      expect(row.props).toBe('{}');
+    });
+
+    it('handles props with undefined values gracefully', async () => {
+      const res = await request(app)
+        .post('/api/analytics/event')
+        .send({
+          events: [{ name: 'undef_test', props: { a: undefined, b: 'ok' } }],
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.stored).toBe(1);
+
+      const db = getDb();
+      const row = db.prepare('SELECT props FROM analytics_events WHERE name = ?').get('undef_test') as { props: string };
+      const parsed = JSON.parse(row.props);
+      expect(parsed.b).toBe('ok');
+    });
+
+    it('extracts IP from x-forwarded-for header', async () => {
+      const res = await request(app)
+        .post('/api/analytics/event')
+        .set('X-Forwarded-For', '203.0.113.1, 198.51.100.2')
+        .send({ events: [{ name: 'ip_test' }] });
+
+      expect(res.status).toBe(201);
+
+      const db = getDb();
+      const row = db.prepare('SELECT ip FROM analytics_events WHERE name = ?').get('ip_test') as { ip: string };
+      expect(row.ip).toBe('203.0.113.1');
+    });
+  });
+
+  // --- POST /api/analytics/event — DB error path ---
+
+  describe('POST /api/analytics/event — DB error path', () => {
+    it('returns 500 when DB insert fails', async () => {
+      const db = getDb();
+      db.pragma('query_only = 1');
+
+      const res = await request(app)
+        .post('/api/analytics/event')
+        .send({ events: [{ name: 'fail_test' }] });
+
+      expect(res.status).toBe(500);
+      expect(res.body.error).toContain('Failed');
+
+      db.pragma('query_only = 0');
+    });
+  });
+
+  // --- GET /api/analytics/summary — DB error path ---
+
+  describe('GET /api/analytics/summary — DB error path', () => {
+    it('returns 500 when summary query fails', async () => {
+      const admin = await createAdminUser('admin-test@taronyang.com', 'pass123');
+      const token = makeToken(admin!.id);
+
+      const db = getDb();
+      db.prepare('ALTER TABLE analytics_events RENAME TO analytics_events_bak').run();
+
+      const res = await request(app)
+        .get('/api/analytics/summary?days=7')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(500);
+      expect(res.body.error).toContain('Failed');
+
+      db.prepare('ALTER TABLE analytics_events_bak RENAME TO analytics_events').run();
     });
   });
 });

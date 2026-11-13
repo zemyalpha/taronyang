@@ -2,20 +2,16 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>상담 기록 — 타로냥</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: { extend: {
-                colors: { navy: '#0a0a2e', 'dark-purple': '#1a1a3e', lavender: '#a78bfa', gold: '#fbbf24' },
-                fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Noto Sans KR', 'sans-serif'] }
-            }}
-        }
-    </script>
+    <link rel="stylesheet" href="/static/css/tailwind.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -29,6 +25,7 @@
 </head>
 <body class="bg-navy text-gray-100 font-sans min-h-screen">
 
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="/" class="text-xl font-serif font-bold text-lavender">🔮 타로냥</a>
@@ -39,14 +36,14 @@
         </div>
     </nav>
 
-    <main class="pt-20 pb-10 px-4 max-w-2xl mx-auto">
+    <main id="main-content" class="pt-20 pb-10 px-4 max-w-2xl mx-auto">
         <h1 class="font-serif text-2xl text-lavender mb-6">📜 상담 기록</h1>
 
         <!-- 로그인 필요 -->
         <div id="need-login" class="hidden text-center py-16">
             <div class="text-4xl mb-4">🔒</div>
             <p class="text-gray-400 mb-4">상담 기록을 보려면 로그인해주세요</p>
-            <a href="/login" class="inline-block bg-gradient-to-r from-purple-700 to-lavender text-white px-6 py-3 rounded-full font-bold">로그인하기</a>
+            <a href="/login?redirect=/history" class="inline-block bg-gradient-to-r from-purple-700 to-lavender text-white px-6 py-3 rounded-full font-bold">로그인하기</a>
         </div>
 
         <!-- 기록 목록 -->
@@ -72,19 +69,15 @@
         }
 
         async function loadReadings() {
-            const token = localStorage.getItem('token');
-            if (!token) {
+            if (!localStorage.getItem('user')) {
                 document.getElementById('need-login').classList.remove('hidden');
                 return;
             }
 
             try {
-                const res = await fetch('/api/readings', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await fetch('/api/readings');
                 if (!res.ok) {
                     if (res.status === 401) {
-                        localStorage.removeItem('token');
                         localStorage.removeItem('user');
                         document.getElementById('need-login').classList.remove('hidden');
                     } else {

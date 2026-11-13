@@ -33,8 +33,13 @@ test.describe('API 엔드포인트', () => {
     expect(body.cards[0]).toHaveProperty('position');
   });
 
-  test('POST /api/tarot/read — 정상 요청', async ({ request }) => {
+  test('POST /api/tarot/read — 정상 요청', async ({ browser }) => {
     test.setTimeout(120000);
+    const ctx = await browser.newContext();
+    const request = ctx.request;
+    const email = `tarot-read-${Date.now()}@example.com`;
+    await request.post('/api/auth/signup', { data: { email, password: 'test1234' } });
+
     const shuffleRes = await request.get('/api/tarot/shuffle?count=3');
     const shuffleData = await shuffleRes.json();
     const cards = shuffleData.cards.map((c: any) => ({
@@ -56,20 +61,33 @@ test.describe('API 엔드포인트', () => {
       expect(res.status()).toBe(500);
       expect(body.detail).toBeDefined();
     }
+    await ctx.close();
   });
 
-  test('POST /api/tarot/read — 잘못된 카테고리', async ({ request }) => {
+  test('POST /api/tarot/read — 잘못된 카테고리', async ({ browser }) => {
+    const ctx = await browser.newContext();
+    const request = ctx.request;
+    const email = `bad-cat-${Date.now()}@example.com`;
+    await request.post('/api/auth/signup', { data: { email, password: 'test1234' } });
+
     const res = await request.post('/api/tarot/read', {
       data: { category: 'invalid', question: '', cards: [{ id: 0, is_upright: true }] },
     });
     expect(res.status()).toBe(400);
+    await ctx.close();
   });
 
-  test('POST /api/tarot/read — 카드 부족', async ({ request }) => {
+  test('POST /api/tarot/read — 카드 부족', async ({ browser }) => {
+    const ctx = await browser.newContext();
+    const request = ctx.request;
+    const email = `few-cards-${Date.now()}@example.com`;
+    await request.post('/api/auth/signup', { data: { email, password: 'test1234' } });
+
     const res = await request.post('/api/tarot/read', {
       data: { category: 'love', question: '', cards: [{ id: 0, is_upright: true }] },
     });
     expect(res.status()).toBe(400);
+    await ctx.close();
   });
 
   test('POST /api/auth/signup + /api/auth/login', async ({ request }) => {
@@ -79,7 +97,6 @@ test.describe('API 엔드포인트', () => {
     });
     expect(signupRes.status()).toBe(200);
     const signupData = await signupRes.json();
-    expect(signupData.token).toBeDefined();
     expect(signupData.user.email).toBe(email);
 
     const loginRes = await request.post('/api/auth/login', {
@@ -87,7 +104,7 @@ test.describe('API 엔드포인트', () => {
     });
     expect(loginRes.status()).toBe(200);
     const loginData = await loginRes.json();
-    expect(loginData.token).toBeDefined();
+    expect(loginData.user.email).toBe(email);
   });
 
   test('POST /api/auth/signup — 중복 이메일', async ({ request }) => {
