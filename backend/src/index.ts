@@ -178,6 +178,11 @@ if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-produc
   process.exit(1);
 }
 
+// 처리되지 않은 Promise rejection 로깅
+process.on('unhandledRejection', (reason) => {
+  logger.error('처리되지 않은 Promise rejection', { error: reason instanceof Error ? reason.stack : String(reason) });
+});
+
 // 서버 시작
 app.listen(config.port, config.host, () => {
   logger.info('타로냥 API 서버 시작', { host: config.host, port: config.port, env: config.nodeEnv });
