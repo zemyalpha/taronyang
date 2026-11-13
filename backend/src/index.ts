@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { config } from './config';
 import { initDb } from './database';
@@ -78,6 +79,9 @@ app.use(morgan(':method :url :status :response-time ms - :res[content-length]', 
 
 // JSON 바디 파서
 app.use(express.json({ limit: '1mb' }));
+
+// 쿠키 파서 — HttpOnly 인증 쿠키 + OAuth state 쿠키 (GitHub #296)
+app.use(cookieParser());
 
 // API 레이트 리미팅 — 일반 API
 const apiLimiter = rateLimit({
