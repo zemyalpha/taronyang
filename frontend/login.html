@@ -89,8 +89,8 @@
             <a href="/tarot" class="text-sm text-gray-400 hover:text-lavender transition">비회원으로 이용하기 →</a>
         </div>
 
-        <!-- 소셜 로그인 -->
-        <div class="mt-8 pt-6 border-t border-lavender/20">
+        <!-- 소셜 로그인 (OAuth 자격증명이 서버에 설정되기 전까지 hidden — ZEMA-3418) -->
+        <div class="mt-8 pt-6 border-t border-lavender/20" id="social-login-section" hidden>
             <p class="text-center text-sm text-gray-400 mb-4">또는 소셜 계정으로</p>
             <div class="space-y-3" id="social-buttons">
                 <button onclick="socialLogin('kakao')" class="w-full py-3 bg-[#FEE500] text-[#3C1E1E] rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2">
@@ -221,6 +221,17 @@
                 window.location.href = '/';
             }
         }
+
+        // 소셜 로그인 UI 표시 제어 (ZEMA-3418)
+        // OAuth 자격증명이 서버에 설정되기 전까지 #social-login-section은 hidden.
+        // config.js(/static/js/config.js)가 DOMContentLoaded 전에 실행되므로
+        // window.__TARONYANG_CONFIG__.socialLoginEnabled === true일 때만 노출.
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.__TARONYANG_CONFIG__ && window.__TARONYANG_CONFIG__.socialLoginEnabled === true) {
+                var section = document.getElementById('social-login-section');
+                if (section) section.removeAttribute('hidden');
+            }
+        });
     </script>
 
     <script src="/static/js/config.js"></script>
