@@ -1,26 +1,26 @@
 {
-  "date": "2026-11-14",
-  "weekday": "토요일",
+  "date": "2026-11-15",
+  "weekday": "일요일",
   "cards": [
     {
-      "name": "정의",
-      "symbol": "⚖️",
-      "slug": "11-justice"
-    },
-    {
-      "name": "연인",
-      "symbol": "💕",
-      "slug": "6-lovers"
+      "name": "세계",
+      "symbol": "🌍",
+      "slug": "21-world"
     },
     {
       "name": "바보",
       "symbol": "🃏",
       "slug": "0-fool"
+    },
+    {
+      "name": "악마",
+      "symbol": "😈",
+      "slug": "15-devil"
     }
   ],
-  "summary": "오늘은 「공정」의 에너지가 흐르는 날이에요. 정의로운 결과가 따를 거예요. 정직하게 행동하면 좋은 결실이 있어요. 다만 「사랑」과 관련된 부분은 조심하고, 바보가 주는 「새시…",
-  "luckyColor": "골드",
-  "luckyColorHex": "#fbbf24",
+  "summary": "오늘은 「완성」의 에너지가 흐르는 날이에요. 하나의 큰 순환이 완성되고 있어요. 지금까지의 노력이 아름답게 완성될 거예요. 다만 「무모함」과 관련된 부분은 조심하고, 악마가 …",
+  "luckyColor": "라벤더 퍼플",
+  "luckyColorHex": "#a78bfa",
   "luckyNumber": 8,
-  "url": "/blog/daily/2026-11-14.html"
+  "url": "/blog/daily/2026-11-15.html"
 }
