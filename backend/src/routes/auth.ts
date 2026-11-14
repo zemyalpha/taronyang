@@ -1,9 +1,11 @@
 /** 인증 API 라우터 */
 import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { config } from '../config';
-import { createUser, verifyUser, getUserById, getUserByEmail, getDb, User } from '../database';
+import { createUser, verifyUser, getUserById, getUserByEmail, getDb, findOrCreateOAuthUser, User } from '../database';
 import { signupSchema, loginSchema, updateMeSchema } from '../validation';
+import { logger } from '../logger';
 
 export const authRouter = Router();
 
@@ -157,6 +159,117 @@ authRouter.get('/oauth/urls', (_req: Request, res: Response) => {
     urls.google = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.googleClientId}&redirect_uri=${config.googleRedirectUri}&response_type=code&scope=${scope}&access_type=offline`;
   }
   res.json(urls);
+});
+
+// --- 네이버 OAuth 콜백 (ZEMA-4743) ---
+
+/** naver_oauth_state 쿠키 옵션 — /oauth/urls에서 세팅할 때와 동일하게 유지 */
+const naverStateCookieOptions = {
+  httpOnly: true,
+  secure: config.nodeEnv === 'production',
+  sameSite: 'lax' as const,
+};
+
+/** 문자열 타이밍 세이프 비교 (길이 다르면 즉시 불일치) */
+function timingSafeEqualStr(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+interface NaverTokenResponse {
+  access_token?: string;
+  error?: string;
+  error_description?: string;
+}
+
+interface NaverProfileResponse {
+  resultcode?: string;
+  message?: string;
+  response?: {
+    id?: string;
+    email?: string;
+    nickname?: string;
+  };
+}
+
+/** 네이버 OAuth 콜백 — CSRF state 검증 후 토큰 교환 및 로그인 처리 */
+authRouter.get('/oauth/naver/callback', async (req: Request, res: Response) => {
+  const stateFromCookie = req.cookies?.naver_oauth_state as string | undefined;
+  const stateFromQuery = typeof req.query.state === 'string' ? req.query.state : '';
+  const code = typeof req.query.code === 'string' ? req.query.code : '';
+
+  // state 쿠키는 일회용 — 검증 결과와 무관하게 즉시 무효화
+  res.clearCookie('naver_oauth_state', naverStateCookieOptions);
+
+  // CSRF 검증: /oauth/urls가 세팅한 httpOnly 쿠키와 state 파라미터 비교
+  if (!stateFromCookie || !stateFromQuery || !timingSafeEqualStr(stateFromCookie, stateFromQuery)) {
+    res.status(401).json({ detail: '유효하지 않은 로그인 요청입니다. 다시 시도해주세요.' });
+    return;
+  }
+
+  // 네이버 사용자가 취소했거나 code가 없는 경우
+  if (!code) {
+    res.status(401).json({ detail: '네이버 로그인이 취소되었습니다.' });
+    return;
+  }
+
+  if (!config.naverClientId || !config.naverClientSecret) {
+    logger.error('네이버 OAuth 설정 누락 (NAVER_CLIENT_ID / NAVER_CLIENT_SECRET)');
+    res.status(503).json({ detail: '네이버 로그인이 서버에 설정되지 않았습니다.' });
+    return;
+  }
+
+  try {
+    // 1) Authorization Code → Access Token 교환
+    const tokenUrl = new URL('https://nid.naver.com/oauth2.0/token');
+    tokenUrl.searchParams.set('grant_type', 'authorization_code');
+    tokenUrl.searchParams.set('client_id', config.naverClientId);
+    tokenUrl.searchParams.set('client_secret', config.naverClientSecret);
+    tokenUrl.searchParams.set('code', code);
+    tokenUrl.searchParams.set('state', stateFromQuery);
+
+    const tokenRes = await fetch(tokenUrl);
+    if (!tokenRes.ok) {
+      throw new Error(`naver token exchange failed: HTTP ${tokenRes.status}`);
+    }
+    const tokenJson = (await tokenRes.json()) as NaverTokenResponse;
+    if (!tokenJson.access_token) {
+      throw new Error(`naver token exchange failed: ${tokenJson.error || 'access_token missing'}`);
+    }
+
+    // 2) 사용자 프로필 조회
+    const profileRes = await fetch('https://openapi.naver.com/v1/nid/me', {
+      headers: { Authorization: `Bearer ${tokenJson.access_token}` },
+    });
+    if (!profileRes.ok) {
+      throw new Error(`naver profile fetch failed: HTTP ${profileRes.status}`);
+    }
+    const profileJson = (await profileRes.json()) as NaverProfileResponse;
+    const naverId = profileJson.response?.id;
+    if (!naverId) {
+      throw new Error('naver profile response missing id');
+    }
+
+    // 3) 사용자 생성/조회 후 프론트엔드 로그인 랜딩(/login?oauth=1)으로 리다이렉트
+    const user = findOrCreateOAuthUser({
+      provider: 'naver',
+      provider_id: naverId,
+      email: profileJson.response?.email,
+      nickname: profileJson.response?.nickname,
+    });
+
+    const redirect = new URL('/login', config.frontendUrl);
+    redirect.searchParams.set('oauth', '1');
+    redirect.searchParams.set('token', createToken(user.id));
+    redirect.searchParams.set('user_id', user.id);
+    redirect.searchParams.set('nickname', user.nickname ?? '');
+    res.redirect(302, redirect.toString());
+  } catch (err) {
+    logger.error('네이버 OAuth 콜백 처리 실패', { message: err instanceof Error ? err.message : String(err) });
+    res.status(502).json({ detail: '네이버 로그인 처리 중 오류가 발생했습니다. 다시 시도해주세요.' });
+  }
 });
 
 /** 생일로 별자리 계산 */
