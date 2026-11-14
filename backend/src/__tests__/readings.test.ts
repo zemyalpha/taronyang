@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
 import request from 'supertest';
-import { initDb, getDb, createUser } from '../database';
+import { initDb, createUser } from '../database';
 import { authRouter } from '../routes/auth';
 import { readingsRouter, saveReading } from '../routes/readings';
 import jwt from 'jsonwebtoken';
