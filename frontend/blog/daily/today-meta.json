@@ -1,26 +1,26 @@
 {
-  "date": "2026-11-13",
-  "weekday": "금요일",
+  "date": "2026-11-18",
+  "weekday": "수요일",
   "cards": [
     {
-      "name": "태양",
-      "symbol": "☀️",
-      "slug": "19-sun"
+      "name": "은둔자",
+      "symbol": "🏔️",
+      "slug": "9-hermit"
     },
     {
-      "name": "죽음",
-      "symbol": "🦋",
-      "slug": "13-death"
+      "name": "정의",
+      "symbol": "⚖️",
+      "slug": "11-justice"
     },
     {
-      "name": "탑",
-      "symbol": "🗼",
-      "slug": "16-tower"
+      "name": "세계",
+      "symbol": "🌍",
+      "slug": "21-world"
     }
   ],
-  "summary": "오늘은 「성공」의 에너지가 흐르는 날이에요. 밝은 에너지가 가득해요! 지금 하는 일이 좋은 결과를 맺을 거예요. 다만 「끝과시작」과 관련된 부분은 조심하고, 탑이 주는 「급변…",
-  "luckyColor": "선셋 오렌지",
-  "luckyColorHex": "#fb923c",
-  "luckyNumber": 7,
-  "url": "/blog/daily/2026-11-13.html"
+  "summary": "오늘은 「성찰」의 에너지가 흐르는 날이에요. 혼자만의 시간이 필요해요. 내면을 깊이 들여다보며 답을 찾으세요. 다만 「불공정」과 관련된 부분은 조심하고, 세계가 주는 「완성」…",
+  "luckyColor": "스카이 블루",
+  "luckyColorHex": "#38bdf8",
+  "luckyNumber": 8,
+  "url": "/blog/daily/2026-11-18.html"
 }
