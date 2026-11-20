@@ -19,6 +19,7 @@ const PRECACHE_URLS = [
   "/static/js/app.js",
   "/static/js/config.js",
   "/static/js/analytics.js",
+  "/static/js/utils.js",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
 ];
