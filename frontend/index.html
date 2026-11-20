@@ -189,11 +189,6 @@
             </a>
         </section>
 
-        <!-- 통계 -->
-        <div class="stats">
-            오늘 <strong id="today-count">-</strong>명이 타로를 봤어요 🔮
-        </div>
-
         <!-- 후기 -->
         <section class="section">
             <p class="section-title">실제 상담 후기</p>
@@ -281,9 +276,6 @@
         ];
         document.getElementById('daily-text').textContent =
             dailyMessages[new Date().getDate() % dailyMessages.length];
-
-        // 통계 (임시 하드코딩, 추후 API 연동)
-        document.getElementById('today-count').textContent = '1,247';
 
         // 오늘의 타로운세 미리보기 (ZEMA-2666)
         // 클라이언트 사이드 날짜 검증 (ZEMA-2910): today-meta.json이 스테일한 경우
