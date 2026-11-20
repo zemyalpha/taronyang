@@ -9,6 +9,7 @@ import { config } from './config';
 import { getDb } from './database';
 import { callLlm } from './llm';
 import { getKstDate } from './routes/notify';
+import { toKstDate, getKstDateStringKo } from './datetime';
 import { logger } from './logger';
 
 const ZODIAC_SIGNS = [
@@ -96,7 +97,7 @@ export async function generateAllHoroscopes(): Promise<Record<string, string>> {
 
 /** 이메일 HTML 템플릿 */
 function buildEmailHtml(nickname: string, zodiacSign: string, horoscope: string): string {
-  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const today = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' });
   const horoscopeHtml = horoscope.replace(/\n/g, '<br>');
   return `<!DOCTYPE html>
 <html>
@@ -197,8 +198,7 @@ export async function sendDailyNotifications(): Promise<void> {
   }
 
   const horoscopes = await generateAllHoroscopes();
-  const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
-  const todayStr = kstNow.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+  const todayStr = getKstDateStringKo();
   let sent = 0;
 
   const results = await Promise.allSettled(enabled.map(async (sub) => {
@@ -227,9 +227,8 @@ export function startDailyScheduler(): void {
   let lastSentDate = '';
 
   setInterval(async () => {
-    const now = new Date();
-    const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    const today = kstNow.toISOString().split('T')[0];
+    const kstNow = toKstDate();
+    const today = kstNow.toISOString().slice(0, 10);
     const hour = kstNow.getUTCHours();
 
     if (hour >= 7 && lastSentDate !== today) {
