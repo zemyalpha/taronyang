@@ -2,17 +2,16 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>관리자 — 타로냥</title>
     <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { theme: { extend: {
-            colors: { navy: '#0a0a2e', 'dark-purple': '#1a1a3e', lavender: '#a78bfa', gold: '#fbbf24' },
-            fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Noto Sans KR', 'sans-serif'] }
-        }}}
-    </script>
+    <link rel="stylesheet" href="/static/css/tailwind.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -26,6 +25,7 @@
 </head>
 <body class="bg-navy text-gray-100 font-sans min-h-screen">
 
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="/" class="text-xl font-serif font-bold text-lavender">🔮 타로냥 관리자</a>
@@ -33,7 +33,7 @@
         </div>
     </nav>
 
-    <main class="pt-20 pb-10 px-4 max-w-6xl mx-auto">
+    <main id="main-content" class="pt-20 pb-10 px-4 max-w-6xl mx-auto">
 
         <!-- 통계 카드 -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="stats">
@@ -63,6 +63,7 @@
 
         <!-- 사용자 목록 -->
         <div id="panel-users">
+            <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-gray-400 border-b border-lavender/15">
@@ -74,10 +75,12 @@
                 </thead>
                 <tbody id="users-table"></tbody>
             </table>
+            </div>
         </div>
 
         <!-- 상담 기록 -->
         <div id="panel-readings" class="hidden">
+            <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-gray-400 border-b border-lavender/15">
@@ -89,13 +92,14 @@
                 </thead>
                 <tbody id="readings-table"></tbody>
             </table>
+            </div>
         </div>
 
     </main>
 
     <script>
-        const token = localStorage.getItem('token');
-        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        if (!localStorage.getItem('user')) { window.location.href = '/'; }
+        const headers = { 'Content-Type': 'application/json' };
 
         function escapeHtml(str) {
             if (str == null) return '';
@@ -126,7 +130,12 @@
                 document.getElementById('stat-premium').textContent = data.premium_users;
                 document.getElementById('stat-readings').textContent = data.total_readings;
                 document.getElementById('stat-today').textContent = data.today_new_users;
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('stat-users').textContent = '-';
+                document.getElementById('stat-premium').textContent = '-';
+                document.getElementById('stat-readings').textContent = '-';
+                document.getElementById('stat-today').textContent = '-';
+            }
         }
 
         async function loadUsers() {
@@ -147,7 +156,9 @@
                         <td>${u.subscription_status === 'premium' ? '<span class="text-lavender">💎</span>' : '<span class="text-gray-500">무료</span>'}</td>
                     </tr>
                 `).join('');
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('users-table').innerHTML = '<tr><td colspan="4" class="py-4 text-center text-gray-500">데이터를 불러오지 못했습니다</td></tr>';
+            }
         }
 
         async function loadReadings() {
@@ -169,7 +180,9 @@
                         <td class="text-gray-400">${r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '-'}</td>
                     </tr>
                 `).join('');
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('readings-table').innerHTML = '<tr><td colspan="4" class="py-4 text-center text-gray-500">데이터를 불러오지 못했습니다</td></tr>';
+            }
         }
 
         function showAdminTab(tab) {

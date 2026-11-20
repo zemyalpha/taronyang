@@ -2,6 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' cdn.iamport.kr https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; frame-src cdn.iamport.kr; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>요금제 - 무료 타로 & 프리미엄 무제한 상담 | 타로냥</title>
     <meta name="description" content="타로냥 요금제 안내. 매일 1회 무료 AI 타로 상담부터 무제한 상담, 상세 해석, 추가 대화가 가능한 프리미엄(월 9,900원)까지.">
@@ -9,20 +12,20 @@
     <meta property="og:title" content="요금제 - 무료 타로 & 프리미엄 무제한 상담 | 타로냥">
     <meta property="og:description" content="매일 1회 무료 타로! 무제한 상담 프리미엄은 월 9,900원.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://zemyalpha.github.io/taronyang/pricing">
+    <meta property="og:url" content="https://taronyang.com/pricing">
     <meta property="og:site_name" content="타로냥">
-    <meta property="og:image" content="https://zemyalpha.github.io/taronyang/og-image.png">
+    <meta property="og:image" content="https://taronyang.com/og-image.png">
     <meta property="og:locale" content="ko_KR">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://zemyalpha.github.io/taronyang/og-image.png">
+    <meta name="twitter:image" content="https://taronyang.com/og-image.png">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://zemyalpha.github.io/taronyang/pricing">
+    <link rel="canonical" href="https://taronyang.com/pricing">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "타로냥 요금제",
-      "url": "https://zemyalpha.github.io/taronyang/pricing",
+      "url": "https://taronyang.com/pricing",
       "applicationCategory": "LifestyleApplication",
       "operatingSystem": "Web",
       "inLanguage": "ko-KR",
@@ -46,16 +49,9 @@
     }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: { extend: {
-                colors: { navy: '#0a0a2e', 'dark-purple': '#1a1a3e', lavender: '#a78bfa', gold: '#fbbf24' },
-                fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Noto Sans KR', 'sans-serif'] }
-            }}
-        }
-    </script>
+    <link rel="stylesheet" href="/static/css/tailwind.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
@@ -68,6 +64,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
 </head>
 <body class="bg-navy text-gray-100 font-sans min-h-screen">
+    <a href="#main-content" class="skip-nav">본문으로 건너뛰기</a>
 
     <nav class="fixed top-0 w-full z-50 bg-navy/80 backdrop-blur-md border-b border-lavender/20">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -76,7 +73,7 @@
         </div>
     </nav>
 
-    <main class="pt-20 pb-10 px-4 max-w-3xl mx-auto">
+    <main id="main-content" tabindex="-1" class="pt-20 pb-10 px-4 max-w-3xl mx-auto">
         <h1 class="font-serif text-3xl text-center text-lavender mb-12">💎 프리미엄 구독</h1>
 
         <!-- 현재 상태 -->
@@ -93,9 +90,9 @@
                     <li>✅ 매일 1회 타로 상담</li>
                     <li>✅ 기본 AI 해석</li>
                     <li>✅ 오늘의 운세</li>
-                    <li class="text-gray-600">❌ 추가 대화</li>
-                    <li class="text-gray-600">❌ 일운 알림</li>
-                    <li class="text-gray-600">❌ 상담 기록</li>
+                    <li class="text-gray-500">❌ 추가 대화</li>
+                    <li class="text-gray-500">❌ 일운 알림</li>
+                    <li class="text-gray-500">❌ 상담 기록</li>
                 </ul>
             </div>
 
@@ -111,30 +108,20 @@
                     <li>✅ 매일 아침 운세 알림</li>
                     <li>✅ 상담 기록 저장</li>
                 </ul>
-                <button id="btn-subscribe" onclick="subscribe()" class="mt-6 w-full py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">
+                <button type="button" id="btn-subscribe" onclick="subscribe()" class="mt-6 w-full py-3 bg-gradient-to-r from-purple-700 to-lavender text-white rounded-full font-bold hover:shadow-lg hover:shadow-lavender/30 transition">
                     프리미엄 시작하기 ✨
                 </button>
             </div>
         </div>
     </main>
 
-    <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-lavender/90 text-navy font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
+    <script src="/static/js/utils.js"></script>
     <script>
-        let toastTimeout;
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.remove('opacity-0', 'pointer-events-none');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2500);
-        }
-
         async function checkStatus() {
-            const token = localStorage.getItem('token');
-            if (!token) return;
+            if (!localStorage.getItem('user')) return;
             try {
-                const res = await fetch('/api/payment/status', { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch('/api/payment/status');
                 if (!res.ok) return;
                 const data = await res.json();
                 const badge = document.getElementById('status-badge');
@@ -149,21 +136,46 @@
                     badge.textContent = '🆓 무료 플랜';
                     badge.className = 'inline-block px-4 py-2 rounded-full text-sm font-bold bg-gray-500/20 text-gray-400';
                 }
-            } catch (e) {}
+            } catch (e) {
+                showToast('구독 상태를 불러올 수 없습니다.');
+            }
         }
 
-        function subscribe() {
+        let iamportLoaded = false;
+        async function ensureIamportLoaded() {
+            if (iamportLoaded || window.IMP) {
+                iamportLoaded = true;
+                return window.IMP;
+            }
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.iamport.kr/js/iamport.payment-1.2.0.js';
+                script.crossOrigin = 'anonymous';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('Iamport load failed'));
+                document.head.appendChild(script);
+            });
+            iamportLoaded = true;
+            return window.IMP;
+        }
+
+        async function subscribe() {
             const btn = document.getElementById('btn-subscribe');
             if (btn.disabled) return;
 
-            const token = localStorage.getItem('token');
-            if (!token) {
+            if (!localStorage.getItem('user')) {
                 showToast('로그인이 필요합니다');
-                setTimeout(() => window.location.href = '/login', 1000);
+                setTimeout(() => window.location.href = '/login?redirect=/pricing', 1000);
                 return;
             }
 
-            const IMP = window.IMP;
+            let IMP;
+            try {
+                IMP = await ensureIamportLoaded();
+            } catch (_e) {
+                showToast('결제 모듈을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
             if (!IMP) {
                 showToast('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');
                 return;
@@ -179,14 +191,13 @@
                 merchant_uid: 'taronyang_' + Date.now(),
                 name: '타로냥 프리미엄 (월간)',
                 amount: 9900,
-                buyer_email: '',
+                buyer_email: (JSON.parse(localStorage.getItem('user') || '{}').email) || '',
             }, async function(rsp) {
                 if (rsp.success) {
                     try {
                         const res = await fetch('/api/payment/verify', {
                             method: 'POST',
                             headers: {
-                                'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ imp_uid: rsp.imp_uid })

@@ -2,6 +2,7 @@
 import { Router, Request, Response } from 'express';
 import { getDb } from '../database';
 import { authMiddleware, adminMiddleware } from './auth';
+import { logger } from '../logger';
 
 export const adminRouter = Router();
 
@@ -11,9 +12,9 @@ adminRouter.get('/stats', authMiddleware, adminMiddleware, (_req: Request, res: 
 
   const totalUsers = db.prepare('SELECT COUNT(*) AS total FROM users').get() as { total: number };
   const premiumUsers = db.prepare("SELECT COUNT(*) AS total FROM users WHERE subscription_status = 'premium'").get() as { total: number };
-  const todayUsers = db.prepare("SELECT COUNT(*) AS total FROM users WHERE date(created_at) = date('now')").get() as { total: number };
+  const todayUsers = db.prepare("SELECT COUNT(*) AS total FROM users WHERE date(created_at) = date('now', '+9 hours')").get() as { total: number };
   const totalReadings = db.prepare('SELECT COUNT(*) AS total FROM readings').get() as { total: number };
-  const todayReadings = db.prepare("SELECT COUNT(*) AS total FROM readings WHERE date(created_at) = date('now')").get() as { total: number };
+  const todayReadings = db.prepare("SELECT COUNT(*) AS total FROM readings WHERE date(created_at) = date('now', '+9 hours')").get() as { total: number };
 
   res.json({
     total_users: totalUsers.total,
@@ -28,8 +29,8 @@ adminRouter.get('/stats', authMiddleware, adminMiddleware, (_req: Request, res: 
 /** 사용자 목록 */
 adminRouter.get('/users', authMiddleware, adminMiddleware, (req: Request, res: Response) => {
   const db = getDb();
-  const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
-  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const limit = Math.min(parseInt(String(req.query.limit), 10) || 20, 100);
+  const page = Math.max(parseInt(String(req.query.page), 10) || 1, 1);
   const offset = (page - 1) * limit;
 
   const users = db.prepare(
@@ -49,8 +50,8 @@ adminRouter.get('/users', authMiddleware, adminMiddleware, (req: Request, res: R
 /** 전체 상담 기록 */
 adminRouter.get('/readings', authMiddleware, adminMiddleware, (req: Request, res: Response) => {
   const db = getDb();
-  const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
-  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const limit = Math.min(parseInt(String(req.query.limit), 10) || 20, 100);
+  const page = Math.max(parseInt(String(req.query.page), 10) || 1, 1);
   const offset = (page - 1) * limit;
 
   const readings = db.prepare(
@@ -68,11 +69,43 @@ adminRouter.get('/readings', authMiddleware, adminMiddleware, (req: Request, res
 });
 
 /** 사용자 삭제 */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 adminRouter.delete('/users/:id', authMiddleware, adminMiddleware, (req: Request, res: Response) => {
+  if (!UUID_RE.test(req.params.id)) {
+    res.status(400).json({ error: '잘못된 사용자 ID입니다' });
+    return;
+  }
   const db = getDb();
-  db.prepare('DELETE FROM daily_horoscopes WHERE user_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM readings WHERE user_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
+
+  if (req.params.id === req.user!.id) {
+    res.status(400).json({ error: '자기 자신을 삭제할 수 없습니다.' });
+    return;
+  }
+
+  const target = db.prepare('SELECT email, is_admin FROM users WHERE id = ?').get(req.params.id) as { email: string | null; is_admin: number } | undefined;
+  if (!target) {
+    res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+    return;
+  }
+  if (target.is_admin) {
+    res.status(400).json({ error: '관리자 계정은 삭제할 수 없습니다.' });
+    return;
+  }
+
+  const deleteMany = db.transaction(() => {
+    db.prepare('DELETE FROM processed_payments WHERE user_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM daily_horoscopes WHERE user_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM readings WHERE user_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
+  });
+  deleteMany();
+
+  logger.info('admin user delete', {
+    actor: req.user!.id,
+    actor_email: req.user!.email,
+    target_id: req.params.id,
+    target_email: target.email ?? 'unknown',
+  });
 
   res.json({ ok: true });
 });

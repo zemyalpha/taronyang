@@ -4,7 +4,7 @@
  * - API(/api/*): Network First, 실패 시 캐시 (있으면)
  */
 
-const SW_VERSION = "taronyang-sw-v1";
+const SW_VERSION = "taronyang-sw-v9";
 const STATIC_CACHE = `${SW_VERSION}-static`;
 const PAGE_CACHE = `${SW_VERSION}-pages`;
 const API_CACHE = `${SW_VERSION}-api`;
@@ -14,11 +14,19 @@ const PRECACHE_URLS = [
   "/",
   "/tarot",
   "/daily",
+  "/faq",
+  "/pricing",
+  "/blog/",
+  "/cards/",
   "/manifest.json",
+  "/static/css/tailwind.css",
   "/static/css/style.css",
   "/static/js/app.js",
   "/static/js/config.js",
+  "/static/js/utils.js",
   "/static/js/analytics.js",
+  "/static/js/share.js",
+  "/static/js/stars.js",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
 ];
@@ -116,6 +124,9 @@ const SENSITIVE_API_PATHS = [
   "/api/payment",
   "/api/readings",
   "/api/notifications",
+  "/api/tarot",
+  "/api/analytics",
+  "/api/health/detail",
 ];
 
 function isCacheableApiRequest(url) {
@@ -187,19 +198,34 @@ async function handlePage(event) {
   }
 }
 
-// API: Network First, 실패 시 캐시 (GET만)
+// API: Network First, 실패 시 캐시 (GET만). 캐시 항목 6시간 TTL.
+const API_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 async function handleApi(request) {
   if (request.method !== "GET") return fetch(request);
   const cache = await caches.open(API_CACHE);
   try {
     const networkResponse = await fetch(request);
     if (networkResponse && networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
+      const cc = networkResponse.headers.get("Cache-Control") || "";
+      if (!cc.includes("no-store") && !cc.includes("private")) {
+        const cached = networkResponse.clone();
+        const headers = new Headers(cached.headers);
+        headers.set("X-SW-Cached-At", Date.now().toString());
+        const ttlResponse = new Response(cached.body, { status: cached.status, statusText: cached.statusText, headers });
+        cache.put(request, ttlResponse);
+      }
     }
     return networkResponse;
   } catch (_err) {
     const cached = await cache.match(request);
-    if (cached) return cached;
+    if (cached) {
+      const cachedAt = parseInt(cached.headers.get("X-SW-Cached-At") || "0", 10);
+      if (cachedAt && Date.now() - cachedAt > API_CACHE_TTL_MS) {
+        cache.delete(request);
+      } else {
+        return cached;
+      }
+    }
     return new Response(
       JSON.stringify({ error: "오프라인 상태입니다. 잠시 후 다시 시도해 주세요." }),
       { status: 503, headers: { "Content-Type": "application/json; charset=utf-8" } }

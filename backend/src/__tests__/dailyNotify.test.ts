@@ -38,11 +38,11 @@ describe('generateDailyHoroscope', () => {
     const db = getDb();
     db.prepare(
       'INSERT INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run('test-id-1', '황소자리', '2026-07-15', '캐시된 운세', '캐시', '{}');
+    ).run('test-id-1', '황소자리', '2026-07-15', '캐시된 운세 '.repeat(60), '캐시', '{}');
 
     const result = await generateDailyHoroscope('황소자리', '2026-07-15');
 
-    expect(result).toBe('캐시된 운세');
+    expect(result).toBe('캐시된 운세 '.repeat(60));
     expect(callLlm).not.toHaveBeenCalled();
   });
 
@@ -56,14 +56,42 @@ describe('generateDailyHoroscope', () => {
     expect(callLlm).toHaveBeenCalledTimes(1);
   });
 
-  it('should cache fallback message on LLM failure', async () => {
+  it('should NOT cache fallback message on LLM failure (allows retry)', async () => {
     callLlm.mockRejectedValue(new Error('API unavailable'));
 
     await generateDailyHoroscope('게자리', '2026-07-15');
 
     const db = getDb();
-    const cached = db.prepare('SELECT full_reading FROM daily_horoscopes WHERE zodiac_sign = ? AND date = ?').get('게자리', '2026-07-15') as { full_reading?: string };
-    expect(cached.full_reading).toContain('가져오지 못했어요');
+    const cached = db.prepare('SELECT full_reading FROM daily_horoscopes WHERE zodiac_sign = ? AND date = ?').get('게자리', '2026-07-15') as { full_reading?: string } | undefined;
+    expect(cached).toBeUndefined();
+  });
+
+  it('should retry LLM when cache contains stale fallback', async () => {
+    const db = getDb();
+    db.prepare(
+      'INSERT INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run('fallback-id', '사자자리', '2026-07-15', '🐹 오늘 사자자리의 운세를 가져오지 못했어요. 잠시 후 다시 확인해주세요.'.repeat(10), '요약', '{}');
+
+    callLlm.mockResolvedValue('재시도 성공 운세'.repeat(50));
+
+    const result = await generateDailyHoroscope('사자자리', '2026-07-15');
+
+    expect(result).toBe('재시도 성공 운세'.repeat(50));
+    expect(callLlm).toHaveBeenCalledTimes(1);
+  });
+
+  it('should regenerate when cached content is too short (truncated)', async () => {
+    const db = getDb();
+    db.prepare(
+      'INSERT INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run('truncated-id', '처녀자리', '2026-07-15', '짧음', '요약', '{}');
+
+    callLlm.mockResolvedValue('재생성된 충분히 긴 운세 내용입니다.'.repeat(20));
+
+    const result = await generateDailyHoroscope('처녀자리', '2026-07-15');
+
+    expect(result.length).toBeGreaterThanOrEqual(300);
+    expect(callLlm).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -107,7 +135,7 @@ describe('generateAllHoroscopes', () => {
     const today = getKstDate();
     db.prepare(
       'INSERT INTO daily_horoscopes (id, zodiac_sign, date, full_reading, summary, scores) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run('cached-1', '양자리', today, '캐시됨', '요약', '{}');
+    ).run('cached-1', '양자리', today, '캐시됨 '.repeat(120), '요약', '{}');
 
     callLlm.mockImplementation(() => Promise.resolve('새로 생성'));
 
@@ -117,7 +145,7 @@ describe('generateAllHoroscopes', () => {
 
     const result = await promise;
 
-    expect(result['양자리']).toBe('캐시됨');
+    expect(result['양자리']).toBe('캐시됨 '.repeat(120));
     expect(callLlm).toHaveBeenCalledTimes(11);
   });
 });
