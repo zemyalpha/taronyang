@@ -1,16 +1,8 @@
-import express, { Express } from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { initDb, getDb, createUser, User } from '../database';
 import { config } from '../config';
-import { healthRouter } from '../routes/health';
-
-function createApp(): Express {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/health', healthRouter);
-  return app;
-}
+import app from '../index';
 
 function makeToken(userId: string): string {
   return jwt.sign({ user_id: userId }, config.jwtSecret, { expiresIn: '7d' });
@@ -26,13 +18,10 @@ function createAdminUser(email: string, password: string): User | null {
 }
 
 describe('GET /api/health', () => {
-  let app: Express;
-
   beforeEach(() => {
     initDb();
     const db = getDb();
     db.prepare('DELETE FROM users').run();
-    app = createApp();
   });
 
   it('should return 200 with status ok', async () => {
@@ -46,13 +35,10 @@ describe('GET /api/health', () => {
 });
 
 describe('GET /api/health/detail', () => {
-  let app: Express;
-
   beforeEach(() => {
     initDb();
     const db = getDb();
     db.prepare('DELETE FROM users').run();
-    app = createApp();
   });
 
   it('should return 401 without auth token', async () => {
