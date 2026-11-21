@@ -28,6 +28,10 @@ createServer(async (req, res) => {
   try {
     let urlPath = decodeURIComponent(req.url.split('?')[0]);
     if (urlPath === '/') urlPath = '/index.html';
+    // Mirror production asset layout: build-gh-pages.mjs maps /static/* to the
+    // frontend root (css/, js/, icons/), and _headers serves manifest.json as
+    // application/manifest+json. Without this alias local E2E loads no CSS/JS.
+    if (urlPath.startsWith('/static/')) urlPath = urlPath.slice('/static'.length);
 
     let filePath = resolve(join(ROOT, urlPath));
 
@@ -63,7 +67,36 @@ createServer(async (req, res) => {
     }
 
     const data = await readFile(filePath);
-    res.writeHead(200, { 'Content-Type': MIME[extname(filePath)] || 'application/octet-stream' });
+    // Match production: _headers serves /manifest.json as application/manifest+json,
+    // and build-gh-pages.mjs step 5.6 rewrites its GitHub Pages base path
+    // (/taronyang/*) to root-relative paths for the custom domain.
+    if (filePath.endsWith(`${sep}manifest.json`)) {
+      const prefix = '/taronyang/';
+      const stripBasePath = (value) =>
+        typeof value === 'string' && value.startsWith(prefix)
+          ? '/' + value.slice(prefix.length)
+          : value;
+      const manifest = JSON.parse(data.toString('utf8'));
+      if (typeof manifest.id === 'string') manifest.id = stripBasePath(manifest.id);
+      if (typeof manifest.start_url === 'string') manifest.start_url = stripBasePath(manifest.start_url);
+      if (typeof manifest.scope === 'string') manifest.scope = stripBasePath(manifest.scope);
+      if (Array.isArray(manifest.icons)) {
+        manifest.icons = manifest.icons.map((icon) => ({ ...icon, src: stripBasePath(icon.src) }));
+      }
+      if (Array.isArray(manifest.shortcuts)) {
+        manifest.shortcuts = manifest.shortcuts.map((shortcut) => ({
+          ...shortcut,
+          icons: Array.isArray(shortcut.icons)
+            ? shortcut.icons.map((icon) => ({ ...icon, src: stripBasePath(icon.src) }))
+            : shortcut.icons,
+        }));
+      }
+      res.writeHead(200, { 'Content-Type': 'application/manifest+json; charset=utf-8' });
+      res.end(JSON.stringify(manifest, null, 2) + '\n');
+      return;
+    }
+    const contentType = MIME[extname(filePath)] || 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': contentType });
     res.end(data);
   } catch (err) {
     res.writeHead(500, { 'Content-Type': 'text/plain' });
