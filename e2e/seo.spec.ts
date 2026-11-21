@@ -15,7 +15,7 @@ test.describe('SEO 최적화 (ZEMA-2573)', () => {
       expect(robots).toBe('index, follow');
 
       const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
-      expect(canonical).toBe('https://taronyang.com/');
+      expect(canonical).toBe('https://taronyang.zemystudio.com/');
 
       const twitterCard = await page.locator('meta[name="twitter:card"]').getAttribute('content');
       expect(twitterCard).toBe('summary_large_image');
