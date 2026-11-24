@@ -25,6 +25,9 @@ node_modules/
 backend/dist/
 backend/coverage/
 backend/taronyang.db*
+services/notion-slack-bridge/dist/
+services/notion-slack-bridge/coverage/
+services/notion-slack-bridge/data/
 test-results/
 playwright/.cache/
 
