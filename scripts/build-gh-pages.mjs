@@ -54,14 +54,14 @@ function minifyCss(css) {
 }
 
 // Domain currently embedded in source files → target deployment URL.
-// Source files embed the canonical production domain (taronyang.com).
+// Source files embed the canonical production domain (taronyang.zemystudio.com).
 // The build rewrites it to the GitHub Pages URL for GH Pages deployment.
-// To deploy to a custom domain instead, set SITE_URL=https://taronyang.com
+// To deploy to the production domain instead, set SITE_URL=https://taronyang.zemystudio.com
 // and the build will keep the source domain unchanged.
-const CANONICAL_DOMAIN = (process.env.CANONICAL_DOMAIN || 'https://taronyang.com').replace(/\/$/, '');
+const CANONICAL_DOMAIN = (process.env.CANONICAL_DOMAIN || 'https://taronyang.zemystudio.com').replace(/\/$/, '');
 const GH_PAGES_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
 
-// File extensions that may contain taronyang.com URLs and need domain rewriting
+// File extensions that may contain canonical-domain URLs and need domain rewriting
 const DOMAIN_REWRITE_EXTENSIONS = new Set(['.html', '.xml', '.txt', '.js', '.json']);
 
 // Pages that need directory-based routing (clean URL → dir/index.html)
@@ -406,7 +406,9 @@ function rewriteDomainInNonHtmlFiles(dir) {
     const stat = statSync(fullPath);
     if (stat.isDirectory()) {
       rewriteDomainInNonHtmlFiles(fullPath);
-    } else if (DOMAIN_REWRITE_EXTENSIONS.has(extname(entry)) && extname(entry) !== '.html') {
+    } else if (DOMAIN_REWRITE_EXTENSIONS.has(extname(entry)) && extname(entry) !== '.html' && entry !== 'api-beacon.json') {
+      // api-beacon.json is a runtime API pointer (ZEMA-2620), not a canonical/SEO
+      // reference — rewriting it to the Pages host breaks mirror /api/* calls.
       const content = readFileSync(fullPath, 'utf-8');
       const rewritten = rewriteDomain(content);
       if (rewritten !== content) {
