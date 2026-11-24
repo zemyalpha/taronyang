@@ -406,7 +406,9 @@ function rewriteDomainInNonHtmlFiles(dir) {
     const stat = statSync(fullPath);
     if (stat.isDirectory()) {
       rewriteDomainInNonHtmlFiles(fullPath);
-    } else if (DOMAIN_REWRITE_EXTENSIONS.has(extname(entry)) && extname(entry) !== '.html') {
+    } else if (DOMAIN_REWRITE_EXTENSIONS.has(extname(entry)) && extname(entry) !== '.html' && entry !== 'api-beacon.json') {
+      // api-beacon.json is a runtime API pointer (ZEMA-2620), not a canonical/SEO
+      // reference — rewriting it to the Pages host breaks mirror /api/* calls.
       const content = readFileSync(fullPath, 'utf-8');
       const rewritten = rewriteDomain(content);
       if (rewritten !== content) {
