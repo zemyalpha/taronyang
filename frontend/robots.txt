@@ -22,4 +22,4 @@ Disallow: /mypage
 Disallow: /history
 Disallow: /login
 
-Sitemap: https://taronyang.com/sitemap.xml
+Sitemap: https://taronyang.zemystudio.com/sitemap.xml
