@@ -1,26 +1,26 @@
 {
-  "date": "2026-11-25",
-  "weekday": "수요일",
+  "date": "2026-11-26",
+  "weekday": "목요일",
   "cards": [
     {
-      "name": "교황",
-      "symbol": "⛪",
-      "slug": "5-hierophant"
+      "name": "전차",
+      "symbol": "⚡",
+      "slug": "7-chariot"
     },
     {
-      "name": "세계",
-      "symbol": "🌍",
-      "slug": "21-world"
+      "name": "힘",
+      "symbol": "🦁",
+      "slug": "8-strength"
     },
     {
-      "name": "여사제",
-      "symbol": "🌙",
-      "slug": "2-high-priestess"
+      "name": "심판",
+      "symbol": "📯",
+      "slug": "20-judgement"
     }
   ],
-  "summary": "오늘은 「전통」의 에너지가 흐르는 날이에요. 좋은 스승이나 멘토를 만날 수 있는 시기예요. 배움에 열려있으세요. 다만 「미완성」과 관련된 부분은 조심하고, 여사제가 주는 「직…",
-  "luckyColor": "라벤더 퍼플",
-  "luckyColorHex": "#a78bfa",
-  "luckyNumber": 9,
-  "url": "/blog/daily/2026-11-25.html"
+  "summary": "오늘은 「승리」의 에너지가 흐르는 날이에요. 강한 의지로 목표를 향해 전진할 때예요. 승리는 가까워요. 다만 「용기」와 관련된 부분은 조심하고, 심판이 주는 「부활」의 메시지…",
+  "luckyColor": "로즈 골드",
+  "luckyColorHex": "#f472b6",
+  "luckyNumber": 6,
+  "url": "/blog/daily/2026-11-26.html"
 }
