@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-26",
-  "weekday": "목요일",
+  "date": "2026-11-27",
+  "weekday": "금요일",
   "cards": [
     {
-      "name": "전차",
-      "symbol": "⚡",
-      "slug": "7-chariot"
+      "name": "죽음",
+      "symbol": "🦋",
+      "slug": "13-death"
     },
     {
       "name": "힘",
@@ -13,14 +13,14 @@
       "slug": "8-strength"
     },
     {
-      "name": "심판",
-      "symbol": "📯",
-      "slug": "20-judgement"
+      "name": "황제",
+      "symbol": "🏛️",
+      "slug": "4-emperor"
     }
   ],
-  "summary": "오늘은 「승리」의 에너지가 흐르는 날이에요. 강한 의지로 목표를 향해 전진할 때예요. 승리는 가까워요. 다만 「용기」와 관련된 부분은 조심하고, 심판이 주는 「부활」의 메시지…",
-  "luckyColor": "로즈 골드",
-  "luckyColorHex": "#f472b6",
-  "luckyNumber": 6,
-  "url": "/blog/daily/2026-11-26.html"
+  "summary": "오늘은 「끝과시작」의 에너지가 흐르는 날이에요. 하나의 장이 끝나고 새로운 장이 시작돼요. 과거를 내려놓고 변화를 받아들이세요. 다만 「나약함」과 관련된 부분은 조심하고, 황…",
+  "luckyColor": "민트",
+  "luckyColorHex": "#34d399",
+  "luckyNumber": 2,
+  "url": "/blog/daily/2026-11-27.html"
 }
