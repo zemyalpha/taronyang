@@ -1,16 +1,16 @@
 {
-  "date": "2026-11-27",
-  "weekday": "금요일",
+  "date": "2026-11-28",
+  "weekday": "토요일",
   "cards": [
     {
-      "name": "죽음",
-      "symbol": "🦋",
-      "slug": "13-death"
+      "name": "바보",
+      "symbol": "🃏",
+      "slug": "0-fool"
     },
     {
-      "name": "힘",
-      "symbol": "🦁",
-      "slug": "8-strength"
+      "name": "여사제",
+      "symbol": "🌙",
+      "slug": "2-high-priestess"
     },
     {
       "name": "황제",
@@ -18,9 +18,9 @@
       "slug": "4-emperor"
     }
   ],
-  "summary": "오늘은 「끝과시작」의 에너지가 흐르는 날이에요. 하나의 장이 끝나고 새로운 장이 시작돼요. 과거를 내려놓고 변화를 받아들이세요. 다만 「나약함」과 관련된 부분은 조심하고, 황…",
+  "summary": "오늘은 「새시작」의 에너지가 흐르는 날이에요. 새로운 시작과 무한한 가능성이 열려있어요. 두려움 없이 한 걸음 내디뎌보세요. 다만 「직관」과 관련된 부분은 조심하고, 황제가 …",
   "luckyColor": "민트",
   "luckyColorHex": "#34d399",
-  "luckyNumber": 2,
-  "url": "/blog/daily/2026-11-27.html"
+  "luckyNumber": 5,
+  "url": "/blog/daily/2026-11-28.html"
 }
