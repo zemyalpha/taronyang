@@ -111,6 +111,17 @@ const tarotLimiter = rateLimit({
 app.use('/api/tarot/read', tarotLimiter);
 app.use('/api/tarot/chat', tarotLimiter);
 
+// 결제 API 레이트 리미팅 — 결제 검증/프로빙 방어
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { detail: '결제 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/payment/verify', paymentLimiter);
+app.use('/api/payment/cancel', paymentLimiter);
+
 // API 라우터
 app.use('/api/tarot', tarotRouter);
 app.use('/api/auth', authRouter);
