@@ -181,11 +181,11 @@ function cardSlug(card) {
 }
 
 function cardUrl(card) {
-  return `/cards/${cardSlug(card)}.html`;
+  return `/cards/${cardSlug(card)}`;
 }
 
 function cardFullUrl(card) {
-  return `${SITE_URL}/cards/${cardSlug(card)}.html`;
+  return `${SITE_URL}/cards/${cardSlug(card)}`;
 }
 
 // ── Daily fortune HTML page ────────────────────────────────────────
@@ -208,7 +208,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     '@type': 'Article',
     headline: `${dateKr} ${weekday} 오늘의 타로운세`,
     description: summary,
-    url: `${SITE_URL}/blog/daily/${dateStr}.html`,
+    url: `${SITE_URL}/blog/daily/${dateStr}`,
     image: `${SITE_URL}/og-image.png`,
     author: { '@type': 'Organization', name: '타로냥' },
     publisher: {
@@ -233,7 +233,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
       { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
       { '@type': 'ListItem', position: 2, name: '블로그', item: `${SITE_URL}/blog/` },
       { '@type': 'ListItem', position: 3, name: '오늘의 운세', item: `${SITE_URL}/blog/daily/` },
-      { '@type': 'ListItem', position: 4, name: dateKr, item: `${SITE_URL}/blog/daily/${dateStr}.html` },
+      { '@type': 'ListItem', position: 4, name: dateKr, item: `${SITE_URL}/blog/daily/${dateStr}` },
     ],
   };
 
@@ -261,19 +261,19 @@ function generateDailyPage(dateStr, cards, allDates = []) {
 
   const prevDate = subtractDays(dateStr, 1);
   const nextDate = subtractDays(dateStr, -1);
-  const prevExists = allDates.includes(prevDate) || existsSync(join(DAILY_DIR, `${prevDate}.html`));
-  const nextExists = allDates.includes(nextDate) || existsSync(join(DAILY_DIR, `${nextDate}.html`));
+  const prevExists = allDates.includes(prevDate) || existsSync(join(DAILY_DIR, `${prevDate}`)) || existsSync(join(DAILY_DIR, `${prevDate}.html`));
+  const nextExists = allDates.includes(nextDate) || existsSync(join(DAILY_DIR, `${nextDate}`)) || existsSync(join(DAILY_DIR, `${nextDate}.html`));
 
   const navHtml = `
             <nav class="card-nav" aria-label="일운 탐색">
-                ${prevExists ? `<a href="/blog/daily/${prevDate}.html" class="card-nav-btn prev" rel="prev">
+                ${prevExists ? `<a href="/blog/daily/${prevDate}" class="card-nav-btn prev" rel="prev">
                     <span class="card-nav-arrow" aria-hidden="true">←</span>
                     <span class="card-nav-info">
                         <span class="card-nav-label">어제의 운세</span>
                         <span class="card-nav-name">${formatDateKorean(prevDate)}</span>
                     </span>
                 </a>` : '<span class="card-nav-btn prev disabled"></span>'}
-                ${nextExists ? `<a href="/blog/daily/${nextDate}.html" class="card-nav-btn next" rel="next">
+                ${nextExists ? `<a href="/blog/daily/${nextDate}" class="card-nav-btn next" rel="next">
                     <span class="card-nav-info">
                         <span class="card-nav-label">내일의 운세</span>
                         <span class="card-nav-name">${formatDateKorean(nextDate)}</span>
@@ -286,6 +286,9 @@ function generateDailyPage(dateStr, cards, allDates = []) {
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}">
@@ -293,7 +296,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     <meta property="og:title" content="${dateKr} ${weekday} 오늘의 타로운세 | 타로냥">
     <meta property="og:description" content="${escapeHtml(summary)}">
     <meta property="og:type" content="article">
-    <meta property="og:url" content="${SITE_URL}/blog/daily/${dateStr}.html">
+    <meta property="og:url" content="${SITE_URL}/blog/daily/${dateStr}">
     <meta property="og:site_name" content="타로냥">
     <meta property="og:image" content="${SITE_URL}/og-image.png">
     <meta property="og:image:width" content="1200">
@@ -307,7 +310,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     <meta name="twitter:image" content="${SITE_URL}/og-image.png">
     <meta name="robots" content="${robotsMeta}">
     <meta name="author" content="타로냥">
-    <link rel="canonical" href="${SITE_URL}/blog/daily/${dateStr}.html">
+    <link rel="canonical" href="${SITE_URL}/blog/daily/${dateStr}">
     <script type="application/ld+json">
     ${JSON.stringify(articleSchema, null, 2)}
     </script>
@@ -320,6 +323,10 @@ function generateDailyPage(dateStr, cards, allDates = []) {
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="타로냥">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
@@ -431,7 +438,7 @@ function generateDailyPage(dateStr, cards, allDates = []) {
         </article>
 
         <footer class="footer">
-            <p><a href="/blog/daily/">일운 목록</a> · <a href="/blog/">블로그</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a></p>
+            <p><a href="/blog/daily/">일운 목록</a> · <a href="/blog/">블로그</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
         </footer>
     </div>
@@ -461,9 +468,17 @@ function generateDailyPage(dateStr, cards, allDates = []) {
 
 function scanExistingFortunes() {
   if (!existsSync(DAILY_DIR)) return [];
+  const seen = new Set();
   return readdirSync(DAILY_DIR)
-    .filter((f) => /^\d{4}-\d{2}-\d{2}\.html$/.test(f))
-    .map((f) => f.replace('.html', ''))
+    .map((f) => {
+      const match = f.match(/^(\d{4}-\d{2}-\d{2})(?:\.html)?$/);
+      return match ? match[1] : null;
+    })
+    .filter((date) => {
+      if (!date || seen.has(date)) return false;
+      seen.add(date);
+      return true;
+    })
     .sort()
     .reverse();
 }
@@ -488,7 +503,7 @@ function generateDailyIndex(fortuneDates) {
     const weekday = getWeekday(dateStr);
     const summary = overallSummary(cards);
     return `
-                <a href="/blog/daily/${dateStr}.html" class="daily-index-item">
+                <a href="/blog/daily/${dateStr}" class="daily-index-item">
                     <div class="daily-index-date">${formatDateKorean(dateStr)} ${weekday}</div>
                     <div class="daily-index-cards">${cards.map(c => `<span class="daily-index-card-symbol" aria-hidden="true">${c.symbol}</span>`).join('')}</div>
                     <div class="daily-index-summary">${escapeHtml(summary.length > 80 ? summary.slice(0, 78) + '…' : summary)}</div>
@@ -499,6 +514,9 @@ function generateDailyIndex(fortuneDates) {
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}">
@@ -527,6 +545,10 @@ function generateDailyIndex(fortuneDates) {
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="타로냥">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
@@ -562,7 +584,7 @@ ${recent.map(itemHtml).join('\n')}
         </section>
 
         <footer class="footer">
-            <p><a href="/blog/">블로그</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a></p>
+            <p><a href="/blog/">블로그</a> · <a href="/cards/">타로카드 의미</a> · <a href="/">타로냥 홈</a> · <a href="/faq">FAQ</a></p>
             <p style="margin-top:8px;font-size:11px;">이 서비스는 오락 목적이며, 전문적인 조언을 대체하지 않습니다.</p>
         </footer>
     </div>
@@ -604,7 +626,7 @@ function generateTodayMeta(dateStr, cards) {
     luckyColor: luckyColor(dateStr).name,
     luckyColorHex: luckyColor(dateStr).hex,
     luckyNumber: luckyNumber(dateStr),
-    url: `/blog/daily/${dateStr}.html`,
+    url: `/blog/daily/${dateStr}`,
   };
 }
 
@@ -643,7 +665,7 @@ function updateSitemapWithDailyFortunes(fortuneDates) {
 
   const fortuneUrls = fortuneDates.map((dateStr) => [
     `  <url>`,
-    `    <loc>${SITE_URL}/blog/daily/${dateStr}.html</loc>`,
+    `    <loc>${SITE_URL}/blog/daily/${dateStr}</loc>`,
     `    <lastmod>${dateStr}</lastmod>`,
     `    <changefreq>monthly</changefreq>`,
     `    <priority>0.8</priority>`,
@@ -668,6 +690,25 @@ function formatRssDate(dateStr) {
 
 function escapeXml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
+function scanBlogArticles() {
+  const blogDir = join(ROOT, 'frontend', 'blog');
+  if (!existsSync(blogDir)) return [];
+  return readdirSync(blogDir)
+    .filter((f) => f.endsWith('.html') && f !== 'index.html')
+    .sort()
+    .map((f) => {
+      const html = readFileSync(join(blogDir, f), 'utf-8');
+      const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+      const descMatch = html.match(/<meta name="description" content="([^"]+)"/);
+      const slug = f.replace(/\.html$/, '');
+      return {
+        title: titleMatch ? titleMatch[1] : slug,
+        link: `/blog/${slug}`,
+        description: descMatch ? descMatch[1] : '',
+      };
+    });
 }
 
 function updateRssWithDailyFortunes(visibleFortunes) {
@@ -716,15 +757,26 @@ function updateRssWithDailyFortunes(visibleFortunes) {
     return [
       '    <item>',
       `      <title>${escapeXml(`${formatted} ${weekday} 오늘의 타로운세 — ${cardNames}`)}</title>`,
-      `      <link>${SITE_URL}/blog/daily/${dateStr}.html</link>`,
+      `      <link>${SITE_URL}/blog/daily/${dateStr}</link>`,
       `      <description>${escapeXml(`${formatted} ${weekday}의 타로운세. ${cardNames} 카드로 보는 하루 운세와 행운의 색.`)}</description>`,
       `      <pubDate>${formatRssDate(dateStr)}</pubDate>`,
-      `      <guid>${SITE_URL}/blog/daily/${dateStr}.html</guid>`,
+      `      <guid>${SITE_URL}/blog/daily/${dateStr}</guid>`,
       '    </item>',
     ].join('\n');
   }).join('\n');
 
   const allStaticItems = staticItems.map((item) => [
+    '    <item>',
+    `      <title>${escapeXml(item.title)}</title>`,
+    `      <link>${SITE_URL}${item.link}</link>`,
+    `      <description>${escapeXml(item.description)}</description>`,
+    `      <pubDate>${formatRssDate(today)}</pubDate>`,
+    `      <guid>${SITE_URL}${item.link}</guid>`,
+    '    </item>',
+  ].join('\n')).join('\n');
+
+  const blogArticles = scanBlogArticles();
+  const blogItems = blogArticles.map((item) => [
     '    <item>',
     `      <title>${escapeXml(item.title)}</title>`,
     `      <link>${SITE_URL}${item.link}</link>`,
@@ -748,13 +800,15 @@ function updateRssWithDailyFortunes(visibleFortunes) {
     fortuneItems,
     '',
     allStaticItems,
+    '',
+    blogItems,
     '  </channel>',
     '</rss>',
     '',
   ].join('\n');
 
   writeFileSync(RSS_PATH, rss);
-  console.log(`  ✓ rss.xml updated with ${recentFortunes.length} daily fortune entries`);
+  console.log(`  ✓ rss.xml updated with ${recentFortunes.length} daily fortunes, ${staticItems.length} static items, ${blogArticles.length} blog articles`);
 }
 
 // ── Main ───────────────────────────────────────────────────────────
@@ -795,7 +849,7 @@ function main() {
   for (const dateStr of dates) {
     const cards = pickCardsForDate(dateStr);
     const html = generateDailyPage(dateStr, cards, dates);
-    writeFileSync(join(DAILY_DIR, `${dateStr}.html`), html);
+    writeFileSync(join(DAILY_DIR, `${dateStr}`), html);
     console.log(`  ✓ ${dateStr} — ${cards.map(c => c.name).join(' · ')}`);
   }
 

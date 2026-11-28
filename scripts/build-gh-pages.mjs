@@ -54,11 +54,11 @@ function minifyCss(css) {
 }
 
 // Domain currently embedded in source files → target deployment URL.
-// Source files now embed the GitHub Pages URL (ZEMA-2747), so the search
-// domain must match what is actually present for the rewrite to work.
-// To roll back to a custom domain, set SITE_URL=https://taronyang.com and
-// the build will replace the GitHub Pages URL with the custom domain.
-const CANONICAL_DOMAIN = (process.env.CANONICAL_DOMAIN || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
+// Source files embed the canonical production domain (taronyang.com).
+// The build rewrites it to the GitHub Pages URL for GH Pages deployment.
+// To deploy to a custom domain instead, set SITE_URL=https://taronyang.com
+// and the build will keep the source domain unchanged.
+const CANONICAL_DOMAIN = (process.env.CANONICAL_DOMAIN || 'https://taronyang.com').replace(/\/$/, '');
 const GH_PAGES_URL = (process.env.SITE_URL || 'https://zemyalpha.github.io/taronyang').replace(/\/$/, '');
 
 // File extensions that may contain taronyang.com URLs and need domain rewriting
@@ -418,46 +418,55 @@ function rewriteDomainInNonHtmlFiles(dir) {
 }
 rewriteDomainInNonHtmlFiles(BUILD);
 
-// 5.6 Rewrite manifest.json paths for custom domain support
-// Source manifest.json has /taronyang/ prefixed paths for GitHub Pages.
-// When deploying to a custom domain (SITE_URL set), strip the base path prefix.
+// 5.6 Normalize manifest.json paths for the target deployment (ZEMA-5519)
+// The production line serves frontend/manifest.json directly with root-relative
+// paths, so the source no longer carries the /taronyang/ prefix. The build
+// rewrites path fields per target: GitHub Pages gets the base path ADDED,
+// a custom domain build (SITE_URL set) gets any pre-existing prefix STRIPPED.
+// Both directions are idempotent and only touch path fields (id, start_url,
+// scope, icons, shortcuts) so unrelated values like name/description are never
+// modified.
 console.log('[build] Processing manifest.json...');
 (function rewriteManifestPaths() {
   const manifestPath = join(BUILD, 'manifest.json');
   if (!existsSync(manifestPath)) return;
   const normalizedExpectedUrl = `https://zemyalpha.github.io${BASE_PATH}`;
-  if (GH_PAGES_URL === normalizedExpectedUrl) {
-    console.log('  ✓ manifest.json — GitHub Pages paths already correct');
-    return;
-  }
+  const isGitHubPages = GH_PAGES_URL === normalizedExpectedUrl;
 
-  // Custom domain: parse and rewrite only path fields (id, start_url, scope,
-  // icons, shortcuts) so unrelated values like name/description are never touched.
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
   const prefix = `${BASE_PATH}/`;
   const stripBasePath = (value) =>
     typeof value === 'string' && value.startsWith(prefix)
       ? '/' + value.slice(prefix.length)
       : value;
+  const rewritePath = (value) => {
+    const stripped = stripBasePath(value);
+    if (!isGitHubPages || typeof stripped !== 'string' || !stripped.startsWith('/')) {
+      return stripped;
+    }
+    return `${BASE_PATH}${stripped}`;
+  };
 
-  if (typeof manifest.id === 'string') manifest.id = stripBasePath(manifest.id);
-  if (typeof manifest.start_url === 'string') manifest.start_url = stripBasePath(manifest.start_url);
-  if (typeof manifest.scope === 'string') manifest.scope = stripBasePath(manifest.scope);
+  if (typeof manifest.id === 'string') manifest.id = rewritePath(manifest.id);
+  if (typeof manifest.start_url === 'string') manifest.start_url = rewritePath(manifest.start_url);
+  if (typeof manifest.scope === 'string') manifest.scope = rewritePath(manifest.scope);
   if (Array.isArray(manifest.icons)) {
-    manifest.icons = manifest.icons.map((icon) => ({ ...icon, src: stripBasePath(icon.src) }));
+    manifest.icons = manifest.icons.map((icon) => ({ ...icon, src: rewritePath(icon.src) }));
   }
   if (Array.isArray(manifest.shortcuts)) {
     manifest.shortcuts = manifest.shortcuts.map((shortcut) => ({
       ...shortcut,
-      url: stripBasePath(shortcut.url),
+      url: rewritePath(shortcut.url),
       icons: Array.isArray(shortcut.icons)
-        ? shortcut.icons.map((icon) => ({ ...icon, src: stripBasePath(icon.src) }))
+        ? shortcut.icons.map((icon) => ({ ...icon, src: rewritePath(icon.src) }))
         : shortcut.icons,
     }));
   }
 
   writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
-  console.log(`  ✓ manifest.json — stripped ${BASE_PATH}/ prefix for custom domain`);
+  console.log(
+    `  ✓ manifest.json — ${isGitHubPages ? `prefixed paths with ${prefix} for GitHub Pages` : `stripped ${prefix} prefix for custom domain`}`,
+  );
 })();
 
 // 6. Create directory-based routing for clean URLs

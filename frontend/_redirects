@@ -1,0 +1,3 @@
+/blog/daily/:date.html /blog/daily/:date 301
+/blog/:article.html /blog/:article 301
+/cards/:card.html /cards/:card 301

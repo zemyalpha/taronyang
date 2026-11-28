@@ -122,16 +122,67 @@ test.describe('SEO 최적화 (ZEMA-2573)', () => {
 
   test.describe('페이지 로딩 회귀 테스트', () => {
     test('모든 주요 페이지 200 로드', async ({ page }) => {
-      const routes = ['/', '/tarot', '/daily', '/history', '/mypage', '/login', '/pricing'];
+      const routes = [
+        '/', '/tarot', '/daily', '/history', '/mypage', '/login', '/pricing',
+        '/faq', '/blog/', '/cards/',
+      ];
       for (const route of routes) {
         const response = await page.goto(route, { waitUntil: 'domcontentloaded' });
         expect(response?.status()).toBe(200);
       }
     });
 
-    test('CSS 스타일시트 로드', async ({ page }) => {
-      const response = await page.goto('/static/css/style.css');
-      expect(response?.status()).toBe(200);
+    test('정적 자산 및 SEO 파일 로드', async ({ request }) => {
+      const assets = [
+        '/static/css/style.css',
+        '/og-image.png',
+        '/sitemap.xml',
+        '/robots.txt',
+        '/rss.xml',
+        '/manifest.json',
+        '/blog/daily/today-meta.json',
+      ];
+      for (const asset of assets) {
+        const response = await request.get(asset);
+        expect(response.status(), `${asset} should be 200`).toBe(200);
+      }
+    });
+
+    test('루트 파비콘 — favicon.ico와 apple-touch-icon.png가 200', async ({ request }) => {
+      const favicon = await request.get('/favicon.ico');
+      expect(favicon.status(), '/favicon.ico should be 200').toBe(200);
+      expect(favicon.headers()['content-type']).toContain('image/');
+
+      const appleIcon = await request.get('/apple-touch-icon.png');
+      expect(appleIcon.status(), '/apple-touch-icon.png should be 200').toBe(200);
+      expect(appleIcon.headers()['content-type']).toContain('image/');
+    });
+
+    test('404 — 존재하지 않는 HTML 페이지 → 브랜드 404 페이지', async ({ page }) => {
+      const response = await page.goto('/nonexistent-page-xyz', { waitUntil: 'domcontentloaded' });
+      expect(response?.status()).toBe(404);
+      const lang = await page.locator('html').getAttribute('lang');
+      expect(lang).toBe('ko');
+      const title = await page.title();
+      expect(title).toContain('페이지를 찾을 수 없어요');
+      const homeLink = page.locator('a[href="/"]');
+      await expect(homeLink).toBeVisible();
+    });
+
+    test('404 — 존재하지 않는 API 엔드포인트 → JSON 에러', async ({ request }) => {
+      const response = await request.get('/api/nonexistent-endpoint');
+      expect(response.status()).toBe(404);
+      const body = await response.json();
+      expect(body).toHaveProperty('error');
+    });
+
+    test('gzip 압축 활성화 확인', async ({ request }) => {
+      const response = await request.get('/blog/', {
+        headers: { 'Accept-Encoding': 'gzip' },
+      });
+      expect(response.status()).toBe(200);
+      const encoding = response.headers()['content-encoding'];
+      expect(encoding).toContain('gzip');
     });
   });
 });

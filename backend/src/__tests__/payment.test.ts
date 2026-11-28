@@ -55,7 +55,7 @@ describe('Payment routes', () => {
   });
 
   it('GET /payment/status — free user gets free status', async () => {
-    const user = createUser('free@example.com', 'password123', 'freeuser')!;
+    const user = (await createUser('free@example.com', 'password123', 'freeuser'))!;
     const res = await request(app)
       .get('/payment/status')
       .set(authHeader(user.id));
@@ -64,7 +64,7 @@ describe('Payment routes', () => {
   });
 
   it('GET /payment/status — active premium user gets premium status', async () => {
-    const user = createUser('premium@example.com', 'password123', 'premiumuser')!;
+    const user = (await createUser('premium@example.com', 'password123', 'premiumuser'))!;
     const future = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     setPremium(user.id, future);
 
@@ -76,7 +76,7 @@ describe('Payment routes', () => {
   });
 
   it('GET /payment/status — expired premium auto-downgrades to free', async () => {
-    const user = createUser('expired@example.com', 'password123', 'expireduser')!;
+    const user = (await createUser('expired@example.com', 'password123', 'expireduser'))!;
     const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     setPremium(user.id, past);
 
@@ -93,7 +93,7 @@ describe('Payment routes', () => {
   });
 
   it('GET /payment/status — active cancelling user gets cancelling status', async () => {
-    const user = createUser('cancelling@example.com', 'password123', 'cancellinguser')!;
+    const user = (await createUser('cancelling@example.com', 'password123', 'cancellinguser'))!;
     const future = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     getDb()
       .prepare("UPDATE users SET subscription_status = 'cancelling', subscription_expires_at = ? WHERE id = ?")
@@ -107,7 +107,7 @@ describe('Payment routes', () => {
   });
 
   it('GET /payment/status — expired cancelling auto-downgrades to free', async () => {
-    const user = createUser('expired-cancelling@example.com', 'password123', 'expiredcancel')!;
+    const user = (await createUser('expired-cancelling@example.com', 'password123', 'expiredcancel'))!;
     const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     getDb()
       .prepare("UPDATE users SET subscription_status = 'cancelling', subscription_expires_at = ? WHERE id = ?")
@@ -127,7 +127,7 @@ describe('Payment routes', () => {
   });
 
   it('GET /payment/status — expired premium returns null expires_at after downgrade', async () => {
-    const user = createUser('expired-status@example.com', 'password123', 'expiredstatus')!;
+    const user = (await createUser('expired-status@example.com', 'password123', 'expiredstatus'))!;
     const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     setPremium(user.id, past);
 
@@ -147,7 +147,7 @@ describe('Payment routes', () => {
   });
 
   it('POST /payment/cancel — rejects free user (400)', async () => {
-    const user = createUser('cancel-free@example.com', 'password123', 'cancelfree')!;
+    const user = (await createUser('cancel-free@example.com', 'password123', 'cancelfree'))!;
     const res = await request(app)
       .post('/payment/cancel')
       .set(authHeader(user.id));
@@ -155,7 +155,7 @@ describe('Payment routes', () => {
   });
 
   it('POST /payment/cancel — active premium user can cancel (200)', async () => {
-    const user = createUser('cancel-prem@example.com', 'password123', 'cancelprem')!;
+    const user = (await createUser('cancel-prem@example.com', 'password123', 'cancelprem'))!;
     const future = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     setPremium(user.id, future);
 
@@ -172,7 +172,7 @@ describe('Payment routes', () => {
   });
 
   it('POST /payment/cancel — expired premium is downgraded and rejected (400)', async () => {
-    const user = createUser('expired-cancel@example.com', 'password123', 'expiredcancel')!;
+    const user = (await createUser('expired-cancel@example.com', 'password123', 'expiredcancel'))!;
     const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     setPremium(user.id, past);
 
@@ -188,7 +188,7 @@ describe('Payment routes', () => {
   });
 
   it('POST /payment/cancel — expired cancelling is downgraded and rejected (400)', async () => {
-    const user = createUser('expired-cancel-cancelling@example.com', 'password123', 'expiredcancelc')!;
+    const user = (await createUser('expired-cancel-cancelling@example.com', 'password123', 'expiredcancelc'))!;
     const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     getDb()
       .prepare("UPDATE users SET subscription_status = 'cancelling', subscription_expires_at = ? WHERE id = ?")
@@ -215,7 +215,7 @@ describe('Payment routes', () => {
   });
 
   it('POST /payment/verify — rejects invalid body (400)', async () => {
-    const user = createUser('verify@example.com', 'password123', 'verifyuser')!;
+    const user = (await createUser('verify@example.com', 'password123', 'verifyuser'))!;
     const res = await request(app)
       .post('/payment/verify')
       .set(authHeader(user.id))

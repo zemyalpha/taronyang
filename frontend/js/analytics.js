@@ -23,6 +23,7 @@
     var s = document.createElement('script');
     s.defer = true;
     s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+    s.crossOrigin = 'anonymous';
     s.setAttribute('data-cf-beacon', '{"token": "' + CF_TOKEN + '"}');
     document.head.appendChild(s);
   }

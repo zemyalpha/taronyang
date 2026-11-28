@@ -4,7 +4,7 @@ import { z } from 'zod';
 /** 회원가입 */
 export const signupSchema = z.object({
   email: z.string().email('올바른 이메일 형식이 아닙니다').max(254),
-  password: z.string().min(6, '비밀번호는 6자 이상이어야 합니다').max(128),
+  password: z.string().min(8, '비밀번호는 8자 이상이어야 합니다').max(128),
   nickname: z.string().max(30).optional(),
 });
 
@@ -27,7 +27,7 @@ export const tarotReadSchema = z.object({
   category: z.string().min(1).max(50),
   question: z.string().max(500).optional().default(''),
   cards: z.array(z.object({
-    id: z.number().int().min(0),
+    id: z.number().int().min(0).max(77, '카드 번호는 0~77 사이여야 합니다'),
     is_upright: z.boolean(),
   })).length(3, '카드를 3장 선택해주세요')
     .refine((cards) => new Set(cards.map((c) => c.id)).size === 3, '같은 카드를 중복으로 선택할 수 없습니다'),
@@ -38,16 +38,17 @@ export const tarotChatSchema = z.object({
   question: z.string().min(1, '질문을 입력해주세요').max(500, '질문은 500자 이내로 입력해주세요'),
   chat_history: z.array(z.object({
     role: z.enum(['user', 'assistant']),
-    content: z.string().max(2000),
+    content: z.string().max(1000),
   })).max(9).optional(),
   category: z.string().max(50).optional(),
-  cards_summary: z.string().max(500).optional(),
-  previous_reading: z.string().max(5000).optional(),
+  cards_summary: z.string().max(300).optional(),
+  previous_reading: z.string().max(2000).optional(),
+  reading_id: z.string().uuid().optional(),
 });
 
-/** 결제 검증 */
+/** 결제 검증 — imp_uid는 PortOne 형식(imp_ + 영숫자)만 허용, 경로 조작 방지 */
 export const paymentVerifySchema = z.object({
-  imp_uid: z.string().min(1, 'imp_uid가 필요합니다').max(100),
+  imp_uid: z.string().regex(/^imp_[A-Za-z0-9_-]+$/, '올바르지 않은 imp_uid 형식입니다').max(100),
 });
 
 /** 알림 설정 변경 */
@@ -63,4 +64,19 @@ export const zodiacSchema = z.object({
     '양자리', '황소자리', '쌍둥이자리', '게자리', '사자자리', '처녀자리',
     '천칭자리', '전갈자리', '사수자리', '염소자리', '물병자리', '물고기자리',
   ]),
+});
+
+/** 분석 이벤트 단건 */
+export const analyticsEventSchema = z.object({
+  name: z.string().min(1).max(100),
+  props: z.record(z.unknown()).optional(),
+  path: z.string().max(500).optional(),
+  referrer: z.string().max(500).optional(),
+  session_id: z.string().max(100).optional(),
+  ts: z.string().max(50).optional(),
+});
+
+/** 분석 이벤트 배치 */
+export const analyticsBatchSchema = z.object({
+  events: z.array(analyticsEventSchema).min(1).max(20),
 });

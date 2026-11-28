@@ -4,7 +4,13 @@
   "description": "AI 타로/운세 웹앱 서비스",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i frontend/css/tailwind-input.css -o frontend/css/tailwind.css --minify",
+    "build:backend": "cd backend && npm run build",
+    "build": "npm run build:css && npm run build:backend",
+    "test": "cd backend && npm test",
+    "test:e2e": "npx playwright test",
+    "typecheck": "cd backend && npx tsc --noEmit",
+    "lint": "cd backend && npx eslint src --ext .ts",
     "prepare": "husky"
   },
   "repository": {
@@ -28,6 +34,7 @@
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "husky": "^9.1.7",
-    "lint-staged": "^16.4.0"
+    "lint-staged": "^16.4.0",
+    "tailwindcss": "^3.4.19"
   }
 }
