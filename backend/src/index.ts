@@ -79,6 +79,25 @@ app.use(morgan(':method :url :status :response-time ms - :res[content-length]', 
 // JSON 바디 파서
 app.use(express.json({ limit: '1mb' }));
 
+// 전용 limiter가 적용되는 경로 — apiLimiter 카운트에서 제외 (ZEMA-4284)
+// 일반 API 한도(100회/15분)를 소진한 사용자가 정상 결제/인증/타로 요청까지
+// 이중으로 차단되지 않도록, 아래 경로는 각 전용 limiter로만 보호한다.
+const dedicatedLimiterPaths = [
+  '/api/auth/login',
+  '/api/auth/signup',
+  '/api/tarot/read',
+  '/api/tarot/chat',
+  '/api/payment/verify',
+  '/api/payment/cancel',
+];
+
+function isDedicatedLimiterPath(req: express.Request): boolean {
+  const pathname = req.originalUrl.split('?')[0];
+  return dedicatedLimiterPaths.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+}
+
 // API 레이트 리미팅 — 일반 API
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -86,6 +105,8 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { detail: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+  // 전용 limiter 경로는 apiLimiter가 카운트하지 않음 (ZEMA-4284)
+  skip: isDedicatedLimiterPath,
 });
 app.use('/api/', apiLimiter);
 
@@ -178,10 +199,12 @@ if (config.nodeEnv === 'production' && config.jwtSecret === 'change-me-in-produc
   process.exit(1);
 }
 
-// 서버 시작
-app.listen(config.port, config.host, () => {
-  logger.info('타로냥 API 서버 시작', { host: config.host, port: config.port, env: config.nodeEnv });
-  startDailyScheduler();
-});
+// 서버 시작 — 테스트에서 모듈을 임포트할 때는 리스닝/스케줄러 비활성화
+if (require.main === module) {
+  app.listen(config.port, config.host, () => {
+    logger.info('타로냥 API 서버 시작', { host: config.host, port: config.port, env: config.nodeEnv });
+    startDailyScheduler();
+  });
+}
 
 export default app;
