@@ -4,6 +4,7 @@ import { getDb } from '../database';
 import { authMiddleware } from './auth';
 import { generateDailyHoroscope } from '../dailyNotify';
 import { notifySettingsSchema, zodiacSchema } from '../validation';
+import { getKstDateString } from '../datetime';
 
 export const notifyRouter = Router();
 
@@ -98,5 +99,5 @@ notifyRouter.get('/horoscope/:sign', async (req: Request, res: Response) => {
 
 /** KST 기준 오늘 날짜 반환 */
 export function getKstDate(): string {
-  return new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+  return getKstDateString();
 }
