@@ -133,8 +133,10 @@
     <script>
         const API = window.location.origin + '/api';
         const token = localStorage.getItem('token');
-        if (!token) { location.href = '/login'; }
-        const headers = { 'Authorization': 'Bearer ' + token };
+        // OAuth 세션은 HttpOnly 쿠키 기반이므로 token 없이 user만 있을 수 있음 (GitHub #296)
+        const hasSession = !!(token || localStorage.getItem('user'));
+        if (!hasSession) { location.href = '/login'; }
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
 
         function escapeHtml(str) {
             if (str == null) return '';
@@ -161,6 +163,7 @@
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         localStorage.removeItem('token');
+                        localStorage.removeItem('user');
                         location.href = '/login';
                     } else {
                         showToast('프로필을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
@@ -298,7 +301,7 @@
             }
         }
 
-        if (token) {
+        if (hasSession) {
             loadProfile();
             loadNotifications();
             loadSubscription();

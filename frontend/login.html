@@ -191,9 +191,15 @@
             const token = localStorage.getItem('token');
             return token ? { 'Authorization': `Bearer ${token}` } : {};
         }
-        function isLoggedIn() { return !!localStorage.getItem('token'); }
+        function isLoggedIn() { return !!(localStorage.getItem('token') || localStorage.getItem('user')); }
         function getUser() { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } }
-        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; }
+        function logout() {
+            // HttpOnly 인증 쿠키 삭제 요청 (GitHub #296) — 실패해도 로컬 정리는 진행
+            try { fetch('/api/auth/logout', { method: 'POST' }); } catch (e) { /* 무시 */ }
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
 
         // 소셜 로그인
         async function socialLogin(provider) {
@@ -210,16 +216,40 @@
             }
         }
 
-        // OAuth 콜백 처리
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('oauth') === '1') {
-            const token = params.get('token');
-            const user = { id: params.get('user_id'), nickname: params.get('nickname') };
-            if (token) {
-                localStorage.setItem('token', token);
-                localStorage.setItem('user', JSON.stringify(user));
-                window.location.href = '/';
-            }
+        // OAuth 콜백 처리 — 인증은 HttpOnly 쿠키로 전달 (GitHub #296)
+        // URL에 token/user_id/nickname이 남지 않으며, 사용자 정보는 쿠키 기반 /api/auth/me로 조회
+        const oauthParams = new URLSearchParams(window.location.search);
+        if (oauthParams.get('oauth') === '1') {
+            // URL에서 oauth 파라미터 제거 (브라우저 히스토리 청소)
+            window.history.replaceState({}, document.title, window.location.pathname);
+            (async () => {
+                try {
+                    const res = await fetch('/api/auth/me');
+                    if (res.ok) {
+                        const user = await res.json();
+                        localStorage.setItem('user', JSON.stringify(user));
+                        if (window.TaronyangAnalytics) {
+                            TaronyangAnalytics.track('login_complete', { method: 'oauth' });
+                        }
+                        window.location.href = '/';
+                    }
+                } catch (e) {
+                    // 쿠키가 설정되지 않은 경우 — 로그인 페이지 유지
+                }
+            })();
+        } else if (oauthParams.get('oauth_error')) {
+            const oauthErrorMessages = {
+                cancelled: '소셜 로그인이 취소되었습니다.',
+                missing_code: '로그인 요청이 올바르지 않습니다. 다시 시도해주세요.',
+                state_mismatch: '유효하지 않은 로그인 요청입니다. 다시 시도해주세요.',
+                not_configured: '소셜 로그인이 서버에 설정되지 않았습니다.',
+                incomplete_profile: '이메일/프로필 정보 제공에 동의해주세요.',
+                server_error: '소셜 로그인 처리 중 오류가 발생했습니다. 다시 시도해주세요.',
+                invalid_provider: '지원하지 않는 로그인 방식입니다.',
+            };
+            const errorCode = oauthParams.get('oauth_error');
+            showToast(oauthErrorMessages[errorCode] || '소셜 로그인에 실패했습니다.');
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
     </script>
 

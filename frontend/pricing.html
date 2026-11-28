@@ -132,9 +132,10 @@
 
         async function checkStatus() {
             const token = localStorage.getItem('token');
-            if (!token) return;
+            // OAuth 세션은 HttpOnly 쿠키 기반 (GitHub #296)
+            if (!token && !localStorage.getItem('user')) return;
             try {
-                const res = await fetch('/api/payment/status', { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch('/api/payment/status', { headers: token ? { 'Authorization': `Bearer ${token}` } : {} });
                 if (!res.ok) return;
                 const data = await res.json();
                 const badge = document.getElementById('status-badge');
@@ -157,7 +158,7 @@
             if (btn.disabled) return;
 
             const token = localStorage.getItem('token');
-            if (!token) {
+            if (!token && !localStorage.getItem('user')) {
                 showToast('로그인이 필요합니다');
                 setTimeout(() => window.location.href = '/login', 1000);
                 return;
@@ -186,7 +187,7 @@
                         const res = await fetch('/api/payment/verify', {
                             method: 'POST',
                             headers: {
-                                'Authorization': `Bearer ${token}`,
+                                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ imp_uid: rsp.imp_uid })
